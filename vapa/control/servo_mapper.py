@@ -28,6 +28,9 @@ class ServoMapper:
     def __init__(self, servo_configs: Dict[str, Any]):
         self.servos: Dict[str, ServoCalibration] = {}
         for name, cfg in servo_configs.get("servos", {}).items():
+            direction = int(cfg.get("direction", 1))
+            if cfg.get("reversed", False):
+                direction = -1
             self.servos[name] = ServoCalibration(
                 channel=cfg["channel"],
                 model=cfg.get("model", "MG996R"),
@@ -36,7 +39,7 @@ class ServoMapper:
                 pulse_max_us=float(cfg.get("pulse_max_us", 2000.0)),
                 angle_min_deg=float(cfg.get("angle_min_deg", 0.0)),
                 angle_max_deg=float(cfg.get("angle_max_deg", 90.0)),
-                direction=int(cfg.get("direction", 1)),
+                direction=direction,
                 max_slew_rate_deg_s=float(cfg.get("max_slew_rate_deg_s", 180.0)),
                 home_position=float(cfg.get("home_position", 0.0)),
                 calibrated=bool(cfg.get("calibrated", False)),

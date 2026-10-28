@@ -36,3 +36,10 @@ This document records safety and architectural design choices, alternatives cons
 - **Decision:** Configure TCA9548A hardware address to `0x71` by pulling A0 to 3.3V.
 - **Alternatives Considered:** Leaving TCA9548A at default `0x70`.
 - **Reason:** PCA9685 responds to the I2C All-Call broadcast address `0x70`. Placing the mux at `0x70` causes bus conflicts whenever the All-Call address is acknowledged.
+
+---
+
+### DEC-006: Servo Range Safety Clamping and Closed-Loop Mismatch Monitoring
+- **Decision:** Any uncalibrated servo in `config/servos.yaml` is clamped to neutral (1500 us) to prevent mechanical overdrive. For joints with AS5600 encoders, closed-loop tracking trips a system fault if commanded-vs-measured position mismatch exceeds 12° for >0.35 s (stall/mechanical jamming) or uncommanded motion exceeds 20°/s for >0.25 s (slippage/external backdrive). In the finger force loop, exceeding the force cap triggers immediate positional backoff, while opening motions bypass the force controller unconditionally.
+- **Alternatives Considered:** Open-loop commands only; or continuing to drive servos during joint stall.
+- **Reason:** Tendon-driven fingers and high-torque digital servos will strip gears or burn motors if driven while jammed. Immediate detection and disarm protects the mechanics and patient.

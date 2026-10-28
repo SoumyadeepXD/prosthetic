@@ -8,6 +8,7 @@ class PIConfig:
     kp: float = 0.002
     ki: float = 0.0005
     anti_windup_limit: float = 0.3
+    backoff_step: float = 0.05
 
 class FingerForceController:
     """PI force controller running at 100 Hz to regulate finger closing against FSR force feedback."""
@@ -17,6 +18,10 @@ class FingerForceController:
         self.integral_errors: Dict[str, float] = {
             "thumb": 0.0, "index": 0.0, "middle": 0.0, "ring": 0.0, "little": 0.0
         }
+
+    @property
+    def integrals(self) -> Dict[str, float]:
+        return self.integral_errors
 
     def reset(self) -> None:
         for f in self.integral_errors:
@@ -45,7 +50,7 @@ class FingerForceController:
 
         # If measured force exceeds safe force cap, back off
         if measured_force >= force_cap:
-            backoff_pos = max(0.0, current_pos - 0.05)
+            backoff_pos = max(0.0, current_pos - self.cfg.backoff_step)
             self.integral_errors[finger_name] = 0.0
             return backoff_pos
 

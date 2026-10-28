@@ -1,0 +1,158 @@
+# Grip Profile Definitions (Rev 2)
+# Finger values: 0.0 = fully open, 1.0 = fully closed
+# Forces: calibrated grams
+
+profiles:
+  default:
+    description: "Conservative general-purpose grasp"
+    preshape:
+      thumb: 0.2
+      index: 0.2
+      middle: 0.2
+      ring: 0.2
+      little: 0.2
+    closing_target:
+      thumb: 0.8
+      index: 0.8
+      middle: 0.8
+      ring: 0.8
+      little: 0.8
+    force_target_grams: 150.0
+    force_cap_grams: 300.0
+    close_speed: 0.5          # Normalized speed factor [0.1..1.0]
+    wrist_hint_deg:
+      flex: 0.0
+      rotate: 0.0
+      bend: 0.0
+
+  cylindrical:
+    description: "Bottle, can, large cylinder"
+    preshape:
+      thumb: 0.1
+      index: 0.1
+      middle: 0.1
+      ring: 0.1
+      little: 0.1
+    closing_target:
+      thumb: 0.9
+      index: 0.9
+      middle: 0.9
+      ring: 0.9
+      little: 0.9
+    force_target_grams: 200.0
+    force_cap_grams: 350.0
+    close_speed: 0.6
+    wrist_hint_deg:
+      flex: -10.0
+      rotate: 0.0
+      bend: 0.0
+
+  spherical:
+    description: "Ball, fruit, rounded object"
+    preshape:
+      thumb: 0.15
+      index: 0.15
+      middle: 0.15
+      ring: 0.15
+      little: 0.15
+    closing_target:
+      thumb: 0.85
+      index: 0.85
+      middle: 0.85
+      ring: 0.85
+      little: 0.85
+    force_target_grams: 180.0
+    force_cap_grams: 320.0
+    close_speed: 0.5
+    wrist_hint_deg:
+      flex: 0.0
+      rotate: 0.0
+      bend: 0.0
+
+  pinch:
+    description: "Small object, pen, key (thumb + index)"
+    preshape:
+      thumb: 0.3
+      index: 0.3
+      middle: 0.8
+      ring: 0.9
+      little: 0.9
+    closing_target:
+      thumb: 0.85
+      index: 0.85
+      middle: 1.0
+      ring: 1.0
+      little: 1.0
+    force_target_grams: 120.0
+    force_cap_grams: 220.0
+    close_speed: 0.4
+    wrist_hint_deg:
+      flex: 15.0
+      rotate: 0.0
+      bend: 0.0
+
+  lateral:
+    description: "Card, key turn, flat sheet"
+    preshape:
+      thumb: 0.4
+      index: 0.6
+      middle: 0.8
+      ring: 0.9
+      little: 0.9
+    closing_target:
+      thumb: 0.9
+      index: 0.7
+      middle: 1.0
+      ring: 1.0
+      little: 1.0
+    force_target_grams: 160.0
+    force_cap_grams: 280.0
+    close_speed: 0.5
+    wrist_hint_deg:
+      flex: 0.0
+      rotate: 45.0
+      bend: 0.0
+
+  flat:
+    description: "Open palm, plate support"
+    preshape:
+      thumb: 0.0
+      index: 0.0
+      middle: 0.0
+      ring: 0.0
+      little: 0.0
+    closing_target:
+      thumb: 0.1
+      index: 0.1
+      middle: 0.1
+      ring: 0.1
+      little: 0.1
+    force_target_grams: 80.0
+    force_cap_grams: 150.0
+    close_speed: 0.3
+    wrist_hint_deg:
+      flex: -20.0
+      rotate: 0.0
+      bend: 0.0
+
+  fragile_cup:
+    description: "Fragile cup or glass (reduced force cap)"
+    preshape:
+      thumb: 0.1
+      index: 0.1
+      middle: 0.1
+      ring: 0.1
+      little: 0.1
+    closing_target:
+      thumb: 0.8
+      index: 0.8
+      middle: 0.8
+      ring: 0.8
+      little: 0.8
+    force_target_grams: 80.0
+    force_cap_grams: 120.0      # Enforced low cap for safety
+    close_speed: 0.3
+    wrist_hint_deg:
+      flex: -5.0
+      rotate: 0.0
+      bend: 0.0

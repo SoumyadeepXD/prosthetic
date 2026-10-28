@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vapa"
+version = "0.2.0"
+description = "Vision-Assisted Prosthetic Arm control software and safety stack"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0.0",
+    "numpy>=1.24.0",
+    "pyserial>=3.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-timeout>=2.1.0",
+]
+hardware = [
+    "smbus2>=0.4.2",
+    "pyrealsense2",
+    "pygame>=2.5.0",
+    "onnxruntime>=1.15.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vapa*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"

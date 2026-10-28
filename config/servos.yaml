@@ -1,0 +1,122 @@
+# Servo configuration and calibration parameters (Rev 2)
+# Conservative defaults: min 1000 us, neutral 1500 us, max 2000 us
+# Slew rates are in us per second or normalized units per second
+
+servos:
+  thumb:
+    channel: 0
+    model: "MG996R"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: 0.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 180.0
+    home_position: 0.0     # 0.0 = fully open, 1.0 = fully closed
+    calibrated: false
+
+  index:
+    channel: 1
+    model: "MG996R"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: 0.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 180.0
+    home_position: 0.0
+    calibrated: false
+
+  middle:
+    channel: 2
+    model: "MG996R"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: 0.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 180.0
+    home_position: 0.0
+    calibrated: false
+
+  ring:
+    channel: 3
+    model: "MG996R"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: 0.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 180.0
+    home_position: 0.0
+    calibrated: false
+
+  little:
+    channel: 4
+    model: "MG996R"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: 0.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 180.0
+    home_position: 0.0
+    calibrated: false
+
+  wrist_flex:
+    channel: 5
+    model: "DS3225"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: -45.0
+    angle_max_deg: 45.0
+    direction: 1
+    max_slew_rate_deg_s: 90.0
+    home_position: 0.0
+    calibrated: false
+
+  wrist_rotate:
+    channel: 6
+    model: "DS3225"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: -90.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 90.0
+    home_position: 0.0
+    calibrated: false
+
+  wrist_bend:
+    channel: 7
+    model: "DS3225"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: -30.0
+    angle_max_deg: 30.0
+    direction: 1
+    max_slew_rate_deg_s: 60.0
+    home_position: 0.0
+    has_encoder: false     # Open loop
+    calibrated: false
+
+  forearm_rotation:
+    channel: 8
+    model: "DS3218"
+    pulse_min_us: 1000      # TODO: verify with calibrate_servos.py
+    pulse_neutral_us: 1500  # TODO: verify with calibrate_servos.py
+    pulse_max_us: 2000      # TODO: verify with calibrate_servos.py
+    angle_min_deg: -90.0
+    angle_max_deg: 90.0
+    direction: 1
+    max_slew_rate_deg_s: 90.0
+    home_position: 0.0
+    calibrated: false

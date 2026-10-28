@@ -1,0 +1,53 @@
+# Vision Pipeline Configuration (Rev 2)
+
+camera:
+  device: "realsense_d435i"
+  width: 640
+  height: 480
+  fps: 30
+  align_depth_to_color: true
+  filters:
+    decimation_magnitude: 2
+    spatial_filter: true
+    spatial_smooth_alpha: 0.5
+    spatial_smooth_delta: 20
+    temporal_filter: true
+    temporal_smooth_alpha: 0.4
+    temporal_smooth_delta: 20
+    hole_filling: 1  # 1 = farest from around
+
+distance_matrix:
+  grid_rows: 12
+  grid_cols: 16
+  roi:
+    x_min_m: -0.2   # 20cm left of palm center
+    x_max_m: 0.2    # 20cm right of palm center
+    y_min_m: -0.15  # 15cm below palm center
+    y_max_m: 0.15   # 15cm above palm center
+    z_min_m: 0.10   # 10cm forward (min range)
+    z_max_m: 0.80   # 80cm forward (max range)
+  reach_confidence_threshold: 0.5
+
+detection:
+  model_type: "onnx"  # "onnx" or "tensorrt"
+  model_path: "models/yolov8n_prosthetics.onnx" # TODO: verify path
+  confidence_threshold: 0.45
+  voting_n: 5         # N-of-M temporal voting
+  voting_m: 7
+
+class_to_profile:
+  bottle: "cylindrical"
+  can: "cylindrical"
+  cup: "fragile_cup"
+  glass: "fragile_cup"
+  wine_glass: "fragile_cup"
+  apple: "spherical"
+  orange: "spherical"
+  sports_ball: "spherical"
+  cell_phone: "pinch"
+  pen: "pinch"
+  spoon: "pinch"
+  fork: "pinch"
+  book: "lateral"
+  plate: "flat"
+  default: "default"

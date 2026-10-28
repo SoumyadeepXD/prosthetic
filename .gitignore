@@ -1,0 +1,24 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.clangd/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

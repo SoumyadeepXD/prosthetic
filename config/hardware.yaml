@@ -1,0 +1,53 @@
+# Hardware Connection Guide Rev 2 Configuration
+
+jetson:
+  i2c_bus: 7  # Typically /dev/i2c-7 on Orin Nano 40-pin header (Pins 3 & 5)
+  uart_port: "/dev/ttyTHS1"  # Orin Nano 40-pin header (Pin 8 TXD, Pin 10 RXD)
+  uart_baudrate: 460800
+
+  pca9685:
+    address: 0x40
+    frequency_hz: 50
+    disable_allcall: true  # MODE1 bit 0 = 0 to prevent 0x70 clash
+
+  tca9548a:
+    address: 0x71  # A0 tied to 3.3V to avoid PCA9685 All-Call clash (0x70)
+
+  as5600:
+    address: 0x36
+    channels:
+      finger_group: 0
+      wrist_flex: 1
+      wrist_rotate: 2
+      forearm_rotation: 3
+      wrist_bend_reserved: 4  # Channel 4 reserved for optional 5th encoder
+
+esp32:
+  pins:
+    i2c_sda: 21
+    i2c_scl: 22
+    fsr_thumb: 32
+    fsr_index: 33
+    fsr_middle: 34
+    fsr_ring: 35
+    fsr_little: 36
+    pca9685_oe: 25  # Active LOW; pulled HIGH by 1k resistor; drive HIGH immediately on boot
+    estop_pin: 27   # INPUT_PULLUP; reads LOW when E-stop is pressed
+    uart_tx: 17     # UART2 TX2 -> Jetson Pin 10 (RXD)
+    uart_rx: 16     # UART2 RX2 -> Jetson Pin 8 (TXD)
+
+  ads1115:
+    address: 0x48
+    sample_rate_sps: 860
+    channels:
+      emg_flexor: 0    # MyoWare #1 ENV
+      emg_extensor: 1  # MyoWare #2 ENV
+      eeg_analog: 2    # EEG analog out (if analog type; mock/disabled by default)
+      spare: 3
+
+timing:
+  sensor_publish_rate_hz: 100
+  heartbeat_rate_hz: 50
+  heartbeat_timeout_ms: 250
+  force_hold_ms: 100
+  force_ceiling_default_adc: 3500  # ADC count ceiling before force fault

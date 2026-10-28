@@ -199,14 +199,30 @@ class RealESPLink(AbstractESPLink):
     def initialize(self) -> bool:
         try:
             import serial
-            self._serial = serial.Serial(
-                port=self.port,
-                baudrate=self.baudrate,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                timeout=0.01,
-            )
+            try:
+                self._serial = serial.Serial(
+                    port=self.port,
+                    baudrate=self.baudrate,
+                    bytesize=serial.EIGHTBITS,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE,
+                    timeout=0.01,
+                )
+            except (OSError, serial.SerialException) as e:
+                # On macOS virtual PTYs, non-standard high baudrates trigger Errno 25 (IOSSIOSPEED ioctl).
+                # PTYs ignore baudrate in memory, so fall back to standard 115200 if pty ioctl fails.
+                if "25" in str(e) or "ioctl" in str(e).lower():
+                    self._serial = serial.Serial(
+                        port=self.port,
+                        baudrate=115200,
+                        bytesize=serial.EIGHTBITS,
+                        parity=serial.PARITY_NONE,
+                        stopbits=serial.STOPBITS_ONE,
+                        timeout=0.01,
+                    )
+                else:
+                    raise
+
             self._running = True
             self._thread = threading.Thread(target=self._rx_loop, daemon=True)
             self._thread.start()

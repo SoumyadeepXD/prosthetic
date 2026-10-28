@@ -1,0 +1,74 @@
+[
+  {
+    "name": "sensor_normal",
+    "type": 1,
+    "seq": 1,
+    "payload_hex": "e80300002c01c201f4013c00460050005a0064000e00",
+    "frame_hex": "a55a160101e80300002c01c201f4013c00460050005a0064000e009fa5",
+    "len": 22
+  },
+  {
+    "name": "sensor_estop",
+    "type": 1,
+    "seq": 2,
+    "payload_hex": "1a040000c800fa00fe01320032003200320032004100",
+    "frame_hex": "a55a1601021a040000c800fa00fe0132003200320032003200410074d3",
+    "len": 22
+  },
+  {
+    "name": "status_ok",
+    "type": 2,
+    "seq": 3,
+    "payload_hex": "00020000000000000a00",
+    "frame_hex": "a55a0a020300020000000000000a002cfe",
+    "len": 10
+  },
+  {
+    "name": "heartbeat_arm",
+    "type": 16,
+    "seq": 4,
+    "payload_hex": "0102",
+    "frame_hex": "a55a02100401029b81",
+    "len": 2
+  },
+  {
+    "name": "heartbeat_disarm",
+    "type": 16,
+    "seq": 5,
+    "payload_hex": "0001",
+    "frame_hex": "a55a0210050001f9b5",
+    "len": 2
+  },
+  {
+    "name": "config_default",
+    "type": 17,
+    "seq": 6,
+    "payload_hex": "ac0dfa006400",
+    "frame_hex": "a55a061106ac0dfa0064000162",
+    "len": 6
+  },
+  {
+    "name": "clear_fault",
+    "type": 18,
+    "seq": 7,
+    "payload_hex": "",
+    "frame_hex": "a55a0012076ad9",
+    "len": 0
+  },
+  {
+    "name": "ack_success",
+    "type": 127,
+    "seq": 8,
+    "payload_hex": "110600",
+    "frame_hex": "a55a037f08110600b9e3",
+    "len": 3
+  },
+  {
+    "name": "nack_error",
+    "type": 127,
+    "seq": 9,
+    "payload_hex": "100401",
+    "frame_hex": "a55a037f091004017ed4",
+    "len": 3
+  }
+]

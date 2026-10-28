@@ -23,15 +23,17 @@ typedef struct {
     bool force_fault;
     bool ads_fault;
     bool latched_fault;
+    bool had_first_heartbeat;
+    bool arm_request_transitioned;
+    uint8_t arm_request;
     uint32_t last_heartbeat_time_ms;
     uint32_t force_fault_start_ms;
-    uint8_t arm_request;
 } supervisor_state_t;
 
 void supervisor_init(supervisor_state_t *state, const supervisor_config_t *cfg);
 void supervisor_process_heartbeat(supervisor_state_t *state, uint8_t arm_req, uint32_t current_time_ms);
-void supervisor_update(supervisor_state_t *state, const supervisor_config_t *cfg, uint32_t current_time_ms, const uint16_t fsr[5]);
-void supervisor_clear_fault(supervisor_state_t *state);
+void supervisor_update(supervisor_state_t *state, const supervisor_config_t *cfg, uint32_t current_time_ms, const uint16_t fsr[5], bool ads_ok);
+bool supervisor_clear_fault(supervisor_state_t *state);
 uint16_t supervisor_get_flags(const supervisor_state_t *state);
 
 #ifdef __cplusplus

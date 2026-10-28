@@ -12,11 +12,12 @@ dist/
 build/
 *.egg-info/
 
-# PlatformIO
+# PlatformIO & native test binaries
 .pio/
 .pioenvs/
 .piolibdeps/
 .clangd/
+firmware/esp32/test/test_native_supervisor
 
 # OS / IDE
 .DS_Store

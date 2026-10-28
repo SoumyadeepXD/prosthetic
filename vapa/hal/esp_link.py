@@ -84,8 +84,8 @@ class MockESPLink(AbstractESPLink):
     def is_healthy(self) -> bool:
         if not self._initialized:
             return False
-        hb_age = (time.time() - self.last_heartbeat_time) * 1000.0
-        return hb_age < self.hb_timeout_ms and not self.latched_fault
+        rx_age = (time.time() - self._last_rx_time) * 1000.0 if self._last_rx_time > 0 else 99999.0
+        return rx_age < 500.0 and not self.latched_fault
 
     def update_supervisor(self) -> None:
         """Simulate Section 4 ESP32 supervisor rules."""

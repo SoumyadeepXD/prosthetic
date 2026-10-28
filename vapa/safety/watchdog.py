@@ -17,11 +17,13 @@ class HeartbeatThread:
         get_arm_request_fn: Callable[[], int],
         get_state_fn: Callable[[], int],
         stall_timeout_s: float = 0.05,  # 50 ms stall threshold
+        on_stall_callback: Optional[Callable[[], None]] = None,
     ):
         self.send_fn = send_fn
         self.get_arm_request_fn = get_arm_request_fn
         self.get_state_fn = get_state_fn
         self.stall_timeout_s = stall_timeout_s
+        self.on_stall_callback = on_stall_callback
 
         self._running = False
         self._thread: Optional[threading.Thread] = None
@@ -62,6 +64,11 @@ class HeartbeatThread:
                     self.send_fn(HeartbeatMessage(arm_request=0, jetson_state=0))
                 except Exception:
                     pass
+                if self.on_stall_callback:
+                    try:
+                        self.on_stall_callback()
+                    except Exception:
+                        pass
             else:
                 try:
                     arm_req = self.get_arm_request_fn()

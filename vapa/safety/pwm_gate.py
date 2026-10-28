@@ -43,6 +43,9 @@ class PWMGate:
     def disable_all(self) -> None:
         self.pca.disable_all()
 
+    def close(self) -> None:
+        self.disable_all()
+
     def enforce_gate(self) -> None:
         """Called periodically to guarantee all channels remain disabled if not armed."""
         if not self.safety.is_pwm_allowed:

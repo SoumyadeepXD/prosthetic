@@ -42,6 +42,9 @@ class HeartbeatThread:
             self._thread.join(timeout=0.2)
             self._thread = None
 
+    def is_alive(self) -> bool:
+        return self._running and self._thread is not None and self._thread.is_alive()
+
     def feed(self) -> None:
         """Called by the 100 Hz main control loop on every iteration."""
         with self._lock:

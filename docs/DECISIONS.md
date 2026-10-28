@@ -64,3 +64,10 @@ This document records safety and architectural design choices, alternatives cons
 - **Decision:** Visual object detections pass through an N-of-M temporal majority voting filter (5 of the last 7 frames must agree) before any grip profile change is accepted. Any detection with confidence below threshold (0.45), unmapped classes, or empty scenes strictly falls back to the conservative `default` grasp profile.
 - **Alternatives Considered:** Instantaneous single-frame top-1 profile selection; hard-locking previous profile without default fallback.
 - **Reason:** Neural network object detections jitter frame-by-frame on live video. Rapidly switching grip profiles mid-approach would cause erratic finger preshaping. Strict fallback to the default profile guarantees safe, conservative grasp dynamics when vision is uncertain.
+
+---
+
+### DEC-010: Dedicated Multiprocess Vision Architecture and Control Loop Jitter Monitoring
+- **Decision:** Camera capture, spatial/temporal filtering, 3D distance matrix processing, and neural network detection run in an isolated child process (`VisionWorker`) at ~30 fps, publishing to a shallow non-blocking queue (`maxsize=2`). The 100 Hz main motion control loop reads non-blocking from this queue and measures execution time with `time.perf_counter`, issuing a warning if a loop cycle exceeds 15 ms and tripping a stall safety fault if it exceeds 40 ms.
+- **Alternatives Considered:** Running vision inline within the 100 Hz thread; using threads with Python GIL contention.
+- **Reason:** RealSense frame delivery (33 ms) and model inference would inevitably stall a synchronous 100 Hz control loop, causing ESP32 supervisor heartbeat timeouts (250 ms) and servo jitter. Multiprocessing provides hard process isolation and zero control loop blocking.

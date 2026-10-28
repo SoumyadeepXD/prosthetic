@@ -12,6 +12,7 @@ from .detector import (
     GripSelector,
 )
 from .replay import VisionSequenceRecorder, VisionReplayHarness
+from .worker import VisionWorker
 
 __all__ = [
     "DistanceMatrixProcessor",
@@ -27,4 +28,5 @@ __all__ = [
     "GripSelector",
     "VisionSequenceRecorder",
     "VisionReplayHarness",
+    "VisionWorker",
 ]

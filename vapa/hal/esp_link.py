@@ -128,9 +128,11 @@ class MockESPLink(AbstractESPLink):
             flags |= FLAG_LATCHED_FAULT
 
         t_ms = int(now * 1000) & 0xFFFFFFFF
+        dither = (self.frames_received % 3)
+        emg_vals = (self.sim_emg[0] + dither, self.sim_emg[1] + (2 - dither))
         self._latest_sensor = SensorMessage(
             t_ms=t_ms,
-            emg=self.sim_emg,
+            emg=emg_vals,
             eeg=self.sim_eeg,
             fsr=self.sim_fsr,
             flags=flags

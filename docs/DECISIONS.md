@@ -50,3 +50,10 @@ This document records safety and architectural design choices, alternatives cons
 - **Decision:** The two-site EMG decoder enforces a 100 ms dwell filter to reject transient electrode movement artifacts, an asymmetric hysteresis band (0.25 activate, 0.15 deactivate), and a 600 ms sustained co-contraction requirement to trigger profile cycling (`MODE_CYCLE`). Extensor (OPEN) intent unconditionally preempts any closing intent. The EEG subsystem is disabled by default behind an abstract mock interface; if enabled, it is strictly forbidden from commanding motion and may only issue mode switch cues.
 - **Alternatives Considered:** Instantaneous threshold crossing without dwell; permitting EEG to initiate grasp.
 - **Reason:** Motion artifacts from electrode tugging or minor involuntary muscle twitches must not cause accidental hand opening or closing. Single dry-channel EEG is too noisy for direct motor intent and must never compromise safety.
+
+---
+
+### DEC-008: Vision Central Zone Target Prioritization and 5-Frame Differentiation
+- **Decision:** The 12x16 depth distance matrix isolates a central target tracking zone (rows 2-9, cols 3-12) directly aligned with the prosthetic palm line. Nearest surface distance and approach velocity are tracked strictly within this cone before falling back to peripheral bounds. Approach velocity is computed via linear regression over a 5-frame sliding window (with negative velocity indicating closing in). Edge-preserving spatial smoothing (delta 20 mm), temporal persistence, and hole filling are executed prior to matrix discretization.
+- **Alternatives Considered:** Global nearest pixel search; single-frame backward difference.
+- **Reason:** Peripheral objects (e.g. tabletops, user torso, or bystanders) would otherwise dominate the nearest distance metric, causing false aperture preshaping. A 5-frame regression window suppresses depth camera noise spikes.

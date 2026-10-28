@@ -2,7 +2,15 @@
 
 from .distance_matrix import DistanceMatrixProcessor, DistanceMatrixResult
 from .filters import SoftwareDepthFilter, FilterConfig
-from .detector import MockObjectDetector, TemporalProfileVoter
+from .detector import (
+    Detection,
+    GripSelectionResult,
+    AbstractObjectDetector,
+    MockObjectDetector,
+    ONNXObjectDetector,
+    TemporalProfileVoter,
+    GripSelector,
+)
 from .replay import VisionSequenceRecorder, VisionReplayHarness
 
 __all__ = [
@@ -10,8 +18,13 @@ __all__ = [
     "DistanceMatrixResult",
     "SoftwareDepthFilter",
     "FilterConfig",
+    "Detection",
+    "GripSelectionResult",
+    "AbstractObjectDetector",
     "MockObjectDetector",
+    "ONNXObjectDetector",
     "TemporalProfileVoter",
+    "GripSelector",
     "VisionSequenceRecorder",
     "VisionReplayHarness",
 ]

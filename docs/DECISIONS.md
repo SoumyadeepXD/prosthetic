@@ -57,3 +57,10 @@ This document records safety and architectural design choices, alternatives cons
 - **Decision:** The 12x16 depth distance matrix isolates a central target tracking zone (rows 2-9, cols 3-12) directly aligned with the prosthetic palm line. Nearest surface distance and approach velocity are tracked strictly within this cone before falling back to peripheral bounds. Approach velocity is computed via linear regression over a 5-frame sliding window (with negative velocity indicating closing in). Edge-preserving spatial smoothing (delta 20 mm), temporal persistence, and hole filling are executed prior to matrix discretization.
 - **Alternatives Considered:** Global nearest pixel search; single-frame backward difference.
 - **Reason:** Peripheral objects (e.g. tabletops, user torso, or bystanders) would otherwise dominate the nearest distance metric, causing false aperture preshaping. A 5-frame regression window suppresses depth camera noise spikes.
+
+---
+
+### DEC-009: Object Classification N-of-M Voting and Default Profile Fallback
+- **Decision:** Visual object detections pass through an N-of-M temporal majority voting filter (5 of the last 7 frames must agree) before any grip profile change is accepted. Any detection with confidence below threshold (0.45), unmapped classes, or empty scenes strictly falls back to the conservative `default` grasp profile.
+- **Alternatives Considered:** Instantaneous single-frame top-1 profile selection; hard-locking previous profile without default fallback.
+- **Reason:** Neural network object detections jitter frame-by-frame on live video. Rapidly switching grip profiles mid-approach would cause erratic finger preshaping. Strict fallback to the default profile guarantees safe, conservative grasp dynamics when vision is uncertain.

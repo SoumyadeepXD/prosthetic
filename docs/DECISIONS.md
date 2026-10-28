@@ -43,3 +43,10 @@ This document records safety and architectural design choices, alternatives cons
 - **Decision:** Any uncalibrated servo in `config/servos.yaml` is clamped to neutral (1500 us) to prevent mechanical overdrive. For joints with AS5600 encoders, closed-loop tracking trips a system fault if commanded-vs-measured position mismatch exceeds 12° for >0.35 s (stall/mechanical jamming) or uncommanded motion exceeds 20°/s for >0.25 s (slippage/external backdrive). In the finger force loop, exceeding the force cap triggers immediate positional backoff, while opening motions bypass the force controller unconditionally.
 - **Alternatives Considered:** Open-loop commands only; or continuing to drive servos during joint stall.
 - **Reason:** Tendon-driven fingers and high-torque digital servos will strip gears or burn motors if driven while jammed. Immediate detection and disarm protects the mechanics and patient.
+
+---
+
+### DEC-007: EMG Dwell Debouncing, Hysteresis, and EEG Isolation
+- **Decision:** The two-site EMG decoder enforces a 100 ms dwell filter to reject transient electrode movement artifacts, an asymmetric hysteresis band (0.25 activate, 0.15 deactivate), and a 600 ms sustained co-contraction requirement to trigger profile cycling (`MODE_CYCLE`). Extensor (OPEN) intent unconditionally preempts any closing intent. The EEG subsystem is disabled by default behind an abstract mock interface; if enabled, it is strictly forbidden from commanding motion and may only issue mode switch cues.
+- **Alternatives Considered:** Instantaneous threshold crossing without dwell; permitting EEG to initiate grasp.
+- **Reason:** Motion artifacts from electrode tugging or minor involuntary muscle twitches must not cause accidental hand opening or closing. Single dry-channel EEG is too noisy for direct motor intent and must never compromise safety.

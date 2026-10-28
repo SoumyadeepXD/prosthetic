@@ -4,6 +4,13 @@ from dataclasses import dataclass
 from typing import Tuple, Optional, Deque
 from collections import deque
 
+# ADS1115 scale factor with PGA=4.096V (single-ended 15-bit resolution 0..32767)
+ADS1115_MV_PER_LSB = 0.125
+
+def counts_to_mv(raw_adc: int) -> float:
+    """Convert raw ADS1115 ADC counts to millivolts."""
+    return float(raw_adc) * ADS1115_MV_PER_LSB
+
 @dataclass
 class EMGCalibration:
     baseline_mv: float = 250.0
@@ -25,6 +32,16 @@ class EnvelopeNormalizer:
         self._flex_history: Deque[float] = deque(maxlen=stuck_window_size)
         self._ext_history: Deque[float] = deque(maxlen=stuck_window_size)
         self.last_fault_reason: Optional[str] = None
+
+    def reset(self) -> None:
+        """Reset histories and clear faults."""
+        self._flex_history.clear()
+        self._ext_history.clear()
+        self.last_fault_reason = None
+
+    def normalize_counts(self, raw_flex_counts: int, raw_ext_counts: int) -> Tuple[float, float, bool]:
+        """Normalize raw ADC counts into activations in [0.0, 1.0]."""
+        return self.normalize(counts_to_mv(raw_flex_counts), counts_to_mv(raw_ext_counts))
 
     def normalize(self, raw_flex_mv: float, raw_ext_mv: float) -> Tuple[float, float, bool]:
         """Normalize readings to activations in [0.0, 1.0].

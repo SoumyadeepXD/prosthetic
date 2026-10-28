@@ -1,0 +1,50 @@
+[Unit]
+Description=Vision-Assisted Prosthetic Arm (VAPA) Control Daemon
+Documentation=https://github.com/vapa/vapa
+After=network.target time-sync.target
+Wants=time-sync.target
+
+# ==============================================================================
+# HARD NON-NEGOTIABLE SAFETY INVARIANT:
+# The system boots strictly in the DISARMED state.
+# Auto-arming on daemon startup or service restart is STRICTLY FORBIDDEN.
+# Arming requires explicit operator command and full precondition satisfaction.
+# ==============================================================================
+
+[Service]
+Type=simple
+User=jetson
+Group=jetson
+WorkingDirectory=/opt/vapa
+
+# Environment & Python unbuffered output for real-time systemd journal streaming
+Environment="PYTHONUNBUFFERED=1"
+Environment="PATH=/opt/vapa/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Main control loop entrypoint in headless production mode
+ExecStart=/opt/vapa/.venv/bin/python3 -m vapa.app.main --headless
+
+# Automatic recovery on abnormal termination
+Restart=always
+RestartSec=2s
+
+# Clean shutdown: allow 3.0s for fail-closed atexit hooks and PWM zeroing
+KillSignal=SIGTERM
+TimeoutStopSec=3s
+SendSIGKILL=yes
+
+# Real-Time Scheduling & Resource Prioritization (100 Hz deterministic control loop)
+# CPUSchedulingPolicy=rr with priority 50 guarantees timely 50 Hz ESP32 heartbeat feeding
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=50
+Nice=-10
+LimitRTPRIO=99
+LimitMEMLOCK=infinity
+
+# Standard output & syslog configuration
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vapa
+
+[Install]
+WantedBy=multi-user.target

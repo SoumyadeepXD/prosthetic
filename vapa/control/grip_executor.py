@@ -41,8 +41,8 @@ class GripExecutor:
         motion_command: str,          # "OPEN", "CLOSE", "HOLD", "MODE_CYCLE"
         emg_velocity: float,          # [0.0..1.0]
         profile_data: Dict[str, Any], # Active grip profile
-        preshape_aperture: float,     # [0.0..1.0] from vision
-        measured_forces: Dict[str, float], # Measured grams per finger
+        preshape_aperture: Optional[float] = None, # [0.0..1.0] from vision (or None)
+        measured_forces: Optional[Dict[str, float]] = None, # Measured grams per finger
         dt_s: float = 0.01,           # 100 Hz = 0.01s
     ) -> Dict[str, float]:
         """Execute one 100 Hz step of grip and motion execution.
@@ -64,7 +64,7 @@ class GripExecutor:
             curr_pos = self.current_finger_positions[f]
             target_close = float(closing_targets.get(f, 0.85))
             target_preshape = float(preshape_targets.get(f, 0.2))
-            meas_force = float(measured_forces.get(f, 0.0))
+            meas_force = float(measured_forces.get(f, 0.0)) if measured_forces else 0.0
 
             if motion_command == "OPEN":
                 # Opening runs at faster open_rate, ignores force targets
@@ -84,7 +84,7 @@ class GripExecutor:
                 )
             else: # HOLD or MODE_CYCLE
                 # Hold at current position, or adapt preshape aperture if opening wider
-                if preshape_aperture > 0 and preshape_aperture < curr_pos:
+                if preshape_aperture is not None and preshape_aperture > 0 and preshape_aperture < curr_pos:
                     # Vision preshape can open the hand toward target, never close it
                     next_pos = max(preshape_aperture, curr_pos - self.open_rate * dt_s)
                 else:

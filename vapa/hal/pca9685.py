@@ -132,15 +132,30 @@ class RealPCA9685(AbstractPCA9685):
 
         reg = self.PCA9685_LED0_ON_L + 4 * channel
         data = [0x00, 0x00, ticks & 0xFF, (ticks >> 8) & 0x0F]
-        self._bus.write_i2c_block_data(self.address, reg, data)
+        try:
+            self._bus.write_i2c_block_data(self.address, reg, data)
+        except Exception:
+            try:
+                from smbus2 import SMBus
+                self._bus = SMBus(self.bus_num)
+                self._bus.write_i2c_block_data(self.address, reg, data)
+            except Exception as e:
+                self._healthy = False
+                raise RuntimeError(f"PCA9685 I2C write failed on channel {channel}: {e}")
 
     def disable_channel(self, channel: int) -> None:
         if not (0 <= channel < 16):
             raise ValueError(f"Channel {channel} out of range (0-15)")
         if self._bus and self._healthy:
             reg = self.PCA9685_LED0_ON_L + 4 * channel
-            self._bus.write_i2c_block_data(self.address, reg, [0x00, 0x00, 0x00, 0x10]) # Full OFF bit
+            try:
+                self._bus.write_i2c_block_data(self.address, reg, [0x00, 0x00, 0x00, 0x10]) # Full OFF bit
+            except Exception:
+                self._healthy = False
 
     def disable_all(self) -> None:
         if self._bus and self._healthy:
-            self._bus.write_byte_data(self.address, self.PCA9685_ALL_LED_OFF_H, 0x10)
+            try:
+                self._bus.write_byte_data(self.address, self.PCA9685_ALL_LED_OFF_H, 0x10)
+            except Exception:
+                self._healthy = False

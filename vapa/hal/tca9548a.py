@@ -74,6 +74,7 @@ class RealTCA9548A(AbstractTCA9548A):
                 pass
             self._bus = None
         self._healthy = False
+        self._active_channel: Optional[int] = None
 
     def is_healthy(self) -> bool:
         return self._healthy
@@ -81,10 +82,32 @@ class RealTCA9548A(AbstractTCA9548A):
     def select_channel(self, channel: int) -> None:
         if not (0 <= channel < 8):
             raise ValueError(f"Channel {channel} out of range (0-7)")
-        if self._bus and self._healthy:
-            # Write one-bit mask byte
+        if self._active_channel == channel:
+            return
+        if not self._healthy or not self._bus:
+            raise RuntimeError("RealTCA9548A is not initialized or healthy")
+        try:
             self._bus.write_byte(self.address, 1 << channel)
+            self._active_channel = channel
+        except Exception:
+            # Attempt one bus recovery
+            try:
+                from smbus2 import SMBus
+                self._bus = SMBus(self.bus_num)
+                self._bus.write_byte(self.address, 1 << channel)
+                self._active_channel = channel
+            except Exception as e:
+                self._healthy = False
+                self._active_channel = None
+                raise RuntimeError(f"TCA9548A failed to select channel {channel}: {e}")
 
     def deselect(self) -> None:
+        if self._active_channel is None:
+            return
         if self._bus and self._healthy:
-            self._bus.write_byte(self.address, 0x00)
+            try:
+                self._bus.write_byte(self.address, 0x00)
+                self._active_channel = None
+            except Exception:
+                self._healthy = False
+                self._active_channel = None

@@ -262,7 +262,38 @@ class RealESPLink(AbstractESPLink):
             self._serial.write(frame)
 
     def _rx_loop(self) -> None:
-        while self._running and self._serial and self._serial.is_open:
+        reconnect_backoff = 0.1
+        while self._running:
+            if not self._serial or not self._serial.is_open:
+                try:
+                    import serial
+                    try:
+                        self._serial = serial.Serial(
+                            port=self.port,
+                            baudrate=self.baudrate,
+                            bytesize=serial.EIGHTBITS,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            timeout=0.01,
+                        )
+                    except (OSError, serial.SerialException) as e:
+                        if "25" in str(e) or "ioctl" in str(e).lower():
+                            self._serial = serial.Serial(
+                                port=self.port,
+                                baudrate=115200,
+                                bytesize=serial.EIGHTBITS,
+                                parity=serial.PARITY_NONE,
+                                stopbits=serial.STOPBITS_ONE,
+                                timeout=0.01,
+                            )
+                        else:
+                            raise
+                    reconnect_backoff = 0.1
+                except Exception:
+                    time.sleep(reconnect_backoff)
+                    reconnect_backoff = min(1.0, reconnect_backoff * 1.5)
+                    continue
+
             try:
                 raw_bytes = self._serial.read(64)
                 if raw_bytes:
@@ -276,7 +307,13 @@ class RealESPLink(AbstractESPLink):
                             self._latest_status = decoded
                             self._last_rx_time = now
             except Exception:
-                time.sleep(0.01)
+                if self._serial:
+                    try:
+                        self._serial.close()
+                    except Exception:
+                        pass
+                    self._serial = None
+                time.sleep(0.05)
 
     def get_latest_sensor(self) -> Optional[SensorMessage]:
         return self._latest_sensor

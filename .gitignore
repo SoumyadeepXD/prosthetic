@@ -1,6 +1,8 @@
 # Python
 .venv/
 venv/
+ENV/
+env/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -11,15 +13,48 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+.mypy_cache/
 
-# PlatformIO & native test binaries
+# PlatformIO & Embedded Builds
 .pio/
 .pioenvs/
 .piolibdeps/
 .clangd/
+*.bin
+*.elf
+*.hex
+*.o
+*.a
 firmware/esp32/test/test_native_supervisor
 
-# OS / IDE
+# Logs & Telemetry Sessions
+logs/
+*.log
+*.csv
+
+# Data & Recordings (Bench recordings, RealSense depth captures)
+data/
+*.npz
+*.bag
+
+# Machine Learning Models (YOLO / ONNX weights)
+models/*.onnx
+models/*.pt
+models/*.engine
+*.weights
+
+# OS Artifacts
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Configuration
 .vscode/
 .idea/
+*.swp
+*.swo
+*~

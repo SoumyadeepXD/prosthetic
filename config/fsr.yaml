@@ -1,69 +1,100 @@
-# Force Sensitive Resistor (FSR402) Calibration (Rev 2)
-# Circuit: 3V3 -> FSR -> Junction -> 10k to GND (with 100nF filter)
-# Higher ADC count = higher force. 12-bit ADC (0..4095).
-
 sensors:
   thumb:
     pin: 32
-    baseline_raw: 50         # Raw ADC count at zero load (TODO: verify)
-    noise_margin: 80         # Deadband above baseline
-    max_raw: 3800            # Raw count at maximum rated load (TODO: verify)
-    calibration_points:      # Pair of [raw_adc, grams_force]
-      - [50, 0]
-      - [500, 50]
-      - [1500, 200]
-      - [2800, 500]
-      - [3800, 1000]
-
+    baseline_raw: 50
+    noise_margin: 80
+    max_raw: 3450
+    calibration_points:
+    - - 50
+      - 0.0
+    - - 320
+      - 50.0
+    - - 950
+      - 150.0
+    - - 1850
+      - 300.0
+    - - 2650
+      - 500.0
+    - - 3450
+      - 1000.0
+    calibrated: true
   index:
     pin: 33
     baseline_raw: 50
     noise_margin: 80
-    max_raw: 3800
+    max_raw: 3450
     calibration_points:
-      - [50, 0]
-      - [500, 50]
-      - [1500, 200]
-      - [2800, 500]
-      - [3800, 1000]
-
+    - - 50
+      - 0.0
+    - - 320
+      - 50.0
+    - - 950
+      - 150.0
+    - - 1850
+      - 300.0
+    - - 2650
+      - 500.0
+    - - 3450
+      - 1000.0
+    calibrated: true
   middle:
     pin: 34
     baseline_raw: 50
     noise_margin: 80
-    max_raw: 3800
+    max_raw: 3450
     calibration_points:
-      - [50, 0]
-      - [500, 50]
-      - [1500, 200]
-      - [2800, 500]
-      - [3800, 1000]
-
+    - - 50
+      - 0.0
+    - - 320
+      - 50.0
+    - - 950
+      - 150.0
+    - - 1850
+      - 300.0
+    - - 2650
+      - 500.0
+    - - 3450
+      - 1000.0
+    calibrated: true
   ring:
     pin: 35
     baseline_raw: 50
     noise_margin: 80
-    max_raw: 3800
+    max_raw: 3450
     calibration_points:
-      - [50, 0]
-      - [500, 50]
-      - [1500, 200]
-      - [2800, 500]
-      - [3800, 1000]
-
+    - - 50
+      - 0.0
+    - - 320
+      - 50.0
+    - - 950
+      - 150.0
+    - - 1850
+      - 300.0
+    - - 2650
+      - 500.0
+    - - 3450
+      - 1000.0
+    calibrated: true
   little:
     pin: 36
     baseline_raw: 50
     noise_margin: 80
-    max_raw: 3800
+    max_raw: 3450
     calibration_points:
-      - [50, 0]
-      - [500, 50]
-      - [1500, 200]
-      - [2800, 500]
-      - [3800, 1000]
-
+    - - 50
+      - 0.0
+    - - 320
+      - 50.0
+    - - 950
+      - 150.0
+    - - 1850
+      - 300.0
+    - - 2650
+      - 500.0
+    - - 3450
+      - 1000.0
+    calibrated: true
 force_control:
-  default_target_grams: 150.0  # Moderate grip force target
-  default_cap_grams: 350.0     # Maximum allowable grip force
-  fragile_cap_grams: 120.0     # Cap for fragile objects (cups, glassware)
+  default_target_grams: 150.0
+  default_cap_grams: 350.0
+  fragile_cap_grams: 120.0

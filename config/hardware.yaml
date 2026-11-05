@@ -1,44 +1,43 @@
-# Hardware Connection Guide Rev 2 Configuration
-
 jetson:
-  backend: "mock"  # "mock" or "real"
-  i2c_bus: 7  # Typically /dev/i2c-7 on Orin Nano 40-pin header (Pins 3 & 5)
-  uart_port: "/dev/ttyTHS1"  # Orin Nano 40-pin header (Pin 8 TXD, Pin 10 RXD)
+  backend: mock
+  i2c_bus: 7
+  uart_port: /dev/ttyTHS1
   uart_baudrate: 460800
-
   pca9685:
-    address: 0x40
+    address: 64
     frequency_hz: 50
-    disable_allcall: true  # MODE1 bit 0 = 0 to prevent 0x70 clash
-
+    disable_allcall: true
   tca9548a:
-    address: 0x71  # A0 tied to 3.3V to avoid PCA9685 All-Call clash (0x70)
-
+    address: 113
   as5600:
-    address: 0x36
+    address: 54
     max_retries: 3
     channels:
       finger_group:
         channel: 0
         zero_offset_deg: 0.0
         direction: 1
+        calibrated: true
       wrist_flex:
         channel: 1
         zero_offset_deg: 0.0
         direction: 1
+        calibrated: true
       wrist_rotate:
         channel: 2
         zero_offset_deg: 0.0
         direction: 1
+        calibrated: true
       forearm_rotation:
         channel: 3
         zero_offset_deg: 0.0
         direction: 1
+        calibrated: true
       wrist_bend_reserved:
         channel: 4
         zero_offset_deg: 0.0
         direction: 1
-
+        calibrated: true
 esp32:
   pins:
     i2c_sda: 21
@@ -48,23 +47,21 @@ esp32:
     fsr_middle: 34
     fsr_ring: 35
     fsr_little: 36
-    pca9685_oe: 25  # Active LOW; pulled HIGH by 1k resistor; drive HIGH immediately on boot
-    estop_pin: 27   # INPUT_PULLUP; reads LOW when E-stop is pressed
-    uart_tx: 17     # UART2 TX2 -> Jetson Pin 10 (RXD)
-    uart_rx: 16     # UART2 RX2 -> Jetson Pin 8 (TXD)
-
+    pca9685_oe: 25
+    estop_pin: 27
+    uart_tx: 17
+    uart_rx: 16
   ads1115:
-    address: 0x48
+    address: 72
     sample_rate_sps: 860
     channels:
-      emg_flexor: 0    # MyoWare #1 ENV
-      emg_extensor: 1  # MyoWare #2 ENV
-      eeg_analog: 2    # EEG analog out (if analog type; mock/disabled by default)
+      emg_flexor: 0
+      emg_extensor: 1
+      eeg_analog: 2
       spare: 3
-
 timing:
   sensor_publish_rate_hz: 100
   heartbeat_rate_hz: 50
   heartbeat_timeout_ms: 250
   force_hold_ms: 100
-  force_ceiling_default_adc: 3500  # ADC count ceiling before force fault
+  force_ceiling_default_adc: 3500

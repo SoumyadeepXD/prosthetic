@@ -1,0 +1,22 @@
+device: Intel RealSense D435i
+connection: USB 3.1 Gen 1
+resolution:
+  width: 640
+  height: 480
+target_distance_m: 0.35
+temporal_noise_std_mm: 0.0
+frame_rate_fps: 22.7
+noise_acceptable: true
+camera_to_palm_transform:
+  translation_mm:
+    x: 0.0
+    y: 45.0
+    z: -20.0
+  rotation_deg:
+    pitch: 15.0
+    yaw: 0.0
+    roll: 0.0
+  nominal_workspace_range_m:
+    min: 0.15
+    max: 0.85
+calibrated_timestamp: '2026-11-05 13:04:47'

@@ -1,34 +1,27 @@
-# EMG and EEG processing configuration (Rev 2)
-
-decoder: "threshold"  # Options: "threshold", "classifier" (classifier disabled by default)
-
+decoder: threshold
 thresholds:
   flexor:
-    baseline_mv: 250.0       # Rest baseline envelope (TODO: verify with calibrate_emg.py)
-    mvc_mv: 2200.0           # Maximum Voluntary Contraction (TODO: verify)
-    activation_threshold: 0.25  # Fraction of normalized activation [0..1]
-    deactivation_threshold: 0.15 # Hysteresis cutoff
-    saturation_mv: 3200.0    # Signal rail detection
-
-  extensor:
-    baseline_mv: 250.0
-    mvc_mv: 2000.0
+    baseline_mv: 239.4
+    mvc_mv: 2302.2
     activation_threshold: 0.25
     deactivation_threshold: 0.15
     saturation_mv: 3200.0
-
+  extensor:
+    baseline_mv: 250.1
+    mvc_mv: 2331.7
+    activation_threshold: 0.25
+    deactivation_threshold: 0.15
+    saturation_mv: 3200.0
 timing:
-  min_dwell_ms: 100          # Minimum duration activation must be held
+  min_dwell_ms: 100
   debounce_ms: 50
-  co_contraction_hold_ms: 600 # Duration both must be active to trigger mode switch
-  signal_timeout_ms: 300     # Maximum gap before flagging missing signal
-  stuck_signal_window_s: 3.0 # Duration of unchanged value to detect flatline
-
+  co_contraction_hold_ms: 600
+  signal_timeout_ms: 300
+  stuck_signal_window_s: 3.0
 classifier:
-  enabled: false             # INCOMPATIBLE with 100 Hz envelope path. Keep disabled.
-  model_path: ""
-
+  enabled: false
+  model_path: ''
 eeg:
-  enabled: false             # Experimental; disabled by default
-  type: "analog"             # "analog" (ADS1115 A2) or "i2c"
+  enabled: false
+  type: analog
   mode_switch_threshold: 0.8

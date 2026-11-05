@@ -56,5 +56,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-*.swo
-*~
+# Temporary files & Scratch
+*.bak
+scratch/

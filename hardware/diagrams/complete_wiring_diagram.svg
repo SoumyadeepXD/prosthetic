@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1200" width="1920" height="1200" style="background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="blueCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="accentOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="accentRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="accentGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7e22ce"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#4ade80"/>
+    </marker>
+  </defs>
+
+  <!-- Title Block -->
+  <rect x="40" y="30" width="1840" height="70" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="65" y="65" fill="#f8fafc" font-size="24" font-weight="bold">VISION-ASSISTED PROSTHETIC ARM (VAPA) — SYSTEM WIRING HARNESS (REV 2)</text>
+  <text x="65" y="86" fill="#94a3b8" font-size="14">Drawing: VAPA-ELEC-001 | Architecture: NVIDIA Jetson Orin Nano + ESP32 Safety Supervisor + Dual 6V Servo Rails | Scale: Schematic</text>
+  <rect x="1680" y="42" width="180" height="46" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="1770" y="65" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">STATUS: PRODUCTION BASELINE</text>
+  <text x="1770" y="80" fill="#94a3b8" font-size="10" text-anchor="middle">IEC 60601-1 TYPE BF ISOLATED</text>
+
+  <!-- ==================== 1. POWER DISTRIBUTION SECTION ==================== -->
+  <rect x="40" y="120" width="400" height="420" rx="10" fill="url(#blueCard)" stroke="#dc2626" stroke-width="2"/>
+  <rect x="40" y="120" width="400" height="40" rx="10" fill="url(#accentRed)"/>
+  <text x="60" y="146" fill="#ffffff" font-size="16" font-weight="bold">1. POWER DISTRIBUTION &amp; E-STOP</text>
+
+  <!-- Battery Box -->
+  <rect x="60" y="180" width="360" height="70" rx="6" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+  <text x="75" y="205" fill="#c7d2fe" font-size="14" font-weight="bold">12V Li-Ion Battery Pack (3S, 5200mAh)</text>
+  <text x="75" y="225" fill="#94a3b8" font-size="12">Connector: XT60 High-Current (AWG 12 Silicone)</text>
+  <text x="75" y="240" fill="#38bdf8" font-size="11">Continuous: 30A | Peak Discharge: 100A (30C)</text>
+
+  <!-- Protection & Switching -->
+  <rect x="60" y="265" width="170" height="60" rx="6" fill="#1f2937" stroke="#475569" stroke-width="1"/>
+  <text x="70" y="288" fill="#f87171" font-size="12" font-weight="bold">FUSE F1: 30A ATO</text>
+  <text x="70" y="306" fill="#94a3b8" font-size="10">Automotive Fast-Blade</text>
+  <text x="70" y="318" fill="#64748b" font-size="10">Max Rating: 32V DC</text>
+
+  <rect x="250" y="265" width="170" height="60" rx="6" fill="#1f2937" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="260" y="288" fill="#fca5a5" font-size="12" font-weight="bold">IDEC E-STOP (NC)</text>
+  <text x="260" y="306" fill="#94a3b8" font-size="10">Mushroom Push-Lock</text>
+  <text x="260" y="318" fill="#64748b" font-size="10">250V 3A Direct Open</text>
+
+  <!-- High Side Switch -->
+  <rect x="60" y="340" width="360" height="65" rx="6" fill="#18181b" stroke="#ef4444" stroke-width="1"/>
+  <text x="75" y="362" fill="#ef4444" font-size="13" font-weight="bold">HIGH-SIDE PROFET (BTS50015-1TMA)</text>
+  <text x="75" y="380" fill="#94a3b8" font-size="11">Rds(on) = 1.5 mOhm | 33A Cont | Over-temp shutdown</text>
+  <text x="75" y="395" fill="#f59e0b" font-size="10">Turn-off Time &lt; 35 us upon E-stop button depression</text>
+
+  <!-- Regulators Summary -->
+  <rect x="60" y="420" width="110" height="100" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+  <text x="68" y="440" fill="#4ade80" font-size="11" font-weight="bold">LOGIC 5V / 6A</text>
+  <text x="68" y="458" fill="#94a3b8" font-size="10">TPS54620</text>
+  <text x="68" y="474" fill="#64748b" font-size="9">Eff: 95%</text>
+  <text x="68" y="490" fill="#38bdf8" font-size="9">Jetson 5V</text>
+  <text x="68" y="506" fill="#f87171" font-size="9">PTC 6A (F4)</text>
+
+  <rect x="185" y="420" width="110" height="100" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+  <text x="193" y="440" fill="#fbbf24" font-size="11" font-weight="bold">SERVO A: 6V 15A</text>
+  <text x="193" y="458" fill="#94a3b8" font-size="10">Pololu D36V50F6</text>
+  <text x="193" y="474" fill="#64748b" font-size="9">Peak: 20A</text>
+  <text x="193" y="490" fill="#fbbf24" font-size="9">Fingers 1-5</text>
+  <text x="193" y="506" fill="#f87171" font-size="9">Fuse 15A (F2)</text>
+
+  <rect x="310" y="420" width="110" height="100" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+  <text x="318" y="440" fill="#fbbf24" font-size="11" font-weight="bold">SERVO B: 6V 15A</text>
+  <text x="318" y="458" fill="#94a3b8" font-size="10">Pololu D36V50F6</text>
+  <text x="318" y="474" fill="#64748b" font-size="9">Peak: 20A</text>
+  <text x="318" y="490" fill="#fbbf24" font-size="9">Wrist &amp; Forearm</text>
+  <text x="318" y="506" fill="#f87171" font-size="9">Fuse 15A (F3)</text>
+
+
+  <!-- ==================== 2. MAIN COMPUTING SECTION (JETSON) ==================== -->
+  <rect x="480" y="120" width="460" height="420" rx="10" fill="url(#blueCard)" stroke="#0284c7" stroke-width="2"/>
+  <rect x="480" y="120" width="460" height="40" rx="10" fill="url(#accentCyan)"/>
+  <text x="500" y="146" fill="#ffffff" font-size="16" font-weight="bold">2. MAIN COMPUTING: NVIDIA JETSON ORIN NANO</text>
+
+  <rect x="500" y="180" width="420" height="85" rx="6" fill="#1e1b4b" stroke="#38bdf8" stroke-width="1"/>
+  <text x="515" y="202" fill="#38bdf8" font-size="14" font-weight="bold">Orin Nano 40-Pin Header Interface</text>
+  <text x="515" y="222" fill="#94a3b8" font-size="12">Pins 2, 4: +5.0V Input (from Logic Buck via AWG 20)</text>
+  <text x="515" y="238" fill="#94a3b8" font-size="12">Pins 6, 9: Logic Ground (GND_LOGIC Star Return)</text>
+  <text x="515" y="254" fill="#94a3b8" font-size="12">Pins 3, 5: I2C-7 (400 kHz Fast-Mode) | Pins 8, 10: UART1 (460.8 kbps)</text>
+
+  <rect x="500" y="280" width="420" height="120" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+  <text x="515" y="302" fill="#f8fafc" font-size="13" font-weight="bold">RealSense D435i Camera Integration</text>
+  <text x="515" y="322" fill="#94a3b8" font-size="11">Physical Link: USB 3.1 Gen 1 Type-C with locking thumb screws</text>
+  <text x="515" y="340" fill="#94a3b8" font-size="11">Data Streams: 640x480 Depth @ 30 FPS + 1280x720 RGB @ 30 FPS</text>
+  <text x="515" y="358" fill="#94a3b8" font-size="11">Power Draw: 5V @ 700mA supplied via Jetson internal USB VBUS</text>
+  <text x="515" y="376" fill="#4ade80" font-size="11">Fail-Safe: Control loop never blocks on vision; 250ms freshness expiry</text>
+
+  <!-- Software Architecture Callout -->
+  <rect x="500" y="415" width="420" height="105" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="515" y="435" fill="#93c5fd" font-size="12" font-weight="bold">JETSON REAL-TIME SOFTWARE STACK</text>
+  <text x="515" y="453" fill="#cbd5e1" font-size="11">• 100 Hz Main Control Loop with perf_counter jitter monitor</text>
+  <text x="515" y="471" fill="#cbd5e1" font-size="11">• 50 Hz Dedicated Heartbeat Thread (trips if loop stalls &gt; 40ms)</text>
+  <text x="515" y="489" fill="#cbd5e1" font-size="11">• Shared-Control Arbitration: EMG = Intent, Vision = Context Only</text>
+  <text x="515" y="507" fill="#f87171" font-size="11">• Non-Negotiable: Vision can NEVER initiate or increase closing motion</text>
+
+
+  <!-- ==================== 3. SAFETY CONTROLLER SECTION (ESP32) ==================== -->
+  <rect x="980" y="120" width="450" height="420" rx="10" fill="url(#blueCard)" stroke="#eab308" stroke-width="2"/>
+  <rect x="980" y="120" width="450" height="40" rx="10" fill="url(#accentOrange)"/>
+  <text x="1000" y="146" fill="#ffffff" font-size="16" font-weight="bold">3. SAFETY SUPERVISOR: ESP32-WROOM-32E</text>
+
+  <rect x="1000" y="180" width="410" height="145" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+  <text x="1015" y="202" fill="#fbbf24" font-size="13" font-weight="bold">Hardware Pin Allocations &amp; Fast I/O</text>
+  <text x="1015" y="222" fill="#f87171" font-size="11">GPIO 25: PCA9685 /OE (Active LOW; 10k pull-up; Boots HIGH)</text>
+  <text x="1015" y="238" fill="#f87171" font-size="11">GPIO 27: E-Stop Input (Optocoupled; active LOW triggers OE drop)</text>
+  <text x="1015" y="254" fill="#38bdf8" font-size="11">GPIO 16/17: UART2 RX2/TX2 (460.8 kbps to Jetson Orin Nano)</text>
+  <text x="1015" y="270" fill="#4ade80" font-size="11">GPIO 21/22: I2C Master to ISO1540 (Isolated ADS1115 sampling)</text>
+  <text x="1015" y="286" fill="#c084fc" font-size="11">GPIO 32-36: ADC1 Channels 4, 5, 6, 7, 0 (5x FSR402 Dividers)</text>
+  <text x="1015" y="302" fill="#94a3b8" font-size="11">Power: 3.3V from dedicated AP2112K LDO (600mA, &lt;250mV dropout)</text>
+  <text x="1015" y="318" fill="#fbbf24" font-size="11">Watchdog: Hardware Task WDT set to 350 ms timeout</text>
+
+  <!-- Supervisor State Machine Rules -->
+  <rect x="1000" y="340" width="410" height="180" rx="6" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+  <text x="1015" y="360" fill="#a5b4fc" font-size="12" font-weight="bold">FREERTOS INDEPENDENT SUPERVISOR RULES</text>
+  <text x="1015" y="378" fill="#cbd5e1" font-size="10">1. System Boots strictly DISARMED (/OE held HIGH).</text>
+  <text x="1015" y="394" fill="#cbd5e1" font-size="10">2. Arming requires explicit Jetson 0-&gt;1 arm transition + safe status.</text>
+  <text x="1015" y="410" fill="#cbd5e1" font-size="10">3. Heartbeat loss (&gt;250ms) latches fault and drops /OE immediately.</text>
+  <text x="1015" y="426" fill="#cbd5e1" font-size="10">4. E-stop strike drops /OE instantly in &lt;100us hardware interrupt.</text>
+  <text x="1015" y="442" fill="#cbd5e1" font-size="10">5. Force ceiling &gt;3500 ADC counts (&gt;100ms warning, &gt;500ms latch fault).</text>
+  <text x="1015" y="458" fill="#cbd5e1" font-size="10">6. Non-blocking ADS1115 sampling at 860 SPS (A0, A1, A2 cycling).</text>
+  <text x="1015" y="474" fill="#cbd5e1" font-size="10">7. Fast CRC16-CCITT-FALSE 256-entry lookup table for all UART frames.</text>
+  <text x="1015" y="490" fill="#cbd5e1" font-size="10">8. I2C Bus Auto-Recovery: 9 SCL clock pulses on bus lockup.</text>
+  <text x="1015" y="506" fill="#f87171" font-size="10">Jetson CANNOT override ESP32 supervisor hardware shutdown.</text>
+
+
+  <!-- ==================== 4. ACTUATION: PCA9685 & 9 SERVOS ==================== -->
+  <rect x="1470" y="120" width="410" height="420" rx="10" fill="url(#blueCard)" stroke="#a855f7" stroke-width="2"/>
+  <rect x="1470" y="120" width="410" height="40" rx="10" fill="url(#accentPurple)"/>
+  <text x="1490" y="146" fill="#ffffff" font-size="16" font-weight="bold">4. ACTUATION: PCA9685 &amp; 9 SERVOS</text>
+
+  <rect x="1490" y="180" width="370" height="110" rx="6" fill="#0f172a" stroke="#c084fc" stroke-width="1"/>
+  <text x="1505" y="202" fill="#c084fc" font-size="13" font-weight="bold">PCA9685 16-Channel 12-Bit PWM (0x40)</text>
+  <text x="1505" y="222" fill="#94a3b8" font-size="11">I2C Address: 0x40 (A0-A5 to GND) | Frequency: 50 Hz</text>
+  <text x="1505" y="238" fill="#f87171" font-size="11">ALLCALL Mode Disabled (MODE1 bit 0 = 0 to avoid 0x70 clash)</text>
+  <text x="1505" y="254" fill="#fbbf24" font-size="11">Output Enable (/OE, Pin 23): Pulled to 3.3V, driven by ESP32 GPIO25</text>
+  <text x="1505" y="270" fill="#94a3b8" font-size="11">Dual 2200uF 16V Low-ESR Decoupling Caps across 6V Terminals</text>
+
+  <!-- 9 Servo Channels -->
+  <rect x="1490" y="305" width="180" height="215" rx="6" fill="#18181b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="1500" y="325" fill="#fbbf24" font-size="11" font-weight="bold">SERVO RAIL A (Fingers)</text>
+  <text x="1500" y="343" fill="#cbd5e1" font-size="10">CH 0: Thumb Flexion (MG996R)</text>
+  <text x="1500" y="360" fill="#cbd5e1" font-size="10">CH 1: Index Flexion (MG996R)</text>
+  <text x="1500" y="377" fill="#cbd5e1" font-size="10">CH 2: Middle Flexion (MG996R)</text>
+  <text x="1500" y="394" fill="#cbd5e1" font-size="10">CH 3: Ring Flexion (MG996R)</text>
+  <text x="1500" y="411" fill="#cbd5e1" font-size="10">CH 4: Little Flexion (MG996R)</text>
+  <text x="1500" y="433" fill="#94a3b8" font-size="9">Pulse Range: 650 - 2350 us</text>
+  <text x="1500" y="449" fill="#94a3b8" font-size="9">Stall Rating: 2.5A @ 6V per servo</text>
+  <text x="1500" y="465" fill="#f87171" font-size="9">Total Stall Peak: 12.5A</text>
+  <text x="1500" y="481" fill="#4ade80" font-size="9">Protected by 15A Fuse F2</text>
+  <text x="1500" y="500" fill="#38bdf8" font-size="9">Capacitor: 2200uF 16V Low-ESR</text>
+
+  <rect x="1680" y="305" width="180" height="215" rx="6" fill="#18181b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="1690" y="325" fill="#fbbf24" font-size="11" font-weight="bold">SERVO RAIL B (Wrist/Arm)</text>
+  <text x="1690" y="343" fill="#cbd5e1" font-size="10">CH 5: Wrist Flex/Ext (DS3225)</text>
+  <text x="1690" y="360" fill="#cbd5e1" font-size="10">CH 6: Wrist Pron/Sup (DS3225)</text>
+  <text x="1690" y="377" fill="#cbd5e1" font-size="10">CH 7: Wrist Dev (DS3225)</text>
+  <text x="1690" y="394" fill="#cbd5e1" font-size="10">CH 8: Forearm Rot (DS3218)</text>
+  <text x="1690" y="411" fill="#64748b" font-size="10">CH 9-15: Unassigned / Spare</text>
+  <text x="1690" y="433" fill="#94a3b8" font-size="9">Pulse Range: 500 - 2500 us</text>
+  <text x="1690" y="449" fill="#94a3b8" font-size="9">Stall Rating: 2.8A / 2.2A @ 6V</text>
+  <text x="1690" y="465" fill="#f87171" font-size="9">Total Stall Peak: 10.6A</text>
+  <text x="1690" y="481" fill="#4ade80" font-size="9">Protected by 15A Fuse F3</text>
+  <text x="1690" y="500" fill="#38bdf8" font-size="9">Capacitor: 2200uF 16V Low-ESR</text>
+
+
+  <!-- ==================== 5. SENSOR FEEDBACK: ENCODERS & FSRs ==================== -->
+  <rect x="40" y="580" width="900" height="340" rx="10" fill="url(#blueCard)" stroke="#10b981" stroke-width="2"/>
+  <rect x="40" y="580" width="900" height="40" rx="10" fill="url(#accentGreen)"/>
+  <text x="60" y="606" fill="#ffffff" font-size="16" font-weight="bold">5. SENSOR FEEDBACK: TCA9548A I2C MUX + 4x AS5600 ENCODERS + 5x FSR402 SENSORS</text>
+
+  <!-- Encoders Sub-card -->
+  <rect x="60" y="640" width="420" height="260" rx="8" fill="#0f172a" stroke="#3b82f6" stroke-width="1"/>
+  <text x="75" y="662" fill="#60a5fa" font-size="13" font-weight="bold">TCA9548A Multiplexer (0x71) &amp; 4x AS5600 Encoders</text>
+  <text x="75" y="682" fill="#94a3b8" font-size="11">Address Strapping: A0 to 3.3V (0x71) prevents PCA9685 clash</text>
+  <text x="75" y="700" fill="#cbd5e1" font-size="11">• Channel 0: finger_group (Tendon Spool) AS5600 (0x36)</text>
+  <text x="75" y="718" fill="#cbd5e1" font-size="11">• Channel 1: wrist_flex (Wrist Pitch Joint) AS5600 (0x36)</text>
+  <text x="75" y="736" fill="#cbd5e1" font-size="11">• Channel 2: wrist_rotate (Wrist Roll Joint) AS5600 (0x36)</text>
+  <text x="75" y="754" fill="#cbd5e1" font-size="11">• Channel 3: forearm_rotation Joint AS5600 (0x36)</text>
+  <text x="75" y="772" fill="#64748b" font-size="11">• Channel 4: wrist_bend_reserved (Expansion)</text>
+  <text x="75" y="796" fill="#38bdf8" font-size="11">Cabling: 4-Pin JST-SH (3.3V, GND, SCL, SDA) with shield</text>
+  <text x="75" y="814" fill="#38bdf8" font-size="11">Magnets: Diametric N52 Neodymium Discs (6x2.5mm, Air Gap 1.0mm)</text>
+  <text x="75" y="832" fill="#4ade80" font-size="11">Tracking: Closed-loop stall detector trips fault if pos err &gt; 12 deg for &gt; 350ms</text>
+  <text x="75" y="850" fill="#f87171" font-size="11">Uncommanded Motion: Trips fault if velocity &gt; 20 deg/s while held</text>
+
+  <!-- FSR Sub-card -->
+  <rect x="500" y="640" width="420" height="260" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+  <text x="515" y="662" fill="#4ade80" font-size="13" font-weight="bold">5x Fingertip FSR402 Force Sensor Conditioning</text>
+  <text x="515" y="682" fill="#94a3b8" font-size="11">Sensing Area: 0.5" round film on distal fingertips (Thumb to Little)</text>
+  <text x="515" y="700" fill="#cbd5e1" font-size="11">• Circuit: 5x Precision Voltage Dividers with 10.0k 0.1% 25ppm pull-downs</text>
+  <text x="515" y="718" fill="#cbd5e1" font-size="11">• Low-Pass Filter: 0.1 uF ceramic caps across pull-downs (fc = 318 Hz)</text>
+  <text x="515" y="736" fill="#cbd5e1" font-size="11">• ESD Clamping: SP3002 TVS array clamps line to 3.3V rail (+/-15kV air)</text>
+  <text x="515" y="754" fill="#cbd5e1" font-size="11">• ESP32 Inputs: GPIO 32 (Thumb), 33 (Index), 34 (Mid), 35 (Ring), 36 (Little)</text>
+  <text x="515" y="778" fill="#f59e0b" font-size="11">Calibration: Piecewise monotonic interpolation from config/fsr.yaml</text>
+  <text x="515" y="796" fill="#f87171" font-size="11">Hardware Fault Detection:</text>
+  <text x="525" y="814" fill="#cbd5e1" font-size="10">- ADC &lt; 10: Open-circuit / disconnected wire detected -&gt; Trips FAULT</text>
+  <text x="525" y="830" fill="#cbd5e1" font-size="10">- ADC &gt;= 4090: Short-circuit to 3.3V / crushed sensor -&gt; Trips FAULT</text>
+  <text x="525" y="846" fill="#cbd5e1" font-size="10">- Force Ceiling: Real-time backoff if measured force &gt; 350 grams</text>
+
+
+  <!-- ==================== 6. BIOMEDICAL ISOLATED EMG SECTION ==================== -->
+  <rect x="980" y="580" width="900" height="340" rx="10" fill="url(#blueCard)" stroke="#06b6d4" stroke-width="2"/>
+  <rect x="980" y="580" width="900" height="40" rx="10" fill="url(#accentCyan)"/>
+  <text x="1000" y="606" fill="#ffffff" font-size="16" font-weight="bold">6. BIOMEDICAL ISOLATION BARRIER &amp; MYOWARE 2.0 EMG INTERFACE (IEC 60601-1 TYPE BF)</text>
+
+  <!-- Galvanic Barrier Callout -->
+  <rect x="1000" y="640" width="280" height="260" rx="8" fill="#18181b" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="1015" y="665" fill="#38bdf8" font-size="13" font-weight="bold">1.5 kV GALVANIC ISOLATION</text>
+  <text x="1015" y="690" fill="#cbd5e1" font-size="11">• Mornsun B0505S-1WR3</text>
+  <text x="1025" y="708" fill="#94a3b8" font-size="10">5V -&gt; 5V DC-DC (1W)</text>
+  <text x="1025" y="724" fill="#94a3b8" font-size="10">1500 VDC Isolation Barrier</text>
+  <text x="1025" y="740" fill="#94a3b8" font-size="10">Barrier Cap &lt; 2.2 pF</text>
+  <text x="1015" y="765" fill="#cbd5e1" font-size="11">• TI TPS79333 LDO</text>
+  <text x="1025" y="783" fill="#94a3b8" font-size="10">Generates clean 3.3V_ISO</text>
+  <text x="1025" y="799" fill="#94a3b8" font-size="10">Noise floor: 32 uVrms</text>
+  <text x="1015" y="825" fill="#cbd5e1" font-size="11">• TI ISO1540 I2C Isolator</text>
+  <text x="1025" y="843" fill="#94a3b8" font-size="10">2.5 kVrms Bidirectional I2C</text>
+  <text x="1025" y="859" fill="#94a3b8" font-size="10">Creepage &gt; 5.5 mm on PCB</text>
+
+  <!-- Isolated ADS1115 & Electrodes -->
+  <rect x="1300" y="640" width="560" height="260" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+  <text x="1315" y="665" fill="#38bdf8" font-size="13" font-weight="bold">Isolated Patient Subsystem: ADS1115 (0x48) &amp; MyoWare 2.0</text>
+  <text x="1315" y="688" fill="#f8fafc" font-size="12">Patient Skin Contact: Forearm Snap Electrodes (Ag/AgCl Gel Electrodes)</text>
+  <text x="1315" y="708" fill="#4ade80" font-size="11">Channel A0: MyoWare #1 Envelope (Flexor Carpi Radialis) -&gt; Hand Close Intent</text>
+  <text x="1315" y="726" fill="#4ade80" font-size="11">Channel A1: MyoWare #2 Envelope (Extensor Digitorum) -&gt; Hand Open Intent</text>
+  <text x="1315" y="744" fill="#a78bfa" font-size="11">Channel A2: Auxiliary EEG / Cranial Electrode Input (Reserved)</text>
+  <text x="1315" y="762" fill="#64748b" font-size="11">Channel A3: Isolated Chassis Reference &amp; Baseline Offset Monitor</text>
+  <text x="1315" y="788" fill="#cbd5e1" font-size="11">Biomedical Safety Guarantees:</text>
+  <text x="1325" y="806" fill="#cbd5e1" font-size="10">1. ZERO physical copper/conductive path to 12V battery or noisy servo grounds.</text>
+  <text x="1325" y="822" fill="#cbd5e1" font-size="10">2. Patient Leakage Current &lt; 2 uA (well below IEC 60601-1 100 uA limit).</text>
+  <text x="1325" y="838" fill="#cbd5e1" font-size="10">3. Rapid Extensor Open Override: Extensor spike triggers instant open in &lt; 5 ms.</text>
+  <text x="1325" y="854" fill="#f87171" font-size="10">4. Stuck / Saturated Signal Detection: Baseline &lt; 200mV or &gt; 3000mV flags fault.</text>
+
+
+  <!-- ==================== 7. INTERCONNECT BUSSES & WIRING ROUTING ==================== -->
+  <rect x="40" y="950" width="1840" height="210" rx="10" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="65" y="980" fill="#f8fafc" font-size="15" font-weight="bold">SYSTEM INTERCONNECT &amp; HARNESS ROUTING SPECIFICATIONS</text>
+
+  <!-- Bus Columns -->
+  <g transform="translate(65, 1000)">
+    <rect x="0" y="0" width="340" height="135" rx="6" fill="#1f2937"/>
+    <text x="15" y="24" fill="#38bdf8" font-size="12" font-weight="bold">UART TELEMETRY BUS (460.8 kbps)</text>
+    <text x="15" y="44" fill="#cbd5e1" font-size="11">• Jetson Pin 8 (TXD1) -&gt; ESP32 GPIO 16 (RX2)</text>
+    <text x="15" y="62" fill="#cbd5e1" font-size="11">• ESP32 GPIO 17 (TX2) -&gt; Jetson Pin 10 (RXD1)</text>
+    <text x="15" y="80" fill="#cbd5e1" font-size="11">• Twisted Pair with GND_LOGIC reference</text>
+    <text x="15" y="98" fill="#cbd5e1" font-size="11">• Framing: CRC16-CCITT-FALSE (O(1) table)</text>
+    <text x="15" y="116" fill="#4ade80" font-size="10">Rate: 100 Hz SENSOR packets, 2 Hz STATUS</text>
+  </g>
+
+  <g transform="translate(435, 1000)">
+    <rect x="0" y="0" width="340" height="135" rx="6" fill="#1f2937"/>
+    <text x="15" y="24" fill="#fbbf24" font-size="12" font-weight="bold">FAST I2C MASTER BUS (400 kHz)</text>
+    <text x="15" y="44" fill="#cbd5e1" font-size="11">• Jetson Pin 3 (SDA), Pin 5 (SCL)</text>
+    <text x="15" y="62" fill="#cbd5e1" font-size="11">• PCA9685 PWM Controller at address 0x40</text>
+    <text x="15" y="80" fill="#cbd5e1" font-size="11">• TCA9548A Multiplexer at address 0x71</text>
+    <text x="15" y="98" fill="#cbd5e1" font-size="11">• 4.7k Pull-up resistors to 3.3V logic</text>
+    <text x="15" y="116" fill="#4ade80" font-size="10">SCL/SDA twisted with GND; Shield single-grounded</text>
+  </g>
+
+  <g transform="translate(805, 1000)">
+    <rect x="0" y="0" width="340" height="135" rx="6" fill="#1f2937"/>
+    <text x="15" y="24" fill="#f87171" font-size="12" font-weight="bold">HARDWARE SAFETY / OE INTERLOCK</text>
+    <text x="15" y="44" fill="#cbd5e1" font-size="11">• ESP32 GPIO 25 -&gt; PCA9685 Pin 23 (/OE)</text>
+    <text x="15" y="62" fill="#cbd5e1" font-size="11">• Active LOW: Tristates all 16 PWM channels</text>
+    <text x="15" y="80" fill="#cbd5e1" font-size="11">• 10k Hardware pull-up to 3.3V holds HIGH</text>
+    <text x="15" y="98" fill="#cbd5e1" font-size="11">• Drops OE on: E-stop, HB timeout (250ms), fault</text>
+    <text x="15" y="116" fill="#f87171" font-size="10">Independent of Jetson OS state or crash</text>
+  </g>
+
+  <g transform="translate(1175, 1000)">
+    <rect x="0" y="0" width="340" height="135" rx="6" fill="#1f2937"/>
+    <text x="15" y="24" fill="#4ade80" font-size="12" font-weight="bold">JOINT SENSOR HARNESS (4x ENCODERS)</text>
+    <text x="15" y="44" fill="#cbd5e1" font-size="11">• 4-Pin JST-SH 1.0mm pitch connectors</text>
+    <text x="15" y="62" fill="#cbd5e1" font-size="11">• 30 twists/meter shielded silicone cables</text>
+    <text x="15" y="80" fill="#cbd5e1" font-size="11">• Wrist gimbal bend radius &gt; 15 mm</text>
+    <text x="15" y="98" fill="#cbd5e1" font-size="11">• Cable shield grounded at TCA9548A ONLY</text>
+    <text x="15" y="116" fill="#38bdf8" font-size="10">Latency: 0.82 ms total scan time across 4 joints</text>
+  </g>
+
+  <g transform="translate(1545, 1000)">
+    <rect x="0" y="0" width="335" height="135" rx="6" fill="#1f2937"/>
+    <text x="15" y="24" fill="#a78bfa" font-size="12" font-weight="bold">STAR GROUND &amp; NOISE ISOLATION</text>
+    <text x="15" y="44" fill="#cbd5e1" font-size="11">• GND_POWER: 15A returns from Rail A &amp; B</text>
+    <text x="15" y="62" fill="#cbd5e1" font-size="11">• GND_LOGIC: Jetson, ESP32, PCA9685, TCA</text>
+    <text x="15" y="80" fill="#cbd5e1" font-size="11">• Single Star Point at battery negative shunt</text>
+    <text x="15" y="98" fill="#cbd5e1" font-size="11">• GND_ISO: 100% Galvanically isolated (EMG)</text>
+    <text x="15" y="116" fill="#f87171" font-size="10">Eliminates 400mV inductive servo ground bounce</text>
+  </g>
+</svg>

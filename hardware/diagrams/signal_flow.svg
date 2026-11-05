@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#4ade80"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrowYellow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <rect x="40" y="30" width="1520" height="60" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="65" y="66" fill="#f8fafc" font-size="22" font-weight="bold">VAPA REAL-TIME COMMUNICATION PROTOCOLS &amp; SIGNAL FLOW</text>
+  <text x="1450" y="66" fill="#4ade80" font-size="13" font-weight="bold" text-anchor="end">DWG: VAPA-SIG-003</text>
+
+  <!-- Input Sensors Column (Left) -->
+  <rect x="60" y="130" width="300" height="150" rx="8" fill="url(#cardGrad)" stroke="#06b6d4" stroke-width="2"/>
+  <text x="80" y="160" fill="#38bdf8" font-size="15" font-weight="bold">Biomedical EMG Sensors</text>
+  <text x="80" y="185" fill="#cbd5e1" font-size="12">2x MyoWare 2.0 (Flexor + Extensor)</text>
+  <text x="80" y="205" fill="#94a3b8" font-size="11">ADS1115 16-Bit ADC (Channels A0, A1)</text>
+  <text x="80" y="225" fill="#4ade80" font-size="11">IEC 60601-1 Isolated I2C Bus</text>
+  <text x="80" y="245" fill="#fbbf24" font-size="11">Sampling: Non-blocking 860 SPS</text>
+
+  <rect x="60" y="310" width="300" height="150" rx="8" fill="url(#cardGrad)" stroke="#10b981" stroke-width="2"/>
+  <text x="80" y="340" fill="#4ade80" font-size="15" font-weight="bold">Fingertip Force Sensors</text>
+  <text x="80" y="365" fill="#cbd5e1" font-size="12">5x Interlink FSR402 (Thumb to Little)</text>
+  <text x="80" y="385" fill="#94a3b8" font-size="11">10k 0.1% Dividers + 0.1uF Filter (fc=318Hz)</text>
+  <text x="80" y="405" fill="#94a3b8" font-size="11">Analog Input to ESP32 ADC1 (Pins 32-36)</text>
+  <text x="80" y="425" fill="#f87171" font-size="11">Open (&lt;10) &amp; Short (&gt;=4090) Detection</text>
+
+  <rect x="60" y="490" width="300" height="150" rx="8" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="2"/>
+  <text x="80" y="520" fill="#f87171" font-size="15" font-weight="bold">Emergency Stop &amp; Interlocks</text>
+  <text x="80" y="545" fill="#cbd5e1" font-size="12">IDEC Mushroom Switch (Normally Closed)</text>
+  <text x="80" y="565" fill="#94a3b8" font-size="11">Direct PROFET Gate Cutoff (&lt; 35 us)</text>
+  <text x="80" y="585" fill="#94a3b8" font-size="11">Optocoupled Input to ESP32 GPIO27</text>
+  <text x="80" y="605" fill="#f87171" font-size="11">Instant Hardware OE Tripping</text>
+
+  <rect x="60" y="670" width="300" height="150" rx="8" fill="url(#cardGrad)" stroke="#3b82f6" stroke-width="2"/>
+  <text x="80" y="700" fill="#60a5fa" font-size="15" font-weight="bold">Intel RealSense D435i</text>
+  <text x="80" y="725" fill="#cbd5e1" font-size="12">Active Stereo IR Depth + RGB</text>
+  <text x="80" y="745" fill="#94a3b8" font-size="11">USB 3.1 Gen 1 Link (5 Gbps)</text>
+  <text x="80" y="765" fill="#94a3b8" font-size="11">Dedicated 30 Hz Vision Multiprocess</text>
+  <text x="80" y="785" fill="#fbbf24" font-size="11">Object Classification &amp; Distance Matrix</text>
+
+  <!-- ESP32 Safety Controller (Center-Left) -->
+  <rect x="460" y="190" width="320" height="420" rx="8" fill="url(#cardGrad)" stroke="#eab308" stroke-width="2"/>
+  <text x="480" y="225" fill="#fbbf24" font-size="16" font-weight="bold">ESP32 SAFETY SUPERVISOR</text>
+  <text x="480" y="250" fill="#cbd5e1" font-size="12">FreeRTOS Dual-Core Architecture</text>
+  <text x="480" y="275" fill="#94a3b8" font-size="11">• Core 0: 500 Hz Sensor Sampling Task</text>
+  <text x="480" y="295" fill="#94a3b8" font-size="11">• Core 1: 100 Hz Supervisor &amp; UART Task</text>
+  <text x="480" y="320" fill="#f87171" font-size="11">Independent Watchdog: 350 ms timeout</text>
+  <text x="480" y="345" fill="#cbd5e1" font-size="12">Autonomous Safety Actions:</text>
+  <text x="490" y="365" fill="#cbd5e1" font-size="11">- Drops /OE on E-stop in &lt; 100 us</text>
+  <text x="490" y="385" fill="#cbd5e1" font-size="11">- Drops /OE on Heartbeat timeout &gt; 250ms</text>
+  <text x="490" y="405" fill="#cbd5e1" font-size="11">- Drops /OE on Force fault &gt; 500ms</text>
+  <text x="490" y="425" fill="#cbd5e1" font-size="11">- Drops /OE on ADS1115 ADC fault</text>
+  <text x="480" y="455" fill="#fbbf24" font-size="12">Binary Framing: CRC16-CCITT-FALSE</text>
+  <text x="480" y="475" fill="#94a3b8" font-size="11">TX: 100 Hz MSG_TYPE_SENSOR (22B)</text>
+  <text x="480" y="495" fill="#94a3b8" font-size="11">TX: 2 Hz MSG_TYPE_STATUS (10B)</text>
+  <text x="480" y="515" fill="#94a3b8" font-size="11">RX: 50 Hz MSG_TYPE_HEARTBEAT (2B)</text>
+  <text x="480" y="540" fill="#4ade80" font-size="11">Fast O(1) 256-entry CRC lookup table</text>
+
+  <!-- Connectors into ESP32 -->
+  <path d="M 360 205 L 460 250" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 360 385 L 460 360" stroke="#4ade80" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <path d="M 360 565 L 460 450" stroke="#f87171" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+  <!-- Jetson Orin Nano (Center-Right) -->
+  <rect x="880" y="190" width="340" height="420" rx="8" fill="url(#cardGrad)" stroke="#0284c7" stroke-width="2"/>
+  <text x="900" y="225" fill="#38bdf8" font-size="16" font-weight="bold">JETSON ORIN NANO (100 Hz)</text>
+  <text x="900" y="250" fill="#cbd5e1" font-size="12">Ubuntu 22.04 / Python 3.10+ Real-Time</text>
+  <text x="900" y="275" fill="#94a3b8" font-size="11">• Normalizer: Stuck &amp; Saturated EMG filter</text>
+  <text x="900" y="295" fill="#94a3b8" font-size="11">• Decoder: Hysteresis, Dwell, Open Override</text>
+  <text x="900" y="315" fill="#94a3b8" font-size="11">• Shared Control Arbitrator: EMG Intent Wins</text>
+  <text x="900" y="335" fill="#94a3b8" font-size="11">• FSR Calibrator: Piecewise Non-Linear Curves</text>
+  <text x="900" y="355" fill="#94a3b8" font-size="11">• Closed-Loop Stall &amp; Drift Monitor</text>
+  <text x="900" y="375" fill="#94a3b8" font-size="11">• Slew-Rate Limiter (Max 1200 us/s)</text>
+  <text x="900" y="395" fill="#94a3b8" font-size="11">• Fail-Closed PWM Gate &amp; Emergency Handlers</text>
+  <text x="900" y="425" fill="#38bdf8" font-size="12" font-weight="bold">Dedicated Heartbeat Thread (50 Hz)</text>
+  <text x="900" y="445" fill="#cbd5e1" font-size="11">- Sends Heartbeat packet every 20 ms</text>
+  <text x="900" y="465" fill="#cbd5e1" font-size="11">- Stops immediately if 100Hz loop stalls &gt; 40ms</text>
+  <text x="900" y="495" fill="#4ade80" font-size="12" font-weight="bold">Vision Queue (Non-Blocking)</text>
+  <text x="900" y="515" fill="#cbd5e1" font-size="11">- Camera never blocks control loop</text>
+  <text x="900" y="535" fill="#cbd5e1" font-size="11">- Drops stale profiles after 250 ms</text>
+
+  <!-- Bidirectional UART Link between ESP32 and Jetson -->
+  <path d="M 780 320 L 880 320" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowYellow)"/>
+  <text x="830" y="310" fill="#fbbf24" font-size="11" text-anchor="middle">UART 460.8k</text>
+  <text x="830" y="335" fill="#cbd5e1" font-size="9" text-anchor="middle">Sensor &amp; Status</text>
+
+  <path d="M 880 380 L 780 380" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="830" y="370" fill="#38bdf8" font-size="11" text-anchor="middle">50 Hz HB</text>
+  <text x="830" y="395" fill="#cbd5e1" font-size="9" text-anchor="middle">Arm Request</text>
+
+  <!-- RealSense into Jetson -->
+  <path d="M 360 745 L 880 540" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="620" y="660" fill="#38bdf8" font-size="11" text-anchor="middle">USB 3.1 30 FPS Depth + Color</text>
+
+  <!-- Output Actuators Column (Right) -->
+  <rect x="1290" y="190" width="270" height="190" rx="8" fill="url(#cardGrad)" stroke="#a855f7" stroke-width="2"/>
+  <text x="1310" y="220" fill="#c084fc" font-size="15" font-weight="bold">PCA9685 PWM Controller</text>
+  <text x="1310" y="245" fill="#cbd5e1" font-size="12">12-Bit 50 Hz PWM Generator (0x40)</text>
+  <text x="1310" y="265" fill="#f87171" font-size="11">Hardware /OE from ESP32 GPIO25</text>
+  <text x="1310" y="285" fill="#cbd5e1" font-size="11">I2C Control from Jetson I2C-7</text>
+  <text x="1310" y="305" fill="#fbbf24" font-size="11">Rail A: 5x MG996R Finger Servos</text>
+  <text x="1310" y="325" fill="#fbbf24" font-size="11">Rail B: 3x DS3225 + 1x DS3218 Servos</text>
+  <text x="1310" y="345" fill="#4ade80" font-size="11">Clamped: 500 - 2500 us safe range</text>
+
+  <rect x="1290" y="420" width="270" height="190" rx="8" fill="url(#cardGrad)" stroke="#3b82f6" stroke-width="2"/>
+  <text x="1310" y="450" fill="#60a5fa" font-size="15" font-weight="bold">TCA9548A &amp; 4x AS5600</text>
+  <text x="1310" y="475" fill="#cbd5e1" font-size="12">8-Channel I2C Switch at 0x71</text>
+  <text x="1310" y="495" fill="#cbd5e1" font-size="11">Reads 4x 12-Bit AS5600 Encoders</text>
+  <text x="1310" y="515" fill="#94a3b8" font-size="11">Channels: Finger, W-Flex, W-Rot, Farm</text>
+  <text x="1310" y="535" fill="#4ade80" font-size="11">Continuous Multi-Turn Unwrapping</text>
+  <text x="1310" y="555" fill="#f87171" font-size="11">Stall/Drift Verification vs Command</text>
+  <text x="1310" y="575" fill="#38bdf8" font-size="11">0.82 ms Total Read Latency</text>
+
+  <!-- Jetson to PCA9685 / TCA9548A I2C-7 -->
+  <path d="M 1220 285 L 1290 285" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 1220 480 L 1290 480" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ESP32 to PCA9685 /OE Line (High Priority Red) -->
+  <path d="M 620 190 L 620 160 L 1380 160 L 1380 190" stroke="#ef4444" stroke-width="3" stroke-dasharray="6,3" marker-end="url(#arrowRed)"/>
+  <text x="1000" y="150" fill="#f87171" font-size="12" font-weight="bold" text-anchor="middle">HARDWARE OUTPUT ENABLE (/OE) — INDEPENDENT ESP32 SHUTDOWN INTERLOCK</text>
+
+  <!-- Bottom Legend -->
+  <rect x="60" y="840" width="1480" height="40" rx="6" fill="#111827" stroke="#374151" stroke-width="1"/>
+  <text x="80" y="865" fill="#94a3b8" font-size="12">Signal Flow Legend: </text>
+  <circle cx="210" cy="860" r="5" fill="#38bdf8"/>
+  <text x="225" y="865" fill="#cbd5e1" font-size="11">Jetson I2C/USB</text>
+  <circle cx="340" cy="860" r="5" fill="#fbbf24"/>
+  <text x="355" y="865" fill="#cbd5e1" font-size="11">UART Telemetry</text>
+  <circle cx="470" cy="860" r="5" fill="#4ade80"/>
+  <text x="485" y="865" fill="#cbd5e1" font-size="11">Analog Sensor / Encoders</text>
+  <circle cx="630" cy="860" r="5" fill="#ef4444"/>
+  <text x="645" y="865" fill="#f87171" font-size="11">Hardware Safety Interlock (/OE &amp; E-Stop)</text>
+</svg>

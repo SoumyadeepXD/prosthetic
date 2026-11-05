@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <rect x="40" y="30" width="1520" height="60" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="65" y="66" fill="#f8fafc" font-size="22" font-weight="bold">VAPA POWER DISTRIBUTION ARCHITECTURE &amp; RAIL TOPOLOGY</text>
+  <text x="1450" y="66" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="end">DWG: VAPA-PWR-002</text>
+
+  <!-- Battery Source Block -->
+  <rect x="60" y="130" width="280" height="150" rx="8" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
+  <text x="80" y="165" fill="#c7d2fe" font-size="16" font-weight="bold">12V Li-Ion Battery Pack</text>
+  <text x="80" y="190" fill="#cbd5e1" font-size="12">3S Configuration (11.1V Nom, 12.6V Max)</text>
+  <text x="80" y="210" fill="#94a3b8" font-size="12">Capacity: 5200 mAh, 30C Discharge</text>
+  <text x="80" y="230" fill="#38bdf8" font-size="12">Connector: XT60 Keyed (AWG 12)</text>
+  <text x="80" y="255" fill="#f87171" font-size="12" font-weight="bold">Main Fuse F1: 30A Blade (Littelfuse)</text>
+
+  <!-- Main Switch / PROFET -->
+  <path d="M 340 205 L 420 205" stroke="#f87171" stroke-width="4" marker-end="url(#arrowRed)"/>
+  <rect x="420" y="130" width="260" height="150" rx="8" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="2"/>
+  <text x="440" y="165" fill="#ef4444" font-size="15" font-weight="bold">High-Side Power Switch</text>
+  <text x="440" y="190" fill="#cbd5e1" font-size="12">PROFET BTS50015-1TMA (33A Cont)</text>
+  <text x="440" y="210" fill="#94a3b8" font-size="12">Rds(on) = 1.5 mOhm (P_loss = 0.35W)</text>
+  <text x="440" y="235" fill="#f87171" font-size="12" font-weight="bold">IDEC E-Stop Mushroom (NC)</text>
+  <text x="440" y="255" fill="#f59e0b" font-size="11">Hardware Shutoff Time &lt; 35 us</text>
+
+  <!-- Distribution Bus Line -->
+  <path d="M 680 205 L 760 205" stroke="#f87171" stroke-width="4"/>
+  <line x1="760" y1="180" x2="760" y2="700" stroke="#f87171" stroke-width="4"/>
+
+  <!-- Rail 1: 5V Logic -->
+  <path d="M 760 200 L 840 200" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="840" y="140" width="340" height="120" rx="8" fill="url(#cardGrad)" stroke="#0284c7" stroke-width="2"/>
+  <text x="860" y="170" fill="#38bdf8" font-size="15" font-weight="bold">5.0V Logic Buck Regulator</text>
+  <text x="860" y="195" fill="#cbd5e1" font-size="12">TI TPS54620 Synchronous Step-Down (6A Max)</text>
+  <text x="860" y="215" fill="#94a3b8" font-size="12">Efficiency: 95% | Resettable PTC Fuse 6A (F4)</text>
+  <text x="860" y="238" fill="#4ade80" font-size="12">Powers: Jetson Orin Nano (Pins 2 &amp; 4 via AWG 20)</text>
+
+  <!-- LDO branch from 5V -->
+  <path d="M 1180 200 L 1260 200" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="1260" y="140" width="280" height="120" rx="8" fill="url(#cardGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="1275" y="170" fill="#38bdf8" font-size="14" font-weight="bold">3.3V Logic LDO (AP2112K)</text>
+  <text x="1275" y="195" fill="#cbd5e1" font-size="12">Vout: 3.3V @ 600mA (Dropout &lt; 250mV)</text>
+  <text x="1275" y="215" fill="#94a3b8" font-size="11">Powers: ESP32-WROOM-32E Core</text>
+  <text x="1275" y="235" fill="#94a3b8" font-size="11">Powers: PCA9685, TCA9548A, 4x AS5600s</text>
+
+  <!-- Rail 2: Servo Rail A -->
+  <path d="M 760 420 L 840 420" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <rect x="840" y="360" width="340" height="130" rx="8" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="2"/>
+  <text x="860" y="390" fill="#fbbf24" font-size="15" font-weight="bold">6.0V Servo Rail A (Fingers)</text>
+  <text x="860" y="415" fill="#cbd5e1" font-size="12">Pololu D36V50F6 / TI LM5145 Buck Regulator</text>
+  <text x="860" y="435" fill="#94a3b8" font-size="12">Rating: 15A Cont / 20A Peak | Fuse F2: 15A Blade</text>
+  <text x="860" y="455" fill="#f87171" font-size="12">Peak Stall Current: 12.5A (5x MG996R Servos)</text>
+  <text x="860" y="475" fill="#38bdf8" font-size="11">Capacitor: 2200 uF 16V Low-ESR directly on rail</text>
+
+  <!-- Servos A list -->
+  <path d="M 1180 420 L 1260 420" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <rect x="1260" y="360" width="280" height="130" rx="8" fill="#18181b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="1275" y="385" fill="#fbbf24" font-size="13" font-weight="bold">Actuators: 5x Finger Servos</text>
+  <text x="1275" y="405" fill="#cbd5e1" font-size="11">• Thumb Flexion (MG996R)</text>
+  <text x="1275" y="423" fill="#cbd5e1" font-size="11">• Index Flexion (MG996R)</text>
+  <text x="1275" y="441" fill="#cbd5e1" font-size="11">• Middle Flexion (MG996R)</text>
+  <text x="1275" y="459" fill="#cbd5e1" font-size="11">• Ring &amp; Little Flexion (2x MG996R)</text>
+
+  <!-- Rail 3: Servo Rail B -->
+  <path d="M 760 640 L 840 640" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <rect x="840" y="580" width="340" height="130" rx="8" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="2"/>
+  <text x="860" y="610" fill="#fbbf24" font-size="15" font-weight="bold">6.0V Servo Rail B (Wrist / Arm)</text>
+  <text x="860" y="635" fill="#cbd5e1" font-size="12">Pololu D36V50F6 / TI LM5145 Buck Regulator</text>
+  <text x="860" y="655" fill="#94a3b8" font-size="12">Rating: 15A Cont / 20A Peak | Fuse F3: 15A Blade</text>
+  <text x="860" y="675" fill="#f87171" font-size="12">Peak Stall Current: 10.6A (3x DS3225 + 1x DS3218)</text>
+  <text x="860" y="695" fill="#38bdf8" font-size="11">Capacitor: 2200 uF 16V Low-ESR directly on rail</text>
+
+  <!-- Servos B list -->
+  <path d="M 1180 640 L 1260 640" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <rect x="1260" y="580" width="280" height="130" rx="8" fill="#18181b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="1275" y="605" fill="#fbbf24" font-size="13" font-weight="bold">Actuators: 4x Arm Servos</text>
+  <text x="1275" y="425+200" fill="#cbd5e1" font-size="11">• Wrist Pitch (DS3225 25kg-cm)</text>
+  <text x="1275" y="443+200" fill="#cbd5e1" font-size="11">• Wrist Roll (DS3225 25kg-cm)</text>
+  <text x="1275" y="461+200" fill="#cbd5e1" font-size="11">• Wrist Deviation (DS3225 25kg-cm)</text>
+  <text x="1275" y="479+200" fill="#cbd5e1" font-size="11">• Forearm Rotation (DS3218 20kg-cm)</text>
+
+  <!-- Isolated Biomedical Rail -->
+  <rect x="60" y="580" width="620" height="130" rx="8" fill="#18181b" stroke="#06b6d4" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="80" y="610" fill="#38bdf8" font-size="15" font-weight="bold">IEC 60601-1 Isolated Biomedical Rail (Zone 3)</text>
+  <text x="80" y="635" fill="#cbd5e1" font-size="12">Power: Mornsun B0505S-1WR3 (5V to 5V, 1500 VDC Isolation Barrier, 2.2 pF)</text>
+  <text x="80" y="655" fill="#cbd5e1" font-size="12">Regulation: TI TPS79333 Ultra-Low-Noise LDO (3.3V_ISO @ 200mA, 32 uVrms)</text>
+  <text x="80" y="675" fill="#4ade80" font-size="12">Connected to: ADS1115 ADC &amp; MyoWare 2.0 Forearm Surface Electrodes</text>
+  <text x="80" y="695" fill="#f87171" font-size="11">Safety: Patient leakage current &lt; 2 uA | ZERO conductive path to battery or chassis</text>
+
+  <!-- Star Grounding Callout -->
+  <rect x="60" y="740" width="1480" height="110" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="85" y="770" fill="#f8fafc" font-size="14" font-weight="bold">STAR GROUNDING TOPOLOGY (Eliminates 400mV Inductive Servo Bounce)</text>
+  <text x="85" y="792" fill="#cbd5e1" font-size="12">• GND_POWER (Heavy Copper Bus): Absorbs 23.1A simultaneous stall returns from Servo Rails A and B.</text>
+  <text x="85" y="810" fill="#cbd5e1" font-size="12">• GND_LOGIC (Clean Digital Ground Plane): Jetson Orin Nano, ESP32-WROOM-32E, PCA9685 logic, TCA9548A mux, and FSR dividers.</text>
+  <text x="85" y="828" fill="#cbd5e1" font-size="12">• Physical Intersection: Exactly ONE point at the negative battery terminal of the XT60 connector on the PDB.</text>
+  <text x="85" y="846" fill="#4ade80" font-size="12">• GND_ISO (Floating Patient Ground): 100% Galvanically isolated with zero ohmic or capacitive connection to chassis ground.</text>
+</svg>

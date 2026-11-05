@@ -1,0 +1,61 @@
+(kicad_sch (version 20211123) (generator eeschema)
+
+  (paper "A3")
+
+  (title_block
+    (title "VAPA - ESP32 Safety Controller & Sensor Supervisor")
+    (date "2026-11-05")
+    (rev "2.1")
+    (company "VAPA Firmware & Embedded Systems Team")
+    (comment 1 "Independent Safety Watchdog, PCA9685 /OE Control, UART2 Telemetry")
+  )
+
+  <!-- ESP32-WROOM-32E Microcontroller -->
+  (symbol (lib_id "RF_Module:ESP32-WROOM-32E") (at 152.4 101.6 0) (unit 1)
+    (property "Reference" "U2" (id 0) (at 152.4 38.1 0))
+    (property "Value" "ESP32-WROOM-32E-N4" (id 1) (at 152.4 40.64 0))
+    (property "Footprint" "RF_Module:ESP32-WROOM-32E" (id 2) (at 152.4 101.6 0) (effects (hide yes)))
+    (property "Description" "Dual-core Xtensa 240MHz, 4MB Flash, Independent Supervisor" (id 3) (at 152.4 35.56 0) (effects (hide yes)))
+  )
+
+  <!-- Output Enable (/OE) Hardware Pull-Up Resistor -->
+  (symbol (lib_id "Device:R_Small") (at 215.9 76.2 0) (unit 1)
+    (property "Reference" "R6" (id 0) (at 215.9 68.58 0))
+    (property "Value" "10k_0.1%" (id 1) (at 215.9 71.12 0))
+    (property "Description" "Hardware pull-up to 3.3V: holds PCA9685 /OE HIGH (disabled) at boot" (id 3) (at 215.9 66.04 0) (effects (hide yes)))
+  )
+
+  <!-- E-Stop Input Optocoupler Isolation (PC817) -->
+  (symbol (lib_id "Isolator:PC817") (at 88.9 101.6 0) (unit 1)
+    (property "Reference" "U11" (id 0) (at 88.9 88.9 0))
+    (property "Value" "PC817_OPTO" (id 1) (at 88.9 91.44 0))
+    (property "Footprint" "Package_DIP:DIP-4_W7.62mm" (id 2) (at 88.9 101.6 0) (effects (hide yes)))
+    (property "Description" "Galvanic optocoupler isolating physical E-stop switch from ESP32 core logic" (id 3) (at 88.9 86.36 0) (effects (hide yes)))
+  )
+
+  <!-- I2C Pull-Up Resistors (4.7k) for Local I2C Bus to ISO1540 -->
+  (symbol (lib_id "Device:R_Small") (at 215.9 114.3 0) (unit 1)
+    (property "Reference" "R7" (id 0) (at 215.9 106.68 0))
+    (property "Value" "4.7k_SDA" (id 1) (at 215.9 109.22 0))
+  )
+  (symbol (lib_id "Device:R_Small") (at 228.6 114.3 0) (unit 1)
+    (property "Reference" "R8" (id 0) (at 228.6 106.68 0))
+    (property "Value" "4.7k_SCL" (id 1) (at 228.6 109.22 0))
+  )
+
+  <!-- Decoupling Capacitors -->
+  (symbol (lib_id "Device:C_Small") (at 127.0 50.8 0) (unit 1)
+    (property "Reference" "C5" (id 0) (at 127.0 43.18 0))
+    (property "Value" "10uF_X7R" (id 1) (at 127.0 45.72 0))
+  )
+  (symbol (lib_id "Device:C_Small") (at 137.16 50.8 0) (unit 1)
+    (property "Reference" "C6" (id 0) (at 137.16 43.18 0))
+    (property "Value" "0.1uF_X7R" (id 1) (at 137.16 45.72 0))
+  )
+
+  <!-- Annotation Notes -->
+  (text "CRITICAL SAFETY HARDWARE CONFIGURATION:\n1. GPIO25 is driven HIGH immediately upon boot to keep PCA9685 tristated.\n2. R6 (10k pull-up) guarantees /OE remains HIGH even if ESP32 is unpowered or held in reset.\n3. GPIO27 optocoupler triggers hardware interrupt on contact break (< 100 us shutdown latency)."
+    (at 50.8 177.8 0)
+    (effects (font (size 1.524 1.524)) (justify left top))
+  )
+)

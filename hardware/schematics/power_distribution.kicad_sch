@@ -1,0 +1,109 @@
+(kicad_sch (version 20211123) (generator eeschema)
+
+  (paper "A3")
+
+  (title_block
+    (title "VAPA - Power Distribution, Regulators & E-Stop Interlock")
+    (date "2026-11-05")
+    (rev "2.1")
+    (company "VAPA Electrical Design Team")
+    (comment 1 "Dual 6V 15A Servo Rails + 5V 6A Logic + High-Side PROFET Cutoff")
+  )
+
+  <!-- Power Input: XT60 & Fuse F1 -->
+  (symbol (lib_id "Connector:Conn_01x02_Male") (at 38.1 63.5 0) (unit 1)
+    (property "Reference" "CONN1" (id 0) (at 38.1 53.34 0))
+    (property "Value" "XT60_BATTERY_12V" (id 1) (at 38.1 55.88 0))
+    (property "Footprint" "Connector_AMASS:AMASS_XT60-M" (id 2) (at 38.1 63.5 0) (effects (hide yes)))
+    (pin "1" (uuid "p1-bat-pos"))
+    (pin "2" (uuid "p2-bat-neg"))
+  )
+
+  (symbol (lib_id "Device:Fuse") (at 63.5 60.96 90) (unit 1)
+    (property "Reference" "F1" (id 0) (at 63.5 53.34 0))
+    (property "Value" "30A_ATO_BLADE" (id 1) (at 63.5 55.88 0))
+    (property "Footprint" "Fuse:Fuseholder_Blade_ATO_Littelfuse_FHAC0001" (id 2) (at 63.5 60.96 0) (effects (hide yes)))
+  )
+
+  <!-- E-Stop Industrial Pushbutton & Optocoupler -->
+  (symbol (lib_id "Switch:SW_Push_Dual") (at 88.9 76.2 0) (unit 1)
+    (property "Reference" "SW1" (id 0) (at 88.9 66.04 0))
+    (property "Value" "IDEC_ESTOP_NC" (id 1) (at 88.9 68.58 0))
+    (property "Footprint" "Button_Switch_PanelMount:IDEC_AB6E-3BV01PRM" (id 2) (at 88.9 76.2 0) (effects (hide yes)))
+  )
+
+  <!-- High-Side Power Switch: Infineon BTS50015-1TMA -->
+  (symbol (lib_id "Power_Management:BTS50015-1TMA") (at 127.0 63.5 0) (unit 1)
+    (property "Reference" "U10" (id 0) (at 127.0 48.26 0))
+    (property "Value" "BTS50015-1TMA" (id 1) (at 127.0 50.8 0))
+    (property "Footprint" "Package_TO_SOT_SMD:TO-263-7_TabPin8" (id 2) (at 127.0 63.5 0) (effects (hide yes)))
+    (property "Description" "33A Smart High-Side Switch, 1.5mOhm Rds(on), E-Stop Interlock" (id 3) (at 127.0 45.72 0) (effects (hide yes)))
+  )
+
+  <!-- 5V 6A Logic Buck: TI TPS54620 -->
+  (symbol (lib_id "Regulator_Switching:TPS54620RGY") (at 190.5 55.88 0) (unit 1)
+    (property "Reference" "VR1" (id 0) (at 190.5 40.64 0))
+    (property "Value" "TPS54620_5V_6A" (id 1) (at 190.5 43.18 0))
+    (property "Footprint" "Package_DFN_QFN:Texas_RGY0014B" (id 2) (at 190.5 55.88 0) (effects (hide yes)))
+  )
+
+  (symbol (lib_id "Device:Polyfuse") (at 228.6 55.88 90) (unit 1)
+    (property "Reference" "F4" (id 0) (at 228.6 48.26 0))
+    (property "Value" "6A_PTC_RESETTABLE" (id 1) (at 228.6 50.8 0))
+  )
+
+  <!-- 3.3V Clean LDO: AP2112K-3.3 -->
+  (symbol (lib_id "Regulator_Linear:AP2112K-3.3") (at 266.7 55.88 0) (unit 1)
+    (property "Reference" "U8" (id 0) (at 266.7 43.18 0))
+    (property "Value" "AP2112K-3.3" (id 1) (at 266.7 45.72 0))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (id 2) (at 266.7 55.88 0) (effects (hide yes)))
+  )
+
+  <!-- 6V 15A Servo Rail A Buck Converter (Fingers) -->
+  (symbol (lib_id "Regulator_Switching:Pololu_D36V50F6") (at 190.5 114.3 0) (unit 1)
+    (property "Reference" "VR2" (id 0) (at 190.5 99.06 0))
+    (property "Value" "D36V50F6_6V_15A" (id 1) (at 190.5 101.6 0))
+    (property "Description" "Dedicated Finger Servo Rail A (15A continuous, 20A peak)" (id 3) (at 190.5 96.52 0) (effects (hide yes)))
+  )
+
+  (symbol (lib_id "Device:Fuse") (at 228.6 114.3 90) (unit 1)
+    (property "Reference" "F2" (id 0) (at 228.6 106.68 0))
+    (property "Value" "15A_ATO_BLADE" (id 1) (at 228.6 109.22 0))
+  )
+
+  (symbol (lib_id "Device:CP_Small") (at 254.0 119.38 0) (unit 1)
+    (property "Reference" "C1" (id 0) (at 254.0 109.22 0))
+    (property "Value" "2200uF_16V_LOW_ESR" (id 1) (at 254.0 111.76 0))
+  )
+  (symbol (lib_id "Device:CP_Small") (at 266.7 119.38 0) (unit 1)
+    (property "Reference" "C2" (id 0) (at 266.7 109.22 0))
+    (property "Value" "2200uF_16V_LOW_ESR" (id 1) (at 266.7 111.76 0))
+  )
+
+  <!-- 6V 15A Servo Rail B Buck Converter (Wrist/Arm) -->
+  (symbol (lib_id "Regulator_Switching:Pololu_D36V50F6") (at 190.5 165.1 0) (unit 1)
+    (property "Reference" "VR3" (id 0) (at 190.5 149.86 0))
+    (property "Value" "D36V50F6_6V_15A" (id 1) (at 190.5 152.4 0))
+    (property "Description" "Dedicated Wrist & Forearm Servo Rail B (15A continuous, 20A peak)" (id 3) (at 190.5 147.32 0) (effects (hide yes)))
+  )
+
+  (symbol (lib_id "Device:Fuse") (at 228.6 165.1 90) (unit 1)
+    (property "Reference" "F3" (id 0) (at 228.6 157.48 0))
+    (property "Value" "15A_ATO_BLADE" (id 1) (at 228.6 160.02 0))
+  )
+
+  (symbol (lib_id "Device:CP_Small") (at 254.0 170.18 0) (unit 1)
+    (property "Reference" "C3" (id 0) (at 254.0 160.02 0))
+    (property "Value" "2200uF_16V_LOW_ESR" (id 1) (at 254.0 162.56 0))
+  )
+  (symbol (lib_id "Device:CP_Small") (at 266.7 170.18 0) (unit 1)
+    (property "Reference" "C4" (id 0) (at 266.7 160.02 0))
+    (property "Value" "2200uF_16V_LOW_ESR" (id 1) (at 266.7 162.56 0))
+  )
+
+  <!-- Star Grounding Point Callout -->
+  (text "STAR GROUND JUNCTION POINT:\nGND_POWER and GND_LOGIC tie together at XT60 (-) terminal shunt.\nNo high-current motor return currents flow through logic ground plane."
+    (at 38.1 139.7 0)
+    (effects (font (size 1.524 1.524)) (justify left top))
+  )
+)

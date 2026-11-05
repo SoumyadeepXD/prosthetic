@@ -134,3 +134,23 @@ def test_grip_selector_end_to_end_with_bounding_box():
     assert res.class_name == "apple"
     assert res.confidence == 0.92
     assert res.bounding_box == bbox
+
+
+def test_onnx_detector_missing_file_fallback():
+    """Verify that if ONNX model weights are missing or unreadable, detector falls back to empty standby without crashing."""
+    from vapa.vision.detector import ONNXObjectDetector
+
+    detector = ONNXObjectDetector(model_path="non_existent_yolo_model.onnx")
+    img = np.zeros((480, 640, 3), dtype=np.uint8)
+
+    # Must safely return empty detections list
+    detections = detector.detect(img)
+    assert detections == []
+
+    # Grip selector handles standby detector by falling back to default profile
+    selector = GripSelector(detector=detector)
+    res = selector.process(img)
+    assert res.profile_name == "default"
+    assert res.confidence == 0.0
+    assert res.class_name is None
+

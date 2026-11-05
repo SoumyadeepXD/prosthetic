@@ -1,0 +1,24 @@
+[Unit]
+Description=VAPA Vision-Assisted Prosthetic Arm Controller Daemon
+After=network.target systemd-udevd.service
+Wants=systemd-udevd.service
+
+[Service]
+Type=simple
+User=jetson
+WorkingDirectory=/opt/vapa
+ExecStart=/opt/vapa/.venv/bin/python3 -m vapa.app.main --log-level INFO
+Restart=on-failure
+RestartSec=3s
+KillMode=mixed
+TimeoutStopSec=3s
+Nice=-10
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=50
+
+# Environmental variables
+Environment="PYTHONUNBUFFERED=1"
+Environment="PATH=/opt/vapa/.venv/bin:/usr/local/cuda/bin:/usr/bin:/bin"
+
+[Install]
+WantedBy=multi-user.target

@@ -79,3 +79,39 @@ This document records safety and architectural design choices, alternatives cons
 - **Alternatives Considered:** Standard Linux CFS best-effort scheduling; relying on automated hardware actuation in CI.
 - **Reason:** On Linux/Jetson platforms running heavy background desktop workloads, standard CFS scheduling can preempt the Python control thread, causing ESP32 heartbeat timeouts (> 250 ms) and unintended E-stop disarms. Assigning real-time round-robin scheduling protects control loop determinism. Automated hardware actuation without human verification risks mechanical collision and electrical hazards.
 
+---
+
+### DEC-012: Formal 8-State Safety Architecture and State Latching
+- **Decision:** The system safety lifecycle is formalized into an 8-state finite state machine (`BOOT`, `DISARMED`, `SELF_TEST`, `CALIBRATION`, `ARMED_IDLE`, `ACTIVE`, `FAULT`, `EMERGENCY_STOP`). All transitions into `FAULT` and `EMERGENCY_STOP` are latched; recovery to `DISARMED` strictly requires physical clearing of conditions and explicit operator confirmation. Auto-rearming is strictly prohibited.
+- **Alternatives Considered:** 4-state simplified machine (`DISARMED`, `ARMED`, `ACTIVE`, `FAULT`) with implicit recovery.
+- **Reason:** Implicit recovery from E-stop or sensor failure can cause sudden unintended motion if the operator still has fingers inside a pinch point or if the obstacle was not cleared. A formal 8-state model ensures full traceability and pre-flight diagnostics.
+
+---
+
+### DEC-013: Dual-Layer Actuator Power Disconnection (PROFET BTS50015 & PCA9685 /OE)
+- **Decision:** Never assume that disabling PWM pulses on the PCA9685 controller removes servo power or eliminates mechanical hazards. Actuator power safety is implemented in two independent physical layers: Layer 1 (Logic) via ESP32 GPIO25 controlling PCA9685 `/OE` with a 10 kΩ pull-up to 3.3V; Layer 2 (Power) via an automotive-grade Infineon PROFET BTS50015 high-side solid-state switch in series with the main battery rail, controlled by the physical normally closed (NC) E-stop loop.
+- **Alternatives Considered:** Controlling only the PCA9685 `/OE` pin; using a mechanical automotive relay.
+- **Reason:** Mechanical relays suffer contact bounce and slow opening times (15–30 ms) under 20A DC inductive loads. The PROFET solid-state switch cuts power in < 1 ms without mechanical wear. If a servo MOSFET fails short-circuit, removing logic PWM cannot stop thermal runaway or motor destruction; physical power disconnection is mandatory.
+
+---
+
+### DEC-014: Biomedical Galvanic Isolation (IEC 60601-1 Type BF) for Human EMG Electrodes
+- **Decision:** Surface EMG electrodes worn on human skin and their analog acquisition circuitry (ADS1115 ADC) must be galvanically isolated from the 20A motor battery rail. The EMG interface PCB uses a 1.5 kV isolated DC-DC converter (Mornsun B0505S-1WR3) and a Texas Instruments ISO1540 bidirectional I2C digital isolator.
+- **Alternatives Considered:** Sharing a common ground between the MyoWare sensors, ESP32, and high-current servo battery.
+- **Reason:** Connecting human skin electrodes to a high-current battery ground risks fatal ground-loop shocks, leakage currents > 100 µA (violating IEC 60601-1 Type BF patient safety), and massive electrical noise induction from servo PWM switching transients (20A spikes).
+
+---
+
+### DEC-015: Piecewise Monotonic FSR Force Calibration & Wire Break Detection
+- **Decision:** Replace arbitrary fixed ADC multipliers with a per-finger piecewise monotonic calibration curve (`FSRCalibrator`) mapping raw ADC counts to grams [0..1000g]. The calibrator actively detects open-circuit wiring disconnections (< 10 ADC counts) and short-circuit rail failures (≥ 4090 ADC counts) as critical safety faults.
+- **Alternatives Considered:** Using linear slope/offset approximations.
+- **Reason:** Piezoresistive FSR sensors exhibit highly non-linear logarithmic-hyperbolic resistance vs. force curves. Linear approximations cause massive errors (> 50%) at low forces (light touch) and premature saturation at high forces. Active open/short detection prevents undetected sensor failure leading to crushing injuries.
+
+---
+
+### DEC-016: Proximal Servo Placement & Capstan Spool Sizing for 40mm Tendon Excursion
+- **Decision:** Replace standard 20 mm servo horn arms with 25 mm diameter circular capstan spools to deliver the required 35–40 mm tendon stroke for full finger closure. Place the 3 wrist servos and 5 finger servos in the proximal two-thirds of the forearm housing, transmitting movement across the wrist via flexible push-pull Bowden cables.
+- **Alternatives Considered:** Direct-drive servos placed at the distal wrist and fingers; single-arm 20 mm horns.
+- **Reason:** A standard 20 mm horn over 90° only provides 28.3 mm displacement, leaving the fingers partially open. Placing 4 metal-gear servos (264 g) at the wrist creates a large cantilever bending moment (0.65 N·m) that causes residual limb fatigue and socket slippage. Proximal placement shifts the center of mass 82 mm proximally, reducing the cantilever moment by 47%.
+
+

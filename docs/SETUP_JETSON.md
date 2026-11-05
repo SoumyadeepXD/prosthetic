@@ -53,13 +53,89 @@ i2cdetect -l
 i2cdetect -y -r 7
 ```
 Expected devices on bus 7:
-- `0x40` (PCA9685)
-- `0x71` (TCA9548A multiplexer)
+- `0x40` (PCA9685 PWM Controller)
+- `0x71` (TCA9548A I2C Multiplexer, A0 strapped to 3.3V)
 
 ### UART Configuration
-Ensure the serial port `/dev/ttyTHS1` (or equivalent UART mapped to 40-pin header pins 8 and 10) is not allocated to a Linux serial login console:
+Disable the default Linux serial login console on `/dev/ttyTHS1` (Pins 8 and 10 of 40-pin header):
 ```bash
 sudo systemctl stop nvgetty
 sudo systemctl disable nvgetty
 sudo usermod -aG dialout $USER
+```
+
+---
+
+## 4. Jetson Performance Tuning & Real-Time Setup
+
+To ensure deterministic 100 Hz control loop execution and prevent CPU throttling:
+
+1. **Set Max Performance Mode (15W MAXN)**:
+   ```bash
+   sudo nvpmodel -m 0
+   sudo jetson_clocks
+   ```
+2. **Apply Hardware Udev Rules**:
+   ```bash
+   sudo ./scripts/setup_udev_rules.sh
+   ```
+
+---
+
+## 5. Automated Installation & Build
+
+Run the master installation script:
+```bash
+./scripts/install.sh
+```
+This script installs all system packages, builds Python dependencies inside `.venv`, sets up udev rules, and runs the pre-flight verification test suite (96 tests passing).
+
+---
+
+## 6. End-to-End Bringup Sequence
+
+Follow this order when deploying physical hardware:
+
+1. **Flash ESP32 Firmware**:
+   ```bash
+   ./scripts/flash_esp32.sh /dev/ttyUSB0
+   ```
+2. **Execute Master Bench Calibration**:
+   ```bash
+   python3 tools/calibration/calibrate_system.py
+   ```
+   Follow interactive wizard prompts for Servos, AS5600 Encoders, FSR402 Fingertips, MyoWare EMG, and RealSense D435i.
+3. **Execute Hardware-In-The-Loop (HIL) Qualification**:
+   ```bash
+   python3 tools/bench/hil_system_check.py
+   ```
+   Ensures all 6 hardware subsystems are operational and verified before arming.
+4. **Launch Main Controller**:
+   ```bash
+   # Physical hardware mode (interactive dashboard):
+   ./scripts/run_vapa.sh
+
+   # Or in offline simulation / mock mode:
+   ./scripts/run_vapa.sh --mock
+   ```
+
+---
+
+## 7. Production Systemd Service
+
+To configure VAPA as a managed background system service on the prosthesis:
+
+```bash
+# Copy service definition
+sudo cp scripts/systemd/vapa.service /etc/systemd/system/
+sudo systemctl daemon-reload
+
+# Enable service to start on boot
+sudo systemctl enable vapa.service
+
+# Start service immediately
+sudo systemctl start vapa.service
+
+# View live telemetry logs
+journalctl -u vapa.service -f
 ```

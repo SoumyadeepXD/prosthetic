@@ -1,0 +1,16 @@
+Item,Part Number,Description,Manufacturer / Vendor,Quantity,Material / Specs,Unit Cost USD
+1,M2-BRASS-INSERT,M2 Heat-Set Threaded Insert (OD 3.5mm L 4.0mm),Ruthex / CNC Kitchen,24,Brass CW614N,0.15
+2,M2.5-BRASS-INSERT,M2.5 Heat-Set Insert (OD 4.2mm L 5.0mm),Ruthex,16,Brass CW614N,0.18
+3,M3-BRASS-INSERT,M3 Heat-Set Insert (OD 4.6mm L 5.7mm),Ruthex,32,Brass CW614N,0.20
+4,MF63ZZ,Flanged Miniature Ball Bearing (3x6x2.5mm),FAG / SKF,20,Chrome Steel / Shielded,1.20
+5,6808-2RS,Thin-Section Deep Groove Ball Bearing (40x52x7mm),SKF / NSK,2,AISI 52100 Steel / Dual Rubber Seals,8.50
+6,PIN-D3-20,Precision Ground Dowel Pin 3.0mm h6 x 20mm,Misumi,15,316 Stainless Steel,0.65
+7,DYNEEMA-050,Braided UHMWPE Dyneema Line 0.50mm 100lb,Berkley / Hercules,1,100m Spool / 445N break strength,14.99
+8,PTFE-TUBE-1020,Virgin PTFE Smooth-Bore Tubing 1.0mm ID x 2.0mm OD,Capricorn,2,1m Length / Low friction,4.50
+9,DOME-PU-35A,Molded Elastomeric Force Concentrator Puck (D10mm H2.5mm),Custom Molded,10,Polyurethane / Shore 35A,0.85
+10,MAG-N52-6X25,Diametrically Magnetized Disc Magnet (D6.0mm x T2.5mm),K&J Magnetics,6,Neodymium N52 / Ni-Cu-Ni plating,1.80
+11,CRIMP-DB-08,Dual-Barrel Aluminum Crimp Sleeves 0.8mm bore,American Fishing Wire,50,6061-T6 Aluminum,0.10
+12,SCREW-M3-SHCS-12,M3x12mm Socket Head Cap Screw,Bossard,40,Class 10.9 Zinc Plated / Black,0.08
+13,SCREW-M2-SHCS-8,M2x8mm Socket Head Cap Screw,Bossard,30,A2-70 Stainless Steel,0.06
+14,VIB-BOBBIN-M3,M3 Male-Female Rubber Vibration Isolator Bobbins,RS Components,4,Silicone / Durometer 40 Shore A,1.75
+15,TORSION-SPRING-F,Custom Finger Return Torsion Springs (0.4mm wire),Century Spring,10,Music Wire ASTM A228,0.95

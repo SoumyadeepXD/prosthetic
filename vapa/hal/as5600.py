@@ -156,6 +156,15 @@ class MockAS5600(AbstractAS5600):
             raise ValueError(f"Unknown joint: {joint_name}")
         self._magnet_ok[joint_name] = valid
 
+    def simulate_step(self, commanded_angles: Dict[str, float]) -> None:
+        """Simulate physical joint tracking commanded angles with realistic mechanical dynamics."""
+        for joint, target_deg in commanded_angles.items():
+            if joint in self.trackers:
+                tracker = self.trackers[joint]
+                unwrapped_deg = (tracker.direction * target_deg) + tracker.zero_offset_deg
+                ticks = int((unwrapped_deg % 360.0) / 360.0 * 4096.0) & 0x0FFF
+                self._raw_angles[joint] = ticks
+
     def read_joint_status(self, joint_name: str) -> EncoderStatus:
         if joint_name not in self.trackers:
             raise ValueError(f"Unknown joint: {joint_name}")

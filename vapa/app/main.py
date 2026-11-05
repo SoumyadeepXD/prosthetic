@@ -29,6 +29,7 @@ from ..control import (
     FingerForceController,
     GripExecutor,
     EncoderMonitor,
+    FSRCalibrator,
 )
 from ..emg import (
     ThresholdEMGDecoder,
@@ -93,6 +94,7 @@ class VAPAApplication:
         slew_rates = {k: float(v.get("max_slew_rate_deg_s", 180.0)) for k, v in self.servo_config.get("servos", {}).items()}
         self.slew_limiter = SlewRateLimiter(slew_rates)
         self.force_controller = FingerForceController()
+        self.fsr_calibrator = FSRCalibrator(self.fsr_config)
         self.grip_executor = GripExecutor(
             mapper=self.mapper,
             slew_limiter=self.slew_limiter,
@@ -139,6 +141,7 @@ class VAPAApplication:
         # Latest vision context cache
         self.latest_dist_result: Optional[DistanceMatrixResult] = None
         self.latest_grip_result: Optional[GripSelectionResult] = None
+        self.latest_vision_time: float = 0.0
 
         # Dedicated 50 Hz Heartbeat Watchdog Thread
         self.heartbeat = HeartbeatThread(
@@ -219,8 +222,14 @@ class VAPAApplication:
                 dist_res, grip_res, t_vis = self.vision_queue.get_nowait()
                 self.latest_dist_result = dist_res
                 self.latest_grip_result = grip_res
+                self.latest_vision_time = time.time()
         except Empty:
             pass
+
+        # Vision freshness check (timeout if no vision packet received in > 0.25s / 250ms)
+        if self.latest_vision_time > 0 and (time.time() - self.latest_vision_time) > 0.25:
+            self.latest_dist_result = None
+            self.latest_grip_result = None
 
         # 3. Read Sensor Telemetry from ESP32 Link
         sensor_msg = self.esp_link.get_latest_sensor()
@@ -230,7 +239,7 @@ class VAPAApplication:
 
         # 4. Check ESP32 Supervisor Fault Flags
         if sensor_msg.estop_pressed:
-            self.safety.trigger_fault("Physical Emergency Stop active")
+            self.safety.trigger_estop("Physical Emergency Stop active")
         elif sensor_msg.force_fault:
             self.safety.trigger_fault("ESP32 supervisor hardware force ceiling fault")
         elif sensor_msg.ads_fault:
@@ -262,14 +271,11 @@ class VAPAApplication:
         active_prof_data = self.grip_config.get("profiles", {}).get(arb.active_profile, {})
         preshape_val = arb.preshape_aperture
 
-        # FSR forces (in grams)
-        fsr_grams = {
-            "thumb": float(sensor_msg.fsr[0]) * 0.25,
-            "index": float(sensor_msg.fsr[1]) * 0.25,
-            "middle": float(sensor_msg.fsr[2]) * 0.25,
-            "ring": float(sensor_msg.fsr[3]) * 0.25,
-            "little": float(sensor_msg.fsr[4]) * 0.25,
-        }
+        # Calibrate raw FSR ADC readings to grams using piecewise calibration curve
+        fsr_grams, fsr_ok = self.fsr_calibrator.convert_readings(sensor_msg.fsr)
+        if not fsr_ok:
+            fault_desc = ", ".join(self.fsr_calibrator.last_faults)
+            self.safety.trigger_fault(f"FSR sensor fault: {fault_desc}")
 
         commanded_pulses = self.grip_executor.step(
             motion_command=arb.motion_command,
@@ -281,10 +287,26 @@ class VAPAApplication:
         )
 
         # 9. Closed-Loop Encoder Monitoring
-        # In mock mode, feedback matches command; on real hardware reads AS5600 behind TCA9548A mux
+        # Build commanded angles for all monitored joints (including finger_group)
+        commanded_angles = dict(self.grip_executor.current_joint_angles)
+        commanded_angles["finger_group"] = self.grip_executor.current_finger_positions.get("index", 0.0) * 90.0
+
+        # In mock mode, advance mock physical positions towards commanded angles
+        if isinstance(self.as5600, MockAS5600):
+            self.as5600.simulate_step(commanded_angles)
+
+        # Read actual measured joint angles from AS5600 sensors behind TCA9548A mux
+        measured_angles: Dict[str, float] = {}
+        for joint in self.encoder_monitor.monitored_joints:
+            status = self.as5600.read_joint_status(joint)
+            if not status.is_valid:
+                self.safety.trigger_fault(f"Encoder invalid or disconnected for joint '{joint}'")
+                break
+            measured_angles[joint] = status.joint_angle_degrees
+
         enc_fault, enc_reason = self.encoder_monitor.update(
-            commanded_angles=self.grip_executor.current_joint_angles,
-            measured_angles=self.grip_executor.current_joint_angles,
+            commanded_angles=commanded_angles,
+            measured_angles=measured_angles,
             dt_s=dt_s,
         )
         if enc_fault:

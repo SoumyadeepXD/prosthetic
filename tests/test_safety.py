@@ -263,3 +263,84 @@ def test_loop_stall_stops_heartbeats():
     assert last_sent_hb[-1].arm_request == 0
 
     hb_thread.stop()
+
+def test_formal_eight_states():
+    """Verify all 8 formal safety states defined in Master Architecture."""
+    sm = SafetyStateMachine(initial_state=SafetyState.BOOT)
+    assert sm.state == SafetyState.BOOT
+    assert sm.is_pwm_allowed is False
+
+    # BOOT -> DISARMED
+    sm.boot_complete()
+    assert sm.state == SafetyState.DISARMED
+    assert sm.is_pwm_allowed is False
+
+    # DISARMED -> SELF_TEST -> DISARMED
+    assert sm.start_self_test() is True
+    assert sm.state == SafetyState.SELF_TEST
+    assert sm.is_pwm_allowed is False
+    sm.finish_self_test(passed=True)
+    assert sm.state == SafetyState.DISARMED
+
+    # DISARMED -> CALIBRATION -> DISARMED
+    assert sm.enter_calibration() is True
+    assert sm.state == SafetyState.CALIBRATION
+    assert sm.is_pwm_allowed is True
+    assert sm.exit_calibration() is True
+    assert sm.state == SafetyState.DISARMED
+
+    # DISARMED -> ARMED_IDLE
+    assert sm.request_arm(
+        esp_link_healthy=True,
+        estop_released=True,
+        no_latched_fault=True,
+        pca9685_healthy=True,
+        encoders_healthy=True,
+        emg_plausible=True,
+        fsr_plausible=True,
+    ) is True
+    assert sm.state == SafetyState.ARMED_IDLE
+    assert sm.is_pwm_allowed is True
+
+    # ARMED_IDLE -> ACTIVE
+    sm.set_active()
+    assert sm.state == SafetyState.ACTIVE
+    assert sm.is_pwm_allowed is True
+
+    # ACTIVE -> FAULT
+    sm.trigger_fault("Sensor timeout")
+    assert sm.state == SafetyState.FAULT
+    assert sm.is_pwm_allowed is False
+    assert sm.arm_request == 0
+
+    # FAULT -> DISARMED (via clear_fault)
+    assert sm.clear_fault(estop_released=True) is True
+    assert sm.state == SafetyState.DISARMED
+
+    # DISARMED -> EMERGENCY_STOP
+    sm.trigger_estop("Hardware E-stop button depressed")
+    assert sm.state == SafetyState.EMERGENCY_STOP
+    assert sm.is_pwm_allowed is False
+    assert sm.arm_request == 0
+
+def test_estop_unconditional_override():
+    """Verify E-stop immediately disables PWM and drops arm from any state."""
+    for st in [SafetyState.ACTIVE, SafetyState.ARMED_IDLE, SafetyState.CALIBRATION, SafetyState.SELF_TEST]:
+        sm = SafetyStateMachine()
+        if st == SafetyState.ACTIVE:
+            sm.request_arm(True, True, True, True, True, True, True)
+            sm.set_active()
+        elif st == SafetyState.ARMED_IDLE:
+            sm.request_arm(True, True, True, True, True, True, True)
+        elif st == SafetyState.CALIBRATION:
+            sm.enter_calibration()
+        elif st == SafetyState.SELF_TEST:
+            sm.start_self_test()
+
+        sm.trigger_estop("Physical E-Stop engaged")
+        assert sm.state == SafetyState.EMERGENCY_STOP
+        assert sm.is_pwm_allowed is False
+        assert sm.arm_request == 0
+        # Arming request must be rejected while in E-stop
+        assert sm.request_arm(True, True, True, True, True, True, True) is False
+

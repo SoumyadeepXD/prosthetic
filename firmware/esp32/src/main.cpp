@@ -33,7 +33,7 @@
 #define FW_VERSION 0x0200
 #define SENSOR_INTERVAL_MS 10   // 100 Hz
 #define STATUS_INTERVAL_MS 500  // 2 Hz
-#define WATCHDOG_TIMEOUT_S 2
+#define WATCHDOG_TIMEOUT_MS 350 // 350 ms hardware task watchdog
 
 // ADS1115 Address and Registers
 #define ADS1115_ADDR 0x48
@@ -66,37 +66,57 @@ static inline void set_hardware_oe(bool enable) {
     }
 }
 
-// Simple non-blocking ADS1115 single-ended read
-static bool ads1115_read_channel(uint8_t channel, uint16_t *out_val) {
-    if (channel > 3) return false;
+// I2C bus recovery routine: toggle SCL 9 times to free any stuck slave on I2C bus
+static void i2c_bus_recover() {
+    Wire.end();
+    pinMode(PIN_I2C_SDA, INPUT_PULLUP);
+    pinMode(PIN_I2C_SCL, OUTPUT);
+    digitalWrite(PIN_I2C_SCL, HIGH);
+    delayMicroseconds(5);
 
-    // Config: OS=1 (start single conv), MUX=channel vs GND, PGA=4.096V (001), MODE=single (1), DR=860SPS (111)
+    for (int i = 0; i < 9; i++) {
+        digitalWrite(PIN_I2C_SCL, LOW);
+        delayMicroseconds(5);
+        digitalWrite(PIN_I2C_SCL, HIGH);
+        delayMicroseconds(5);
+    }
+
+    pinMode(PIN_I2C_SDA, OUTPUT);
+    digitalWrite(PIN_I2C_SDA, LOW);
+    delayMicroseconds(5);
+    digitalWrite(PIN_I2C_SCL, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(PIN_I2C_SDA, HIGH);
+    delayMicroseconds(5);
+
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
+}
+
+// Start single-ended conversion on specified ADS1115 channel (A0..A3)
+static bool ads1115_start_conversion(uint8_t channel) {
+    if (channel > 3) return false;
     uint16_t mux_bits = (0x04 | channel) << 12;
+    // Config: OS=1 (start conv), MUX=channel vs GND, PGA=4.096V (001), MODE=single (1), DR=860SPS (111), COMP_QUE=disable (11)
     uint16_t config = 0x8000 | mux_bits | 0x0200 | 0x0100 | 0x00E0 | 0x0003;
 
     Wire.beginTransmission(ADS1115_ADDR);
     Wire.write(ADS_REG_CFG);
     Wire.write((uint8_t)(config >> 8));
     Wire.write((uint8_t)(config & 0xFF));
-    if (Wire.endTransmission() != 0) {
-        return false;
-    }
+    return (Wire.endTransmission() == 0);
+}
 
-    // Wait ~1.2ms for 860 SPS conversion
-    delayMicroseconds(1200);
-
+// Read conversion result of previously triggered channel (non-blocking)
+static bool ads1115_read_conversion(uint16_t *out_val) {
     Wire.beginTransmission(ADS1115_ADDR);
     Wire.write(ADS_REG_CONV);
     if (Wire.endTransmission() != 0) {
         return false;
     }
-
     if (Wire.requestFrom((uint8_t)ADS1115_ADDR, (uint8_t)2) != 2) {
         return false;
     }
-
     uint16_t raw = (Wire.read() << 8) | Wire.read();
-    // Clip negative differential values
     if ((int16_t)raw < 0) raw = 0;
     *out_val = raw;
     return true;
@@ -119,6 +139,12 @@ void SensorSamplingTask(void *pvParameters) {
     static float fsr_ema[5] = {0};
     uint8_t sample_idx = 0;
 
+    uint8_t ads_active_channel = 0;
+    uint16_t emg[2] = {0, 0};
+    uint16_t eeg = 0;
+    bool ads_ok = true;
+    uint8_t consecutive_ads_errors = 0;
+
     for (;;) {
         esp_task_wdt_reset();
 
@@ -140,19 +166,37 @@ void SensorSamplingTask(void *pvParameters) {
         }
         sample_idx = (sample_idx + 1) % 3;
 
-        // 2. Read ADS1115 round-robin: A0 (Flex), A1 (Ext), A2 (EEG)
-        uint16_t emg[2] = {0, 0};
-        uint16_t eeg = 0;
-        bool ads_ok = true;
-
-        if (!ads1115_read_channel(0, &emg[0])) ads_ok = false;
-        if (!ads1115_read_channel(1, &emg[1])) ads_ok = false;
-        if (!ads1115_read_channel(2, &eeg)) ads_ok = false;
-
-        if (!ads_ok) {
+        // 2. Non-blocking ADS1115 sampling (cycles A0->A1->A2 at 2ms interval; 2ms > 1.16ms conv time)
+        uint16_t conv_val = 0;
+        if (ads1115_read_conversion(&conv_val)) {
+            consecutive_ads_errors = 0;
+            ads_ok = true;
+            if (ads_active_channel == 0) {
+                emg[0] = conv_val;
+            } else if (ads_active_channel == 1) {
+                emg[1] = conv_val;
+            } else if (ads_active_channel == 2) {
+                eeg = conv_val;
+            }
+        } else {
+            consecutive_ads_errors++;
             g_ads_err_count++;
-            // Immediate safety reaction: ADS fault disables OE immediately
-            set_hardware_oe(false);
+            if (consecutive_ads_errors >= 3) {
+                ads_ok = false;
+                set_hardware_oe(false); // Fail closed immediately
+                i2c_bus_recover();
+            }
+        }
+
+        // Trigger next channel conversion
+        ads_active_channel = (ads_active_channel + 1) % 3;
+        if (!ads1115_start_conversion(ads_active_channel)) {
+            consecutive_ads_errors++;
+            g_ads_err_count++;
+            if (consecutive_ads_errors >= 3) {
+                ads_ok = false;
+                set_hardware_oe(false);
+            }
         }
 
         // 3. Fast E-stop check in sensor task
@@ -161,7 +205,7 @@ void SensorSamplingTask(void *pvParameters) {
         }
 
         // 4. Update shared data
-        if (xSemaphoreTake(g_data_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
+        if (xSemaphoreTake(g_data_mutex, pdMS_TO_TICKS(2)) == pdTRUE) {
             g_shared_emg[0] = emg[0];
             g_shared_emg[1] = emg[1];
             g_shared_eeg = eeg;
@@ -170,7 +214,7 @@ void SensorSamplingTask(void *pvParameters) {
             xSemaphoreGive(g_data_mutex);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(5)); // High rate sampling cadence
+        vTaskDelay(pdMS_TO_TICKS(2)); // High-rate cadence; 2ms > 1.16ms ADS1115 860SPS conversion
     }
 }
 
@@ -319,13 +363,16 @@ void setup() {
     // 7. Create data synchronization mutex
     g_data_mutex = xSemaphoreCreateMutex();
 
-    // 8. Configure Hardware Task Watchdog
+    // 8. Configure Hardware Task Watchdog (350 ms timeout)
     esp_task_wdt_config_t twdt_config = {
-        .timeout_ms = WATCHDOG_TIMEOUT_S * 1000,
+        .timeout_ms = WATCHDOG_TIMEOUT_MS,
         .idle_core_mask = 0,
         .trigger_panic = true,
     };
     esp_task_wdt_init(&twdt_config);
+
+    // 9. Prime initial ADS1115 conversion
+    ads1115_start_conversion(0);
 
     // 9. Launch FreeRTOS Tasks on separate cores
     xTaskCreatePinnedToCore(

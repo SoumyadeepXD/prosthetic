@@ -19,19 +19,28 @@ def test_pty_serial_end_to_end():
         # Wait briefly for initial frames to arrive
         time.sleep(0.1)
 
+        # Wait up to 250ms for condition to be met
+        def wait_sensor(condition, timeout=0.25):
+            t0 = time.time()
+            while time.time() - t0 < timeout:
+                s = link.get_latest_sensor()
+                if s is not None and condition(s):
+                    return s
+                time.sleep(0.01)
+            return link.get_latest_sensor()
+
         # 3. Check initial sensor reception
-        sensor = link.get_latest_sensor()
+        sensor = wait_sensor(lambda s: s.oe_enabled is False and s.armed is False)
         assert sensor is not None
         assert sensor.oe_enabled is False
         assert sensor.armed is False
 
         # 4. Send arming sequence (first heartbeat with 0, then 1)
         link.send_message(HeartbeatMessage(arm_request=0, jetson_state=1))
-        time.sleep(0.05)
+        time.sleep(0.02)
         link.send_message(HeartbeatMessage(arm_request=1, jetson_state=2))
-        time.sleep(0.05)
 
-        sensor2 = link.get_latest_sensor()
+        sensor2 = wait_sensor(lambda s: s.armed is True)
         assert sensor2 is not None
         assert sensor2.armed is True
         assert sensor2.oe_enabled is True
@@ -39,9 +48,8 @@ def test_pty_serial_end_to_end():
 
         # 5. Simulate E-Stop press on virtual ESP32
         sim.trigger_estop(True)
-        time.sleep(0.05)
 
-        sensor3 = link.get_latest_sensor()
+        sensor3 = wait_sensor(lambda s: s.estop_pressed is True)
         assert sensor3 is not None
         assert sensor3.estop_pressed is True
         assert sensor3.oe_enabled is False
@@ -50,19 +58,17 @@ def test_pty_serial_end_to_end():
         # 6. Release E-Stop and clear fault
         sim.trigger_estop(False)
         link.send_message(HeartbeatMessage(arm_request=0, jetson_state=1))
-        time.sleep(0.05)
+        time.sleep(0.02)
         link.send_message(ClearFaultMessage())
-        time.sleep(0.05)
 
-        sensor4 = link.get_latest_sensor()
+        sensor4 = wait_sensor(lambda s: s.estop_pressed is False and s.latched_fault is False)
         assert sensor4 is not None
         assert sensor4.estop_pressed is False
         assert sensor4.latched_fault is False
 
         # 7. Re-arm with fresh 0->1 transition
         link.send_message(HeartbeatMessage(arm_request=1, jetson_state=2))
-        time.sleep(0.05)
-        sensor5 = link.get_latest_sensor()
+        sensor5 = wait_sensor(lambda s: s.armed is True)
         assert sensor5 is not None
         assert sensor5.armed is True
         assert sensor5.oe_enabled is True

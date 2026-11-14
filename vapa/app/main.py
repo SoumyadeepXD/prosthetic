@@ -56,10 +56,12 @@ class VAPAApplication:
         config_dir: str = "config",
         record: bool = False,
         headless: Optional[bool] = None,
+        enable_vision: bool = False,  # Bypassed by default until generic webcam integration
     ):
         self.mock_mode = mock_mode
         self.config_dir = Path(config_dir)
         self.record_enabled = record
+        self.enable_vision = enable_vision
 
         # Load YAML configurations
         self.hw_config = self._load_yaml("hardware.yaml")
@@ -80,7 +82,11 @@ class VAPAApplication:
             self.esp_link = MockESPLink()
         else:
             from ..hal.factory import create_hal_container
-            container = create_hal_container(backend="real")
+            container = create_hal_container(
+                backend="real",
+                config_dir=str(self.config_dir),
+                enable_camera=self.enable_vision,
+            )
             self.pca9685 = container.pca9685
             self.tca9548a = container.tca9548a
             self.as5600 = container.as5600
@@ -127,18 +133,41 @@ class VAPAApplication:
         self.recorder = SessionRecorder(enabled=self.record_enabled)
         self.ui = StatusScreen(headless=headless)
 
-        # Vision Multiprocess Communication
+        # =========================================================================
+        # VISION / CAMERA INTEGRATION (Bypassed for Standalone EMG Operation)
+        # =========================================================================
+        # NOTE: Intel RealSense camera processing is kept in code but commented out /
+        # bypassed here until generic USB webcam integration is activated.
+        # When enable_vision is False, the arm operates strictly as an active
+        # EMG-driven prosthetic using muscle intent, closed-loop FSR force control,
+        # and AS5600 encoder tracking.
+        # =========================================================================
         self.vision_queue = mp.Queue(maxsize=2)
         self.vision_stop = mp.Event()
-        self.vision_worker = VisionWorker(
-            result_queue=self.vision_queue,
-            stop_event=self.vision_stop,
-            mock_mode=self.mock_mode,
-            fps=30,
-            config_dir=str(self.config_dir),
-        )
+        self.vision_worker: Optional[VisionWorker] = None
 
-        # Latest vision context cache
+        if self.enable_vision:
+            # Active when vision subsystem is explicitly enabled:
+            self.vision_worker = VisionWorker(
+                result_queue=self.vision_queue,
+                stop_event=self.vision_stop,
+                mock_mode=self.mock_mode,
+                fps=30,
+                config_dir=str(self.config_dir),
+            )
+        else:
+            # Standalone EMG prosthetic mode:
+            # The RealSense camera worker process is NOT spawned.
+            # self.vision_worker = VisionWorker(
+            #     result_queue=self.vision_queue,
+            #     stop_event=self.vision_stop,
+            #     mock_mode=self.mock_mode,
+            #     fps=30,
+            #     config_dir=str(self.config_dir),
+            # )
+            logger.info("Camera/Vision worker is BYPASSED. Running in standalone EMG-driven prosthetic mode.")
+
+        # Latest vision context cache (None in standalone EMG mode)
         self.latest_dist_result: Optional[DistanceMatrixResult] = None
         self.latest_grip_result: Optional[GripSelectionResult] = None
         self.latest_vision_time: float = 0.0
@@ -190,8 +219,13 @@ class VAPAApplication:
             logger.error("Failed to initialize one or more HAL devices")
             return False
 
-        # Start 30 Hz Vision Multiprocessing Worker
-        self.vision_worker.start()
+        # Start 30 Hz Vision Multiprocessing Worker (if vision enabled)
+        if self.enable_vision and self.vision_worker is not None:
+            self.vision_worker.start()
+        else:
+            # Standalone EMG prosthetic mode: vision worker not started
+            # self.vision_worker.start()
+            logger.info("Vision worker BYPASSED. Running standalone EMG prosthetic arm control loop.")
 
         # Start 50 Hz Heartbeat Thread
         self.heartbeat.start()
@@ -217,19 +251,27 @@ class VAPAApplication:
         self.heartbeat.feed()
 
         # 2. Poll Vision Queue (Non-blocking: control loop never blocks on vision)
-        try:
-            while True:
-                dist_res, grip_res, t_vis = self.vision_queue.get_nowait()
-                self.latest_dist_result = dist_res
-                self.latest_grip_result = grip_res
-                self.latest_vision_time = time.time()
-        except Empty:
-            pass
+        if self.enable_vision and self.vision_worker is not None:
+            try:
+                while True:
+                    dist_res, grip_res, t_vis = self.vision_queue.get_nowait()
+                    self.latest_dist_result = dist_res
+                    self.latest_grip_result = grip_res
+                    self.latest_vision_time = time.time()
+            except Empty:
+                pass
 
-        # Vision freshness check (timeout if no vision packet received in > 0.25s / 250ms)
-        if self.latest_vision_time > 0 and (time.time() - self.latest_vision_time) > 0.25:
-            self.latest_dist_result = None
-            self.latest_grip_result = None
+            # Vision freshness check (timeout if no vision packet received in > 0.25s / 250ms)
+            if self.latest_vision_time > 0 and (time.time() - self.latest_vision_time) > 0.25:
+                self.latest_dist_result = None
+                self.latest_grip_result = None
+        else:
+            # Standalone EMG prosthetic mode:
+            # Vision results remain None, so arbitrator directly executes pure EMG intent
+            # (Flexor -> Close, Extensor -> Open, Co-contraction -> Mode Cycle, Rest -> Hold)
+            # with closed-loop FSR force control and AS5600 encoder feedback.
+            # dist_res, grip_res, t_vis = self.vision_queue.get_nowait()
+            pass
 
         # 3. Read Sensor Telemetry from ESP32 Link
         sensor_msg = self.esp_link.get_latest_sensor()
@@ -266,6 +308,14 @@ class VAPAApplication:
             distance_result=self.latest_dist_result,
             current_aperture=current_aperture,
         )
+
+        # Update Safety State: transition to ACTIVE during motion, ARMED_IDLE when resting
+        if arb.motion_command in ("CLOSE", "OPEN"):
+            if self.safety.state == SafetyState.ARMED_IDLE:
+                self.safety.set_active()
+        elif arb.motion_command in ("HOLD", "MODE_CYCLE"):
+            if self.safety.state == SafetyState.ACTIVE:
+                self.safety.set_idle()
 
         # 8. Motion & Grip Execution (Clamp -> Slew -> PWMGate)
         active_prof_data = self.grip_config.get("profiles", {}).get(arb.active_profile, {})
@@ -380,9 +430,9 @@ class VAPAApplication:
         self.safety.disarm("System shutdown")
         self.heartbeat.stop()
 
-        # Terminate vision worker
+        # Terminate vision worker if active
         self.vision_stop.set()
-        if hasattr(self, "vision_worker") and self.vision_worker.is_alive():
+        if hasattr(self, "vision_worker") and self.vision_worker is not None and self.vision_worker.is_alive():
             self.vision_worker.join(timeout=1.0)
             if self.vision_worker.is_alive():
                 self.vision_worker.terminate()
@@ -401,7 +451,8 @@ class VAPAApplication:
 
 def main():
     parser = argparse.ArgumentParser(description="VAPA Prosthetic Arm Master Orchestrator")
-    parser.add_argument("--mock", action="store_true", default=True, help="Run with mock hardware backends")
+    parser.add_argument("--mock", action="store_true", help="Run with mock hardware backends (default: False on hardware)")
+    parser.add_argument("--enable-vision", action="store_true", default=False, help="Enable vision subsystem (kept bypassed until generic webcam integration)")
     parser.add_argument("--config", type=str, default="config", help="Configuration directory path")
     parser.add_argument("--record", action="store_true", help="Record session telemetry to logs/")
     parser.add_argument("--headless", action="store_true", help="Run without graphical display")
@@ -413,6 +464,7 @@ def main():
         config_dir=args.config,
         record=args.record,
         headless=args.headless,
+        enable_vision=args.enable_vision,
     )
 
     if not app.initialize():

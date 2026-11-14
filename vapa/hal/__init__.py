@@ -7,7 +7,8 @@ from .as5600 import AbstractAS5600, MockAS5600, RealAS5600, EncoderStatus
 from .esp_link import AbstractESPLink, MockESPLink, RealESPLink
 from .mock_esp32_pty import MockESP32Pty
 from .realsense import AbstractRealSense, MockRealSense, RealRealSense
-from .factory import create_hal, HALContainer
+from .webcam import AbstractWebcam, MockWebcam, GenericWebcam
+from .factory import create_hal, create_hal_container, HALContainer
 
 __all__ = [
     "BaseDevice",
@@ -16,5 +17,6 @@ __all__ = [
     "AbstractAS5600", "MockAS5600", "RealAS5600", "EncoderStatus",
     "AbstractESPLink", "MockESPLink", "RealESPLink", "MockESP32Pty",
     "AbstractRealSense", "MockRealSense", "RealRealSense",
-    "create_hal", "HALContainer",
+    "AbstractWebcam", "MockWebcam", "GenericWebcam",
+    "create_hal", "create_hal_container", "HALContainer",
 ]

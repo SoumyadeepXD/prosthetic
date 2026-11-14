@@ -118,7 +118,11 @@ class StatusScreen:
                         row_chars.append(" ")
                 matrix_lines.append("".join(row_chars))
         else:
-            matrix_lines = ["(Distance matrix initializing...)"]
+            matrix_lines = [
+                "  [VISION BYPASSED]           ",
+                "  Direct EMG-Controlled Grip  ",
+                "  (Webcam pending)            ",
+            ]
 
         while len(matrix_lines) < 6:
             matrix_lines.append("")

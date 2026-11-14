@@ -1,7 +1,9 @@
 """HAL Factory for creating mock or real device backends based on hardware configuration."""
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Any, Optional
+import yaml
 import logging
 from .pca9685 import AbstractPCA9685, MockPCA9685, RealPCA9685
 from .tca9548a import AbstractTCA9548A, MockTCA9548A, RealTCA9548A
@@ -17,15 +19,15 @@ class HALContainer:
     tca9548a: AbstractTCA9548A
     as5600: AbstractAS5600
     esp_link: AbstractESPLink
-    realsense: AbstractRealSense
+    realsense: Optional[AbstractRealSense] = None
 
     def initialize_all(self) -> bool:
-        """Initialize all HAL devices. Returns True if all report healthy."""
+        """Initialize all HAL devices. Returns True if all active devices report healthy."""
         ok_pca = self.pca9685.initialize()
         ok_mux = self.tca9548a.initialize()
         ok_enc = self.as5600.initialize()
         ok_esp = self.esp_link.initialize()
-        ok_rs = self.realsense.initialize()
+        ok_rs = self.realsense.initialize() if self.realsense else True
 
         if not (ok_pca and ok_mux and ok_enc and ok_esp and ok_rs):
             logger.error(
@@ -41,12 +43,28 @@ class HALContainer:
         self.as5600.close()
         self.tca9548a.close()
         self.esp_link.close()
-        self.realsense.close()
+        if self.realsense:
+            self.realsense.close()
 
-def create_hal(hardware_config: Dict[str, Any], force_mock: bool = False) -> HALContainer:
-    """Create and return a HALContainer with appropriate backends."""
+def create_hal(
+    hardware_config: Dict[str, Any],
+    force_mock: bool = False,
+    enable_camera: Optional[bool] = None,
+) -> HALContainer:
+    """Create and return a HALContainer with appropriate backends.
+
+    Args:
+        hardware_config: Hardware configuration dictionary.
+        force_mock: Force mock backends regardless of config.
+        enable_camera: Whether to initialize the depth camera (RealSense).
+                       When None: defaults to True for mock mode (CI tests),
+                       and False for real hardware (since RealSense is absent).
+    """
     jetson_cfg = hardware_config.get("jetson", {})
     backend_mode = "mock" if force_mock else jetson_cfg.get("backend", "mock").lower()
+
+    # Determine camera enablement
+    cam_active = (enable_camera is True) if enable_camera is not None else (backend_mode == "mock")
 
     if backend_mode == "mock":
         logger.info("Initializing HAL with MOCK backends")
@@ -63,7 +81,7 @@ def create_hal(hardware_config: Dict[str, Any], force_mock: bool = False) -> HAL
         esp = MockESPLink(
             hb_timeout_ms=hardware_config.get("timing", {}).get("heartbeat_timeout_ms", 250),
         )
-        rs = MockRealSense()
+        rs = MockRealSense() if cam_active else None
     elif backend_mode == "real":
         logger.info("Initializing HAL with REAL hardware backends")
         i2c_bus = int(jetson_cfg.get("i2c_bus", 7))
@@ -87,7 +105,7 @@ def create_hal(hardware_config: Dict[str, Any], force_mock: bool = False) -> HAL
             port=jetson_cfg.get("uart_port", "/dev/ttyTHS1"),
             baudrate=jetson_cfg.get("uart_baudrate", 460800),
         )
-        rs = RealRealSense()
+        rs = RealRealSense() if cam_active else None
     else:
         raise ValueError(f"Unknown HAL backend mode: {backend_mode}")
 
@@ -98,3 +116,18 @@ def create_hal(hardware_config: Dict[str, Any], force_mock: bool = False) -> HAL
         esp_link=esp,
         realsense=rs,
     )
+
+def create_hal_container(
+    backend: str = "real",
+    config_dir: str = "config",
+    enable_camera: bool = False,
+) -> HALContainer:
+    """Create a HALContainer directly by backend name with optional camera support."""
+    cfg_path = Path(config_dir) / "hardware.yaml"
+    hw_config: Dict[str, Any] = {}
+    if cfg_path.exists():
+        with open(cfg_path, "r") as f:
+            hw_config = yaml.safe_load(f) or {}
+
+    force_mock = (backend.lower() == "mock")
+    return create_hal(hw_config, force_mock=force_mock, enable_camera=enable_camera)

@@ -55,6 +55,8 @@ def main():
     parser.add_argument("--mock", action="store_true", help="Run full calibration in mock simulation mode")
     parser.add_argument("--skip-servos", action="store_true", help="Skip servo calibration")
     parser.add_argument("--skip-emg", action="store_true", help="Skip EMG calibration")
+    parser.add_argument("--skip-camera", action="store_true", default=True, help="Skip camera calibration (default: True until webcam integration)")
+    parser.add_argument("--with-camera", action="store_true", help="Include camera calibration step")
     args = parser.parse_args()
 
     print_master_banner()
@@ -65,12 +67,14 @@ def main():
             print("Aborted.")
             sys.exit(1)
 
+    include_camera = args.with_camera or (args.mock and not args.skip_camera)
+
     steps = [
         ("calibrate_servos.py", "Servo Controller & Actuator Limits", not args.skip_servos),
         ("calibrate_encoders.py", "AS5600 Magnetic Rotary Encoders", True),
         ("calibrate_fsr.py", "FSR402 Fingertip Force Sensors", True),
         ("calibrate_emg.py", "Two-Channel EMG Baseline & MVC", not args.skip_emg),
-        ("calibrate_camera.py", "RealSense D435i Camera Alignment", True),
+        ("calibrate_camera.py", "RealSense D435i Camera Alignment", include_camera),
     ]
 
     active_steps = [s for s in steps if s[2]]

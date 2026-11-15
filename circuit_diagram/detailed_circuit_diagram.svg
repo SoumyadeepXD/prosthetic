@@ -1,0 +1,1304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3400 2300" width="3400" height="2300" style="background-color: #080d1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Consolas, Monaco, monospace;">
+
+    <defs>
+        <pattern id="gridMinor" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0f172a" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="gridMajor" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#gridMinor)"/>
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#1e293b" stroke-width="1"/>
+        </pattern>
+
+        <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+
+        <linearGradient id="icCard" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#111827"/>
+            <stop offset="100%" stop-color="#0a0f1d"/>
+        </linearGradient>
+
+        <linearGradient id="isoMoat" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#3b0764"/>
+            <stop offset="100%" stop-color="#1e1b4b"/>
+        </linearGradient>
+
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+        </filter>
+
+        <!-- Schematic Markers -->
+        <marker id="dotRed" markerWidth="8" markerHeight="8" refX="4" refY="4">
+            <circle cx="4" cy="4" r="3" fill="#ef4444"/>
+        </marker>
+        <marker id="dotBlue" markerWidth="8" markerHeight="8" refX="4" refY="4">
+            <circle cx="4" cy="4" r="3" fill="#3b82f6"/>
+        </marker>
+        <marker id="dotAmber" markerWidth="8" markerHeight="8" refX="4" refY="4">
+            <circle cx="4" cy="4" r="3" fill="#f59e0b"/>
+        </marker>
+        <marker id="dotGreen" markerWidth="8" markerHeight="8" refX="4" refY="4">
+            <circle cx="4" cy="4" r="3" fill="#10b981"/>
+        </marker>
+        <marker id="arrowHead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8"/>
+        </marker>
+        <marker id="arrowHeadRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ef4444"/>
+        </marker>
+    </defs>
+    
+<rect width="3400" height="2300" fill="#080d1a"/>
+<rect width="3400" height="2300" fill="url(#gridMajor)"/>
+
+    <rect x="30" y="30" width="3340" height="2240" fill="none" stroke="#334155" stroke-width="3"/>
+    <rect x="38" y="38" width="3324" height="2224" fill="none" stroke="#1e293b" stroke-width="1"/>
+    
+
+    <!-- MASTER TITLE BLOCK -->
+    <g transform="translate(2540, 1980)">
+        <rect x="0" y="0" width="810" height="270" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="4" filter="url(#shadow)"/>
+        <line x1="0" y1="45" x2="810" y2="45" stroke="#334155" stroke-width="1.5"/>
+        <line x1="0" y1="125" x2="810" y2="125" stroke="#334155" stroke-width="1.5"/>
+        <line x1="0" y1="195" x2="810" y2="195" stroke="#334155" stroke-width="1.5"/>
+        <line x1="520" y1="45" x2="520" y2="270" stroke="#334155" stroke-width="1.5"/>
+
+        <text x="20" y="32" fill="#38bdf8" font-size="18" font-weight="bold" letter-spacing="1">VISION-ASSISTED PROSTHETIC ARM (VAPA)</text>
+        <text x="540" y="32" fill="#94a3b8" font-size="13" font-weight="bold">SYSTEM SCHEMATIC</text>
+
+        <text x="20" y="70" fill="#f8fafc" font-size="16" font-weight="bold">MASTER COMPLETE ELECTRICAL CIRCUIT DIAGRAM</text>
+        <text x="20" y="92" fill="#cbd5e1" font-size="12">Hardware Connection Guide Rev 2 Baseline | Dual-Rail Power | E-Stop Interlock</text>
+        <text x="20" y="112" fill="#94a3b8" font-size="11">IEC 60601-1 Type BF Isolated Biomedical EMG | ISO 13849 PL d Safety</text>
+
+        <text x="20" y="150" fill="#94a3b8" font-size="11">DRAWING NO:</text>
+        <text x="120" y="150" fill="#f8fafc" font-size="13" font-weight="bold">VAPA-ELEC-SCH-001</text>
+        <text x="20" y="178" fill="#94a3b8" font-size="11">REVISION:</text>
+        <text x="120" y="178" fill="#4ade80" font-size="13" font-weight="bold">Rev 2.1 (Production Baseline)</text>
+
+        <text x="20" y="222" fill="#94a3b8" font-size="11">DESIGNED BY:</text>
+        <text x="120" y="222" fill="#e2e8f0" font-size="12">VAPA Systems &amp; Electronics Team</text>
+        <text x="20" y="248" fill="#94a3b8" font-size="11">STATUS:</text>
+        <text x="120" y="248" fill="#38bdf8" font-size="12" font-weight="bold">MOCK &amp; BENCH VERIFIED</text>
+
+        <!-- Right Side of Title Block -->
+        <text x="535" y="70" fill="#94a3b8" font-size="11">SHEET:</text>
+        <text x="610" y="70" fill="#f8fafc" font-size="12" font-weight="bold">1 OF 1 (FULL SYSTEM)</text>
+        <text x="535" y="95" fill="#94a3b8" font-size="11">DATE:</text>
+        <text x="610" y="95" fill="#f8fafc" font-size="12">2026-11-15</text>
+        <text x="535" y="120" fill="#94a3b8" font-size="11">FORMAT:</text>
+        <text x="610" y="120" fill="#f8fafc" font-size="12">ISO A1 / High-Res Vector</text>
+
+        <rect x="535" y="140" width="255" height="42" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" rx="4"/>
+        <text x="662" y="158" fill="#a5b4fc" font-size="10" font-weight="bold" text-anchor="middle">HARDWARE WATCHDOG GATED</text>
+        <text x="662" y="173" fill="#e0e7ff" font-size="9" text-anchor="middle">ESP32 GPIO25 ACTIVE-LOW OE GATING</text>
+
+        <text x="535" y="215" fill="#f87171" font-size="10" font-weight="bold">SAFETY NON-NEGOTIABLE:</text>
+        <text x="535" y="232" fill="#94a3b8" font-size="9">Vision NEVER commands closing.</text>
+        <text x="535" y="247" fill="#94a3b8" font-size="9">EMG open overrides unconditionally.</text>
+    </g>
+    
+
+    <g transform="translate(50, 50)">
+        <rect x="0" y="0" width="3300" height="56" fill="url(#headerGrad)" stroke="#334155" stroke-width="1.5" rx="6" filter="url(#shadow)"/>
+        <text x="25" y="36" fill="#38bdf8" font-size="20" font-weight="bold" letter-spacing="1">VISION-ASSISTED PROSTHETIC ARM (VAPA)</text>
+        <text x="490" y="36" fill="#64748b" font-size="18">|</text>
+        <text x="515" y="36" fill="#f8fafc" font-size="16" font-weight="bold">COMPLETE ELECTRICAL SCHEMATIC &amp; CIRCUIT INTERCONNECT DIAGRAM</text>
+        <text x="1440" y="36" fill="#94a3b8" font-size="13">[ REV 2.1 — DUAL PROCESSOR + PROFET CUTOFF + 9 SERVO CHANNELS + 4 ENCODERS + 5 FSRs + ISOLATED EMG ]</text>
+        <rect x="2980" y="10" width="300" height="36" fill="#18181b" stroke="#10b981" stroke-width="1" rx="4"/>
+        <circle cx="3000" cy="28" r="6" fill="#10b981"/>
+        <text x="3016" y="33" fill="#4ade80" font-size="12" font-weight="bold">STATUS: HARDWARE CERTIFIED</text>
+    </g>
+    
+
+    <!-- ==================== SECTION 1: POWER DISTRIBUTION ==================== -->
+    <g transform="translate(60, 130)">
+        <!-- Section Container -->
+        <rect x="0" y="0" width="760" height="780" fill="url(#icCard)" stroke="#dc2626" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="760" height="38" fill="#991b1b" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">1. POWER DISTRIBUTION, E-STOP &amp; VOLTAGE REGULATION</text>
+        <text x="590" y="25" fill="#fecaca" font-size="12" font-weight="bold">ZONE 1: POWER DOMAIN</text>
+
+        <!-- XT60 Main Battery Connector CONN1 -->
+        <g transform="translate(30, 60)">
+            <rect x="0" y="0" width="120" height="80" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5" rx="4"/>
+            <text x="60" y="22" fill="#a5b4fc" font-size="11" font-weight="bold" text-anchor="middle">CONN1: XT60</text>
+            <text x="60" y="38" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">12V Li-Ion</text>
+            <text x="60" y="54" fill="#94a3b8" font-size="9" text-anchor="middle">3S 5200mAh (30C)</text>
+            <text x="60" y="68" fill="#f87171" font-size="9" text-anchor="middle">11.1V - 12.6V DC</text>
+
+            <!-- Pin 1 (+): 12V_RAW -->
+            <circle cx="120" cy="25" r="4" fill="#ef4444"/>
+            <text x="110" y="20" fill="#fca5a5" font-size="9">Pin 1 (+)</text>
+
+            <!-- Pin 2 (-): BAT_GND -->
+            <circle cx="120" cy="65" r="4" fill="#94a3b8"/>
+            <text x="110" y="60" fill="#cbd5e1" font-size="9">Pin 2 (-)</text>
+        </g>
+
+        <!-- Wire from Pin 1 to Fuse F1 -->
+        <line x1="150" y1="85" x2="190" y2="85" stroke="#ef4444" stroke-width="3"/>
+        <text x="170" y="78" fill="#ef4444" font-size="9" text-anchor="middle">AWG 12</text>
+
+        <!-- Fuse F1: 30A ATO Blade -->
+        <g transform="translate(190, 65)">
+            <rect x="0" y="0" width="70" height="40" fill="#1e293b" stroke="#f87171" stroke-width="1.5" rx="3"/>
+            <!-- Fuse symbol line with S-curve -->
+            <line x1="0" y1="20" x2="20" y2="20" stroke="#ef4444" stroke-width="2"/>
+            <path d="M 20 20 Q 28 8, 35 20 T 50 20" fill="none" stroke="#f87171" stroke-width="2"/>
+            <line x1="50" y1="20" x2="70" y2="20" stroke="#ef4444" stroke-width="2"/>
+            <text x="35" y="12" fill="#f87171" font-size="9" font-weight="bold" text-anchor="middle">F1: 30A</text>
+            <text x="35" y="35" fill="#94a3b8" font-size="8" text-anchor="middle">ATO Blade</text>
+        </g>
+
+        <!-- Wire from F1 to PROFET Pin 3 -->
+        <line x1="260" y1="85" x2="310" y2="85" stroke="#ef4444" stroke-width="3"/>
+        <circle cx="285" cy="85" r="4" fill="#ef4444"/>
+
+        <!-- Wire branch from F1 to E-stop Switch SW1 -->
+        <line x1="285" y1="85" x2="285" y2="175" stroke="#ef4444" stroke-width="2"/>
+        <line x1="285" y1="175" x2="310" y2="175" stroke="#ef4444" stroke-width="2"/>
+
+        <!-- High-Side Smart PROFET U10: BTS50015-1TMA -->
+        <g transform="translate(310, 50)">
+            <rect x="0" y="0" width="160" height="90" fill="#18181b" stroke="#ef4444" stroke-width="2" rx="4"/>
+            <text x="80" y="18" fill="#f87171" font-size="11" font-weight="bold" text-anchor="middle">U10: BTS50015-1TMA</text>
+            <text x="80" y="32" fill="#cbd5e1" font-size="9" text-anchor="middle">Smart High-Side Switch</text>
+            <text x="80" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">Rds(on)=1.5mΩ | 33A Cont</text>
+
+            <!-- Pins -->
+            <text x="8" y="38" fill="#ef4444" font-size="9">Pin 3: VBB</text>
+            <text x="8" y="75" fill="#fbbf24" font-size="9">Pin 2: IN (Gate)</text>
+            <text x="110" y="38" fill="#ef4444" font-size="9">Pin 6,7: OUT</text>
+            <text x="110" y="62" fill="#38bdf8" font-size="9">Pin 4: IS (Sense)</text>
+            <text x="110" y="78" fill="#94a3b8" font-size="9">Pin 1: GND</text>
+
+            <circle cx="0" cy="35" r="4" fill="#ef4444"/>
+            <circle cx="0" cy="70" r="4" fill="#fbbf24"/>
+            <circle cx="160" cy="35" r="4" fill="#ef4444"/>
+            <circle cx="160" cy="58" r="4" fill="#38bdf8"/>
+            <circle cx="160" cy="75" r="4" fill="#94a3b8"/>
+        </g>
+
+        <!-- E-Stop Pushbutton SW1: IDEC Normally Closed -->
+        <g transform="translate(310, 155)">
+            <rect x="0" y="0" width="160" height="55" fill="#1e293b" stroke="#ef4444" stroke-width="1.5" rx="4"/>
+            <text x="80" y="16" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">SW1: IDEC E-STOP (NC)</text>
+            <!-- NC switch symbol -->
+            <circle cx="20" cy="32" r="3" fill="#ef4444"/>
+            <circle cx="140" cy="32" r="3" fill="#ef4444"/>
+            <line x1="20" y1="32" x2="50" y2="32" stroke="#ef4444" stroke-width="2"/>
+            <line x1="50" y1="28" x2="110" y2="28" stroke="#ef4444" stroke-width="2.5"/>
+            <line x1="110" y1="32" x2="140" y2="32" stroke="#ef4444" stroke-width="2"/>
+            <!-- Mushroom head line -->
+            <line x1="80" y1="28" x2="80" y2="18" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="80" y="48" fill="#94a3b8" font-size="8" text-anchor="middle">Normally Closed (Opens on Push)</text>
+        </g>
+
+        <!-- Wire from SW1 to PROFET IN & PC817 Opto U11 -->
+        <line x1="470" y1="187" x2="500" y2="187" stroke="#fbbf24" stroke-width="2"/>
+        <line x1="500" y1="187" x2="500" y2="120" stroke="#fbbf24" stroke-width="2"/>
+        <line x1="500" y1="120" x2="310" y2="120" stroke="#fbbf24" stroke-width="2"/>
+        <circle cx="500" cy="187" r="4" fill="#fbbf24"/>
+
+        <!-- Wire to Optocoupler U11 (E-Stop sense) -->
+        <line x1="500" y1="187" x2="540" y2="187" stroke="#fbbf24" stroke-width="2"/>
+
+        <!-- PC817 Optocoupler U11 -->
+        <g transform="translate(540, 160)">
+            <rect x="0" y="0" width="130" height="65" fill="#18181b" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
+            <text x="65" y="15" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">U11: PC817 OPTO</text>
+            <text x="65" y="27" fill="#94a3b8" font-size="8" text-anchor="middle">Galvanic E-Stop Sense</text>
+            <!-- Opto pins -->
+            <text x="8" y="45" fill="#fbbf24" font-size="8">1: A</text>
+            <text x="8" y="58" fill="#64748b" font-size="8">2: K</text>
+            <text x="85" y="45" fill="#f87171" font-size="8">4: C (ESTOP)</text>
+            <text x="85" y="58" fill="#94a3b8" font-size="8">3: E (GND)</text>
+
+            <circle cx="0" cy="42" r="3" fill="#fbbf24"/>
+            <circle cx="0" cy="55" r="3" fill="#64748b"/>
+            <circle cx="130" cy="42" r="3" fill="#f87171"/>
+            <circle cx="130" cy="55" r="3" fill="#94a3b8"/>
+        </g>
+
+        <!-- Signal ESTOP_SENSE wire to ESP32 -->
+        <line x1="670" y1="202" x2="720" y2="202" stroke="#f87171" stroke-width="2"/>
+        <text x="725" y="198" fill="#f87171" font-size="10" font-weight="bold">ESTOP_SENSE (To ESP32 GPIO27)</text>
+
+        <!-- Switched +12V Bus (from PROFET Pin 6,7) -->
+        <line x1="470" y1="85" x2="520" y2="85" stroke="#ef4444" stroke-width="3"/>
+        <text x="500" y="78" fill="#fca5a5" font-size="10" font-weight="bold">+12V_SW</text>
+        <!-- Heavy Bus Line Vertically Down -->
+        <line x1="520" y1="85" x2="520" y2="600" stroke="#ef4444" stroke-width="3"/>
+        <circle cx="520" cy="85" r="4" fill="#ef4444"/>
+
+        <!-- Feed 1: TPS54620 (5V 6A Logic Buck) VR1 -->
+        <line x1="520" y1="260" x2="440" y2="260" stroke="#ef4444" stroke-width="2.5"/>
+        <circle cx="520" cy="260" r="4" fill="#ef4444"/>
+
+        <g transform="translate(240, 235)">
+            <rect x="0" y="0" width="200" height="95" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5" rx="4"/>
+            <text x="100" y="18" fill="#06b6d4" font-size="11" font-weight="bold" text-anchor="middle">VR1: TPS54620 (5V 6A Buck)</text>
+            <text x="100" y="32" fill="#94a3b8" font-size="9" text-anchor="middle">Main System Logic Regulator (95% Eff)</text>
+            <text x="185" y="28" fill="#ef4444" font-size="9">VIN</text>
+            <text x="10" y="55" fill="#06b6d4" font-size="9">VOUT: +5.0V</text>
+            <text x="10" y="72" fill="#94a3b8" font-size="8">Imax: 6.0A Continuous</text>
+            <text x="100" y="88" fill="#64748b" font-size="8" text-anchor="middle">GND (Pin 7, 15)</text>
+
+            <circle cx="200" cy="25" r="4" fill="#ef4444"/>
+            <circle cx="0" cy="50" r="4" fill="#06b6d4"/>
+            <circle cx="100" cy="95" r="4" fill="#64748b"/>
+        </g>
+
+        <!-- PTC Polyfuse F4 on 5V Logic Rail -->
+        <g transform="translate(140, 270)">
+            <rect x="0" y="0" width="60" height="30" fill="#1e293b" stroke="#06b6d4" stroke-width="1" rx="2"/>
+            <text x="30" y="14" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">F4: 6A</text>
+            <text x="30" y="25" fill="#94a3b8" font-size="8" text-anchor="middle">PTC Poly</text>
+        </g>
+        <line x1="240" y1="285" x2="200" y2="285" stroke="#06b6d4" stroke-width="2.5"/>
+        <line x1="140" y1="285" x2="40" y2="285" stroke="#06b6d4" stroke-width="2.5"/>
+        <text x="25" y="278" fill="#06b6d4" font-size="10" font-weight="bold">+5V_LOGIC</text>
+
+        <!-- Feed 2: AP2112K-3.3 LDO (U8) for ESP32 -->
+        <line x1="90" y1="285" x2="90" y2="350" stroke="#06b6d4" stroke-width="2"/>
+        <circle cx="90" cy="285" r="4" fill="#06b6d4"/>
+        <line x1="90" y1="350" x2="140" y2="350" stroke="#06b6d4" stroke-width="2"/>
+
+        <g transform="translate(140, 330)">
+            <rect x="0" y="0" width="160" height="70" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" rx="4"/>
+            <text x="80" y="16" fill="#3b82f6" font-size="10" font-weight="bold" text-anchor="middle">U8: AP2112K-3.3 LDO</text>
+            <text x="80" y="28" fill="#94a3b8" font-size="8" text-anchor="middle">Ultra-Low Noise 600mA LDO</text>
+            <text x="8" y="45" fill="#06b6d4" font-size="8">1: VIN (5V)</text>
+            <text x="8" y="60" fill="#38bdf8" font-size="8">3: EN (Tie VIN)</text>
+            <text x="100" y="45" fill="#3b82f6" font-size="8">5: VOUT (3.3V)</text>
+            <text x="80" y="62" fill="#64748b" font-size="8" text-anchor="middle">2: GND</text>
+
+            <circle cx="0" cy="40" r="3" fill="#06b6d4"/>
+            <circle cx="160" cy="40" r="3" fill="#3b82f6"/>
+            <circle cx="80" cy="70" r="3" fill="#64748b"/>
+        </g>
+        <line x1="300" y1="370" x2="350" y2="370" stroke="#3b82f6" stroke-width="2.5"/>
+        <text x="355" y="365" fill="#3b82f6" font-size="10" font-weight="bold">+3V3_ESP (Clean Supply)</text>
+
+        <!-- Decoupling Caps C5, C6 for AP2112K -->
+        <g transform="translate(320, 370)">
+            <!-- C5 10uF -->
+            <line x1="0" y1="0" x2="0" y2="25" stroke="#3b82f6" stroke-width="1.5"/>
+            <line x1="-8" y1="25" x2="8" y2="25" stroke="#38bdf8" stroke-width="2"/>
+            <line x1="-8" y1="31" x2="8" y2="31" stroke="#38bdf8" stroke-width="2"/>
+            <line x1="0" y1="31" x2="0" y2="45" stroke="#64748b" stroke-width="1.5"/>
+            <text x="12" y="30" fill="#94a3b8" font-size="8">C5: 10µF</text>
+        </g>
+
+        <!-- Feed 3: Pololu D36V50F6 (6V 15A Servo Rail A - Fingers) VR2 -->
+        <line x1="520" y1="460" x2="440" y2="460" stroke="#ef4444" stroke-width="2.5"/>
+        <circle cx="520" cy="460" r="4" fill="#ef4444"/>
+
+        <g transform="translate(200, 430)">
+            <rect x="0" y="0" width="240" height="95" fill="#0f172a" stroke="#f59e0b" stroke-width="2" rx="4"/>
+            <text x="120" y="18" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">VR2: Pololu D36V50F6 (Rail A)</text>
+            <text x="120" y="32" fill="#fde68a" font-size="9" text-anchor="middle">Dedicated Finger Servo Buck: 6.0V 15A / 20A Peak</text>
+            <text x="215" y="32" fill="#ef4444" font-size="9">VIN</text>
+            <text x="10" y="55" fill="#fbbf24" font-size="9">VOUT: +6.0V (Rail A)</text>
+            <text x="10" y="72" fill="#94a3b8" font-size="8">Powers 5x MG996R Fingers (CH 0-4)</text>
+            <text x="120" y="88" fill="#64748b" font-size="8" text-anchor="middle">GND_POWER</text>
+
+            <circle cx="240" cy="30" r="4" fill="#ef4444"/>
+            <circle cx="0" cy="50" r="4" fill="#fbbf24"/>
+            <circle cx="120" cy="95" r="4" fill="#64748b"/>
+        </g>
+
+        <!-- Fuse F2: 15A ATO Blade on Rail A -->
+        <g transform="translate(100, 465)">
+            <rect x="0" y="0" width="60" height="30" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" rx="2"/>
+            <text x="30" y="14" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle">F2: 15A</text>
+            <text x="30" y="25" fill="#94a3b8" font-size="8" text-anchor="middle">ATO Blade</text>
+        </g>
+        <line x1="200" y1="480" x2="160" y2="480" stroke="#f59e0b" stroke-width="3"/>
+        <line x1="100" y1="480" x2="30" y2="480" stroke="#f59e0b" stroke-width="3"/>
+        <text x="25" y="470" fill="#fbbf24" font-size="10" font-weight="bold">+6V_SERVO_A</text>
+
+        <!-- Dual 2200uF Decoupling Capacitors C1, C2 -->
+        <g transform="translate(50, 480)">
+            <line x1="0" y1="0" x2="0" y2="25" stroke="#f59e0b" stroke-width="2"/>
+            <!-- Cap plates -->
+            <line x1="-12" y1="25" x2="12" y2="25" stroke="#fbbf24" stroke-width="2.5"/>
+            <path d="M -12 32 Q 0 28, 12 32" fill="none" stroke="#64748b" stroke-width="2"/>
+            <line x1="0" y1="32" x2="0" y2="50" stroke="#64748b" stroke-width="2"/>
+            <text x="16" y="28" fill="#fbbf24" font-size="8" font-weight="bold">C1, C2 (2x 2200µF)</text>
+            <text x="16" y="38" fill="#94a3b8" font-size="7">16V Low-ESR (Nichicon)</text>
+            <text x="-16" y="24" fill="#fbbf24" font-size="8">+</text>
+        </g>
+
+        <!-- Feed 4: Pololu D36V50F6 (6V 15A Servo Rail B - Wrist & Forearm) VR3 -->
+        <line x1="520" y1="590" x2="440" y2="590" stroke="#ef4444" stroke-width="2.5"/>
+        <circle cx="520" cy="590" r="4" fill="#ef4444"/>
+
+        <g transform="translate(200, 560)">
+            <rect x="0" y="0" width="240" height="95" fill="#0f172a" stroke="#ea580c" stroke-width="2" rx="4"/>
+            <text x="120" y="18" fill="#fb923c" font-size="11" font-weight="bold" text-anchor="middle">VR3: Pololu D36V50F6 (Rail B)</text>
+            <text x="120" y="32" fill="#fed7aa" font-size="9" text-anchor="middle">Dedicated Wrist/Arm Buck: 6.0V 15A / 20A Peak</text>
+            <text x="215" y="32" fill="#ef4444" font-size="9">VIN</text>
+            <text x="10" y="55" fill="#fb923c" font-size="9">VOUT: +6.0V (Rail B)</text>
+            <text x="10" y="72" fill="#94a3b8" font-size="8">Powers 3x DS3225 &amp; 1x DS3218 (CH 5-8)</text>
+            <text x="120" y="88" fill="#64748b" font-size="8" text-anchor="middle">GND_POWER</text>
+
+            <circle cx="240" cy="30" r="4" fill="#ef4444"/>
+            <circle cx="0" cy="50" r="4" fill="#ea580c"/>
+            <circle cx="120" cy="95" r="4" fill="#64748b"/>
+        </g>
+
+        <!-- Fuse F3: 15A ATO Blade on Rail B -->
+        <g transform="translate(100, 595)">
+            <rect x="0" y="0" width="60" height="30" fill="#1e293b" stroke="#ea580c" stroke-width="1.5" rx="2"/>
+            <text x="30" y="14" fill="#fb923c" font-size="9" font-weight="bold" text-anchor="middle">F3: 15A</text>
+            <text x="30" y="25" fill="#94a3b8" font-size="8" text-anchor="middle">ATO Blade</text>
+        </g>
+        <line x1="200" y1="610" x2="160" y2="610" stroke="#ea580c" stroke-width="3"/>
+        <line x1="100" y1="610" x2="30" y2="610" stroke="#ea580c" stroke-width="3"/>
+        <text x="25" y="600" fill="#fb923c" font-size="10" font-weight="bold">+6V_SERVO_B</text>
+
+        <!-- Dual 2200uF Decoupling Capacitors C3, C4 -->
+        <g transform="translate(50, 610)">
+            <line x1="0" y1="0" x2="0" y2="25" stroke="#ea580c" stroke-width="2"/>
+            <line x1="-12" y1="25" x2="12" y2="25" stroke="#fb923c" stroke-width="2.5"/>
+            <path d="M -12 32 Q 0 28, 12 32" fill="none" stroke="#64748b" stroke-width="2"/>
+            <line x1="0" y1="32" x2="0" y2="50" stroke="#64748b" stroke-width="2"/>
+            <text x="16" y="28" fill="#fb923c" font-size="8" font-weight="bold">C3, C4 (2x 2200µF)</text>
+            <text x="16" y="38" fill="#94a3b8" font-size="7">16V Low-ESR (Nichicon)</text>
+            <text x="-16" y="24" fill="#fb923c" font-size="8">+</text>
+        </g>
+
+        <!-- Central Star Ground Point Representation -->
+        <g transform="translate(180, 700)">
+            <rect x="0" y="0" width="400" height="60" fill="#0b0f19" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,2" rx="4"/>
+            <text x="200" y="20" fill="#cbd5e1" font-size="11" font-weight="bold" text-anchor="middle">STAR GROUND POINT (BATTERY SHUNT TERMINAL)</text>
+            <text x="200" y="36" fill="#94a3b8" font-size="9" text-anchor="middle">Separates High-Current Servo Return (GND_POWER) from Logic Return (GND_LOGIC)</text>
+            <text x="200" y="49" fill="#f87171" font-size="8" text-anchor="middle">Eliminates 400mV Inductive Ground Bounce | Meets IEC 60601-1</text>
+
+            <circle cx="40" cy="30" r="5" fill="#64748b"/>
+            <text x="50" y="33" fill="#cbd5e1" font-size="9" font-weight="bold">GND_POWER</text>
+
+            <circle cx="340" cy="30" r="5" fill="#38bdf8"/>
+            <text x="270" y="33" fill="#38bdf8" font-size="9" font-weight="bold">GND_LOGIC</text>
+        </g>
+    </g>
+    
+
+    <!-- ==================== SECTION 2: COMPUTING & SAFETY SUPERVISOR ==================== -->
+    <g transform="translate(850, 130)">
+        <rect x="0" y="0" width="1020" height="780" fill="url(#icCard)" stroke="#38bdf8" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="1020" height="38" fill="#0369a1" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">2. DUAL-PROCESSOR CO-DESIGN: NVIDIA JETSON ORIN NANO &amp; ESP32 SUPERVISOR</text>
+        <text x="850" y="25" fill="#bae6fd" font-size="12" font-weight="bold">ZONE 2: LOGIC</text>
+
+        <!-- JETSON ORIN NANO (U1) 40-PIN EXPANSION HEADER J41 -->
+        <g transform="translate(30, 60)">
+            <rect x="0" y="0" width="380" height="420" fill="#0f172a" stroke="#0284c7" stroke-width="2" rx="6"/>
+            <rect x="0" y="0" width="380" height="30" fill="#0c4a6e" rx="6 6 0 0"/>
+            <text x="190" y="20" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">U1: NVIDIA JETSON ORIN NANO</text>
+            <text x="190" y="44" fill="#94a3b8" font-size="9" text-anchor="middle">Main Perception &amp; 100 Hz Control Planner</text>
+
+            <!-- 40-Pin Header Representation -->
+            <rect x="20" y="55" width="340" height="260" fill="#18181b" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="190" y="72" fill="#f8fafc" font-size="10" font-weight="bold" text-anchor="middle">J41 EXPANSION HEADER (40-PIN)</text>
+
+            <!-- Pin rows -->
+            <!-- 5V Power In: Pins 2 & 4 -->
+            <g transform="translate(30, 85)">
+                <circle cx="10" cy="10" r="4" fill="#06b6d4"/>
+                <text x="22" y="14" fill="#06b6d4" font-size="10" font-weight="bold">Pin 2: +5V_IN</text>
+                <circle cx="10" cy="30" r="4" fill="#06b6d4"/>
+                <text x="22" y="34" fill="#06b6d4" font-size="10" font-weight="bold">Pin 4: +5V_IN (Paralleled 4A)</text>
+
+                <!-- GND Pins 6 & 9 -->
+                <circle cx="10" cy="55" r="4" fill="#64748b"/>
+                <text x="22" y="59" fill="#94a3b8" font-size="10">Pin 6: GND_LOGIC</text>
+                <circle cx="10" cy="75" r="4" fill="#64748b"/>
+                <text x="22" y="79" fill="#94a3b8" font-size="10">Pin 9: GND_LOGIC</text>
+
+                <!-- I2C Bus 7: Pins 3 & 5 -->
+                <circle cx="10" cy="105" r="4" fill="#10b981"/>
+                <text x="22" y="109" fill="#4ade80" font-size="10" font-weight="bold">Pin 3: I2C-7 SDA (3.3V, 400kHz)</text>
+                <circle cx="10" cy="125" r="4" fill="#eab308"/>
+                <text x="22" y="129" fill="#fde047" font-size="10" font-weight="bold">Pin 5: I2C-7 SCL (3.3V, 400kHz)</text>
+
+                <!-- UART1 Telemetry: Pins 8 & 10 -->
+                <circle cx="10" cy="155" r="4" fill="#f97316"/>
+                <text x="22" y="159" fill="#fb923c" font-size="10" font-weight="bold">Pin 8: UART1 TXD (460.8 kbps)</text>
+                <circle cx="10" cy="175" r="4" fill="#38bdf8"/>
+                <text x="22" y="179" fill="#38bdf8" font-size="10" font-weight="bold">Pin 10: UART1 RXD (460.8 kbps)</text>
+            </g>
+
+            <!-- USB3 Port for RealSense D435i -->
+            <rect x="20" y="325" width="340" height="80" fill="#111827" stroke="#38bdf8" stroke-width="1" rx="4"/>
+            <text x="190" y="343" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">CAM1: INTEL REALSENSE D435i</text>
+            <text x="190" y="358" fill="#cbd5e1" font-size="9" text-anchor="middle">Physical Interface: USB 3.1 Gen 1 Type-C</text>
+            <text x="190" y="372" fill="#94a3b8" font-size="9" text-anchor="middle">Depth 640x480 @ 30fps | RGB 1280x720 @ 30fps</text>
+            <text x="190" y="388" fill="#4ade80" font-size="9" font-weight="bold" text-anchor="middle">Vision Supplies Passive Context Only (Never Closes)</text>
+        </g>
+
+        <!-- ESP32-WROOM-32E SAFETY SUPERVISOR (U2) -->
+        <g transform="translate(560, 60)">
+            <rect x="0" y="0" width="430" height="420" fill="#0f172a" stroke="#eab308" stroke-width="2" rx="6"/>
+            <rect x="0" y="0" width="430" height="30" fill="#713f12" rx="6 6 0 0"/>
+            <text x="215" y="20" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">U2: ESP32-WROOM-32E SAFETY SUPERVISOR</text>
+            <text x="215" y="44" fill="#fef08a" font-size="9" text-anchor="middle">Independent Hardware Gating, FreeRTOS Watchdog &amp; ADC Ingestion</text>
+
+            <!-- Left Pin Column (Digital IO & Busses) -->
+            <g transform="translate(20, 60)">
+                <!-- Power & Reset -->
+                <circle cx="0" cy="15" r="4" fill="#3b82f6"/>
+                <text x="10" y="19" fill="#3b82f6" font-size="10" font-weight="bold">Pin 2: 3V3_ESP (from U8)</text>
+                <circle cx="0" cy="35" r="4" fill="#64748b"/>
+                <text x="10" y="39" fill="#94a3b8" font-size="10">Pin 1, 38: GND_LOGIC</text>
+
+                <!-- Hardware Output Enable /OE (Pin 25) -->
+                <circle cx="0" cy="65" r="4" fill="#ef4444"/>
+                <text x="10" y="69" fill="#f87171" font-size="10" font-weight="bold">GPIO25: /OE Control (PCA9685)</text>
+
+                <!-- E-Stop Hardware Input (Pin 27) -->
+                <circle cx="0" cy="95" r="4" fill="#f87171"/>
+                <text x="10" y="99" fill="#fca5a5" font-size="10" font-weight="bold">GPIO27: ESTOP_SENSE (from U11)</text>
+
+                <!-- UART2 to Jetson (Pins 16 & 17) -->
+                <circle cx="0" cy="125" r="4" fill="#38bdf8"/>
+                <text x="10" y="129" fill="#38bdf8" font-size="10" font-weight="bold">GPIO16: UART2_RX2 (from Pin 8)</text>
+                <circle cx="0" cy="145" r="4" fill="#fb923c"/>
+                <text x="10" y="149" fill="#fb923c" font-size="10" font-weight="bold">GPIO17: UART2_TX2 (to Pin 10)</text>
+
+                <!-- Local I2C to ISO1540 (Pins 21 & 22) -->
+                <circle cx="0" cy="175" r="4" fill="#10b981"/>
+                <text x="10" y="179" fill="#4ade80" font-size="10" font-weight="bold">GPIO21: I2C_SDA_LOCAL</text>
+                <circle cx="0" cy="195" r="4" fill="#eab308"/>
+                <text x="10" y="199" fill="#fde047" font-size="10" font-weight="bold">GPIO22: I2C_SCL_LOCAL</text>
+            </g>
+
+            <!-- Right Pin Column (FSR Analog Channels ADC1) -->
+            <g transform="translate(230, 60)">
+                <text x="10" y="15" fill="#a3e635" font-size="11" font-weight="bold">ADC1 INPUTS (FSRs):</text>
+
+                <circle cx="180" cy="40" r="4" fill="#84cc16"/>
+                <text x="170" y="44" fill="#bef264" font-size="10" text-anchor="end">GPIO32: ADC1_CH4 (Thumb)</text>
+
+                <circle cx="180" cy="65" r="4" fill="#84cc16"/>
+                <text x="170" y="69" fill="#bef264" font-size="10" text-anchor="end">GPIO33: ADC1_CH5 (Index)</text>
+
+                <circle cx="180" cy="90" r="4" fill="#84cc16"/>
+                <text x="170" y="94" fill="#bef264" font-size="10" text-anchor="end">GPIO34: ADC1_CH6 (Middle)</text>
+
+                <circle cx="180" cy="115" r="4" fill="#84cc16"/>
+                <text x="170" y="119" fill="#bef264" font-size="10" text-anchor="end">GPIO35: ADC1_CH7 (Ring)</text>
+
+                <circle cx="180" cy="140" r="4" fill="#84cc16"/>
+                <text x="170" y="144" fill="#bef264" font-size="10" text-anchor="end">GPIO36: ADC1_CH0 (Little)</text>
+            </g>
+
+            <!-- Supervisor Functional Status Box inside ESP32 card -->
+            <rect x="20" y="275" width="390" height="130" fill="#111827" stroke="#eab308" stroke-width="1" rx="4"/>
+            <text x="215" y="293" fill="#fde047" font-size="10" font-weight="bold" text-anchor="middle">SUPERVISOR HARDWARE GUARANTEES</text>
+            <text x="30" y="312" fill="#cbd5e1" font-size="9">• Boots Disarmed: GPIO25 set HIGH immediately; R6 holds HIGH.</text>
+            <text x="30" y="328" fill="#cbd5e1" font-size="9">• Watchdog: Independent Task WDT latches fault if stalled &gt; 350ms.</text>
+            <text x="30" y="344" fill="#cbd5e1" font-size="9">• Heartbeat: Jetson 50Hz heartbeat loss (&gt;250ms) trips hardware OE drop.</text>
+            <text x="30" y="360" fill="#f87171" font-size="9">• E-Stop Strike: &lt; 100 µs ISR tristates PCA9685 PWM outputs.</text>
+            <text x="30" y="376" fill="#cbd5e1" font-size="9">• Jetson operating system CANNOT override ESP32 supervisor cutoff.</text>
+            <text x="30" y="392" fill="#4ade80" font-size="9">• Dual-frame CRC16-CCITT-FALSE validation on all UART telemetry.</text>
+        </g>
+
+        <!-- Hardware Interconnect Wires between Jetson & ESP32 -->
+        <!-- UART TXD1 (Jetson Pin 8) -> UART RX2 (ESP32 Pin 16) -->
+        <g>
+            <path d="M 410, 215 L 485, 215 L 485, 185 L 560, 185" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowHead)"/>
+            <text x="485" y="175" fill="#fb923c" font-size="9" font-weight="bold" text-anchor="middle">Jetson TX -&gt; ESP32 RX</text>
+        </g>
+        <!-- UART TX2 (ESP32 Pin 17) -> UART RXD1 (Jetson Pin 10) -->
+        <g>
+            <path d="M 560, 205 L 485, 205 L 485, 235 L 410, 235" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowHead)"/>
+            <text x="485" y="250" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">ESP32 TX -&gt; Jetson RX</text>
+        </g>
+
+        <!-- Output Enable (/OE) Circuitry & Pull-Up R6 -->
+        <!-- ESP32 GPIO25 -> R6 Pull-up to 3.3V -> PCA9685 Pin 23 -->
+        <g transform="translate(560, 125)">
+            <line x1="0" y1="0" x2="-40" y2="0" stroke="#f87171" stroke-width="2.5"/>
+            <circle cx="-40" cy="0" r="4" fill="#f87171"/>
+
+            <!-- Pull-up resistor R6 -->
+            <line x1="-40" y1="0" x2="-40" y2="-40" stroke="#f87171" stroke-width="2"/>
+            <g transform="translate(-40, -40)">
+                <rect x="-10" y="-30" width="20" height="30" fill="#1e293b" stroke="#f87171" stroke-width="1.5"/>
+                <text x="15" y="-12" fill="#fca5a5" font-size="8" font-weight="bold">R6: 10k 0.1%</text>
+                <text x="15" y="-2" fill="#94a3b8" font-size="7">Pull-up to 3.3V</text>
+                <line x1="0" y1="-30" x2="0" y2="-45" stroke="#3b82f6" stroke-width="2"/>
+                <text x="0" y="-50" fill="#3b82f6" font-size="9" font-weight="bold" text-anchor="middle">+3V3_ESP</text>
+            </g>
+
+            <!-- Line out to PCA9685 /OE (Pin 23) in Section 3 -->
+            <path d="M -40, 0 L -40, 410 L 430, 410 L 430, 490" fill="none" stroke="#f87171" stroke-width="2.5"/>
+            <text x="360" y="402" fill="#f87171" font-size="10" font-weight="bold">PCA9685_OE (Active-LOW Gate)</text>
+        </g>
+
+        <!-- I2C Pull-Up Resistors R7, R8 for Local ESP32 I2C to ISO1540 -->
+        <g transform="translate(680, 240)">
+            <!-- R7: SDA pull-up -->
+            <rect x="0" y="0" width="30" height="16" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+            <text x="15" y="-4" fill="#4ade80" font-size="8" text-anchor="middle">R7: 4.7k</text>
+            <!-- R8: SCL pull-up -->
+            <rect x="50" y="0" width="30" height="16" fill="#1e293b" stroke="#eab308" stroke-width="1"/>
+            <text x="65" y="-4" fill="#fde047" font-size="8" text-anchor="middle">R8: 4.7k</text>
+        </g>
+
+        <!-- Architectural Decoupling Callout Block -->
+        <g transform="translate(30, 500)">
+            <rect x="0" y="0" width="960" height="250" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="6"/>
+            <rect x="0" y="0" width="960" height="28" fill="#1e293b" rx="6 6 0 0"/>
+            <text x="20" y="19" fill="#38bdf8" font-size="12" font-weight="bold">SYSTEM INTERFACE PROTOCOL &amp; DETERMINISTIC CONTROL ARCHITECTURE</text>
+
+            <g transform="translate(20, 45)">
+                <text x="0" y="0" fill="#f8fafc" font-size="11" font-weight="bold">1. JETSON-ESP32 BINARY TELEMETRY PROTOCOL (UART @ 460800 BAUD, 8N1):</text>
+                <text x="15" y="18" fill="#cbd5e1" font-size="10">• Master 100 Hz Downstream SENSOR Frames: ESP32 streams [Header, Type=0x01, Seq, FSR1..5 (10B), EMG1..2 (4B), CRC16].</text>
+                <text x="15" y="34" fill="#cbd5e1" font-size="10">• Upstream 50 Hz HEARTBEAT Frames: Jetson sends [Header, Type=0x02, Seq, ArmRequest, WatchdogAck, CRC16].</text>
+                <text x="15" y="50" fill="#cbd5e1" font-size="10">• CRC16 Polynomial: CCITT-FALSE 0x1021 (Init 0xFFFF) executed via 256-entry O(1) flash lookup table in &lt; 2.5 µs.</text>
+
+                <text x="0" y="80" fill="#f8fafc" font-size="11" font-weight="bold">2. SAFETY LATCHING &amp; STATE ARBITRATION MATRIX:</text>
+                <text x="15" y="98" fill="#cbd5e1" font-size="10">• Heartbeat Timeout: If Jetson fails to emit valid heartbeat within 250 ms, ESP32 drops /OE immediately.</text>
+                <text x="15" y="114" fill="#cbd5e1" font-size="10">• Force Saturation Ceiling: FSR &gt; 3500 ADC counts flags instant backoff (&gt;100ms warning, &gt;500ms safety latch fault).</text>
+                <text x="15" y="130" fill="#cbd5e1" font-size="10">• Uncommanded Motion: AS5600 encoder velocity &gt; 20 deg/s during hold state trips closed-loop position fault.</text>
+                <text x="15" y="146" fill="#cbd5e1" font-size="10">• EMG Intent Supremacy: Extensor spike (&gt;0.65 threshold) executes unconditional open override in &#8804; 15 ms.</text>
+                <text x="15" y="162" fill="#f87171" font-size="10" font-weight="bold">• Vision Assistance Boundary: Computer vision supplies aperture preshaping ONLY; can NEVER trigger or advance closing.</text>
+            </g>
+        </g>
+    </g>
+    
+
+    <!-- ==================== SECTION 3: ACTUATION & PCA9685 ==================== -->
+    <g transform="translate(1900, 130)">
+        <rect x="0" y="0" width="1440" height="780" fill="url(#icCard)" stroke="#a855f7" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="1440" height="38" fill="#581c87" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">3. ACTUATION: PCA9685 16-CHANNEL PWM CONTROLLER &amp; 9 ACTUATORS</text>
+        <text x="1270" y="25" fill="#e9d5ff" font-size="12" font-weight="bold">PWM CONTROLLER</text>
+
+        <!-- PCA9685PW IC U3 -->
+        <g transform="translate(40, 60)">
+            <rect x="0" y="0" width="380" height="690" fill="#0f172a" stroke="#c084fc" stroke-width="2" rx="6"/>
+            <rect x="0" y="0" width="380" height="32" fill="#3b0764" rx="6 6 0 0"/>
+            <text x="190" y="22" fill="#e9d5ff" font-size="13" font-weight="bold" text-anchor="middle">U3: PCA9685PW 16-CH PWM</text>
+            <text x="190" y="48" fill="#c084fc" font-size="10" text-anchor="middle">I2C Address: 0x40 (A0-A5 strapped to GND)</text>
+            <text x="190" y="62" fill="#94a3b8" font-size="9" text-anchor="middle">12-Bit Resolution | Frequency: 50 Hz (20ms Period)</text>
+
+            <!-- Left Pin Rows: Power, I2C, /OE -->
+            <g transform="translate(20, 80)">
+                <circle cx="0" cy="20" r="4" fill="#3b82f6"/>
+                <text x="12" y="24" fill="#3b82f6" font-size="10" font-weight="bold">Pin 28: VDD (3.3V Logic)</text>
+                <circle cx="0" cy="45" r="4" fill="#64748b"/>
+                <text x="12" y="49" fill="#94a3b8" font-size="10">Pin 14: VSS (GND_LOGIC)</text>
+
+                <!-- Jetson I2C Bus 7 Input -->
+                <circle cx="0" cy="80" r="4" fill="#10b981"/>
+                <text x="12" y="84" fill="#4ade80" font-size="10" font-weight="bold">Pin 26: SDA (Jetson I2C-7)</text>
+                <circle cx="0" cy="105" r="4" fill="#eab308"/>
+                <text x="12" y="109" fill="#fde047" font-size="10" font-weight="bold">Pin 25: SCL (Jetson I2C-7)</text>
+
+                <!-- Output Enable /OE (Active LOW) -->
+                <circle cx="0" cy="140" r="5" fill="#f87171"/>
+                <text x="12" y="144" fill="#f87171" font-size="10" font-weight="bold">Pin 23: /OE (Active-LOW)</text>
+                <text x="12" y="158" fill="#94a3b8" font-size="8">Tristates all 16 PWMs when HIGH</text>
+
+                <!-- Address Strapping A0-A5 to GND -->
+                <rect x="0" y="180" width="160" height="90" fill="#18181b" stroke="#334155" stroke-width="1" rx="4"/>
+                <text x="80" y="198" fill="#cbd5e1" font-size="9" font-weight="bold" text-anchor="middle">ADDRESS STRAPPING:</text>
+                <text x="80" y="214" fill="#94a3b8" font-size="8" text-anchor="middle">A0 (Pin 1) -&gt; GND_LOGIC</text>
+                <text x="80" y="228" fill="#94a3b8" font-size="8" text-anchor="middle">A1 (Pin 2) -&gt; GND_LOGIC</text>
+                <text x="80" y="242" fill="#94a3b8" font-size="8" text-anchor="middle">A2 (Pin 3) -&gt; GND_LOGIC</text>
+                <text x="80" y="256" fill="#94a3b8" font-size="8" text-anchor="middle">A3..A5 -&gt; GND_LOGIC</text>
+                <text x="80" y="268" fill="#4ade80" font-size="8" font-weight="bold" text-anchor="middle">7-Bit Base: 0x40</text>
+
+                <text x="12" y="300" fill="#94a3b8" font-size="8">Pin 24: EXTCLK -&gt; GND (Internal 25MHz)</text>
+                <text x="12" y="318" fill="#f87171" font-size="8">ALLCALL Disabled (avoid 0x70 clash)</text>
+            </g>
+
+            <!-- Right Pin Rows: PWM Outputs (CH 0 to CH 8) -->
+            <g transform="translate(360, 80)">
+                <!-- CH 0: Thumb -->
+                <circle cx="0" cy="20" r="4" fill="#c084fc"/>
+                <text x="-12" y="24" fill="#e9d5ff" font-size="10" font-weight="bold" text-anchor="end">Pin 6: PWM0 (Thumb)</text>
+
+                <!-- CH 1: Index -->
+                <circle cx="0" cy="75" r="4" fill="#c084fc"/>
+                <text x="-12" y="79" fill="#e9d5ff" font-size="10" font-weight="bold" text-anchor="end">Pin 7: PWM1 (Index)</text>
+
+                <!-- CH 2: Middle -->
+                <circle cx="0" cy="130" r="4" fill="#c084fc"/>
+                <text x="-12" y="134" fill="#e9d5ff" font-size="10" font-weight="bold" text-anchor="end">Pin 8: PWM2 (Middle)</text>
+
+                <!-- CH 3: Ring -->
+                <circle cx="0" cy="185" r="4" fill="#c084fc"/>
+                <text x="-12" y="189" fill="#e9d5ff" font-size="10" font-weight="bold" text-anchor="end">Pin 9: PWM3 (Ring)</text>
+
+                <!-- CH 4: Little -->
+                <circle cx="0" cy="240" r="4" fill="#c084fc"/>
+                <text x="-12" y="244" fill="#e9d5ff" font-size="10" font-weight="bold" text-anchor="end">Pin 10: PWM4 (Little)</text>
+
+                <!-- CH 5: Wrist Pitch -->
+                <circle cx="0" cy="310" r="4" fill="#fb923c"/>
+                <text x="-12" y="314" fill="#fed7aa" font-size="10" font-weight="bold" text-anchor="end">Pin 11: PWM5 (Wrist Pitch)</text>
+
+                <!-- CH 6: Wrist Roll -->
+                <circle cx="0" cy="365" r="4" fill="#fb923c"/>
+                <text x="-12" y="369" fill="#fed7aa" font-size="10" font-weight="bold" text-anchor="end">Pin 12: PWM6 (Wrist Roll)</text>
+
+                <!-- CH 7: Wrist Dev -->
+                <circle cx="0" cy="420" r="4" fill="#fb923c"/>
+                <text x="-12" y="424" fill="#fed7aa" font-size="10" font-weight="bold" text-anchor="end">Pin 13: PWM7 (Wrist Dev)</text>
+
+                <!-- CH 8: Forearm Rot -->
+                <circle cx="0" cy="475" r="4" fill="#fb923c"/>
+                <text x="-12" y="479" fill="#fed7aa" font-size="10" font-weight="bold" text-anchor="end">Pin 15: PWM8 (Forearm Rot)</text>
+
+                <!-- Spare Channels -->
+                <text x="-12" y="530" fill="#64748b" font-size="9" text-anchor="end">PWM9..PWM15: Reserved Spares</text>
+            </g>
+        </g>
+
+        <!-- SERVO RAIL A ACTUATORS (5x MG996R Fingers) -->
+        <g transform="translate(460, 60)">
+            <rect x="0" y="0" width="460" height="320" fill="#18181b" stroke="#f59e0b" stroke-width="1.5" rx="6"/>
+            <rect x="0" y="0" width="460" height="26" fill="#78350f" rx="6 6 0 0"/>
+            <text x="230" y="18" fill="#fde68a" font-size="11" font-weight="bold" text-anchor="middle">SERVO RAIL A: 5x MG996R FINGER ACTUATORS (6V 15A BUS)</text>
+
+            <!-- 5 Finger Servo Blocks (J1 to J5) -->
+            <!-- J1: Thumb -->
+            <g transform="translate(15, 35)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="bold">J1 / M1: THUMB FLEXION (MG996R)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 650 - 2350 µs | Stall: 2.5A @ 6V | Peak Torque: 10 kg·cm</text>
+                <text x="350" y="20" fill="#c084fc" font-size="9">PWM0 (Pin 6)</text>
+                <text x="350" y="36" fill="#fbbf24" font-size="9">+6V_RAIL_A</text>
+            </g>
+            <!-- J2: Index -->
+            <g transform="translate(15, 90)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="bold">J2 / M2: INDEX FLEXION (MG996R)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 650 - 2350 µs | Stall: 2.5A @ 6V | Slew Rate: 4.5 rad/s</text>
+                <text x="350" y="20" fill="#c084fc" font-size="9">PWM1 (Pin 7)</text>
+                <text x="350" y="36" fill="#fbbf24" font-size="9">+6V_RAIL_A</text>
+            </g>
+            <!-- J3: Middle -->
+            <g transform="translate(15, 145)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="bold">J3 / M3: MIDDLE FLEXION (MG996R)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 650 - 2350 µs | Stall: 2.5A @ 6V | Slew Rate: 4.5 rad/s</text>
+                <text x="350" y="20" fill="#c084fc" font-size="9">PWM2 (Pin 8)</text>
+                <text x="350" y="36" fill="#fbbf24" font-size="9">+6V_RAIL_A</text>
+            </g>
+            <!-- J4: Ring -->
+            <g transform="translate(15, 200)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="bold">J4 / M4: RING FLEXION (MG996R)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 650 - 2350 µs | Stall: 2.5A @ 6V | Slew Rate: 4.5 rad/s</text>
+                <text x="350" y="20" fill="#c084fc" font-size="9">PWM3 (Pin 9)</text>
+                <text x="350" y="36" fill="#fbbf24" font-size="9">+6V_RAIL_A</text>
+            </g>
+            <!-- J5: Little -->
+            <g transform="translate(15, 255)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="bold">J5 / M5: LITTLE FLEXION (MG996R)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 650 - 2350 µs | Stall: 2.5A @ 6V | Slew Rate: 4.5 rad/s</text>
+                <text x="350" y="20" fill="#c084fc" font-size="9">PWM4 (Pin 10)</text>
+                <text x="350" y="36" fill="#fbbf24" font-size="9">+6V_RAIL_A</text>
+            </g>
+        </g>
+
+        <!-- SERVO RAIL B ACTUATORS (3x DS3225 Wrist + 1x DS3218 Forearm) -->
+        <g transform="translate(950, 60)">
+            <rect x="0" y="0" width="460" height="320" fill="#18181b" stroke="#ea580c" stroke-width="1.5" rx="6"/>
+            <rect x="0" y="0" width="460" height="26" fill="#7c2d12" rx="6 6 0 0"/>
+            <text x="230" y="18" fill="#fed7aa" font-size="11" font-weight="bold" text-anchor="middle">SERVO RAIL B: 3x DS3225 WRIST + 1x DS3218 FOREARM (6V 15A)</text>
+
+            <!-- J6: Wrist Pitch -->
+            <g transform="translate(15, 35)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fb923c" font-size="10" font-weight="bold">J6 / M6: WRIST FLEXION / EXTENSION (DS3225)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 500 - 2500 µs | Stall: 2.8A @ 6V | Torque: 25 kg·cm</text>
+                <text x="350" y="20" fill="#fb923c" font-size="9">PWM5 (Pin 11)</text>
+                <text x="350" y="36" fill="#ea580c" font-size="9">+6V_RAIL_B</text>
+            </g>
+            <!-- J7: Wrist Roll -->
+            <g transform="translate(15, 90)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fb923c" font-size="10" font-weight="bold">J7 / M7: WRIST PRONATION / SUPINATION (DS3225)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 500 - 2500 µs | Stall: 2.8A @ 6V | Torque: 25 kg·cm</text>
+                <text x="350" y="20" fill="#fb923c" font-size="9">PWM6 (Pin 12)</text>
+                <text x="350" y="36" fill="#ea580c" font-size="9">+6V_RAIL_B</text>
+            </g>
+            <!-- J8: Wrist Deviation -->
+            <g transform="translate(15, 145)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fb923c" font-size="10" font-weight="bold">J8 / M8: WRIST RADIAL / ULNAR DEVIATION (DS3225)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 500 - 2500 µs | Stall: 2.8A @ 6V | Torque: 25 kg·cm</text>
+                <text x="350" y="20" fill="#fb923c" font-size="9">PWM7 (Pin 13)</text>
+                <text x="350" y="36" fill="#ea580c" font-size="9">+6V_RAIL_B</text>
+            </g>
+            <!-- J9: Forearm Rotation -->
+            <g transform="translate(15, 200)">
+                <rect x="0" y="0" width="430" height="50" fill="#0f172a" stroke="#334155" stroke-width="1" rx="3"/>
+                <text x="12" y="20" fill="#fb923c" font-size="10" font-weight="bold">J9 / M9: FOREARM ROTATION (DS3218)</text>
+                <text x="12" y="36" fill="#94a3b8" font-size="9">Pulse: 500 - 2500 µs | Stall: 2.2A @ 6V | Torque: 20 kg·cm</text>
+                <text x="350" y="20" fill="#fb923c" font-size="9">PWM8 (Pin 15)</text>
+                <text x="350" y="36" fill="#ea580c" font-size="9">+6V_RAIL_B</text>
+            </g>
+            <!-- Harness wiring color legend -->
+            <g transform="translate(15, 260)">
+                <rect x="0" y="0" width="430" height="45" fill="#0b0f19" stroke="#475569" stroke-width="1" rx="3"/>
+                <text x="12" y="18" fill="#cbd5e1" font-size="9" font-weight="bold">SERVO WIRE HARNESS PINOUT &amp; COLORS:</text>
+                <text x="12" y="34" fill="#94a3b8" font-size="8">MG996R: Brown (GND_POWER) | Red (+6V_A) | Orange (PWM_SIG)</text>
+                <text x="235" y="34" fill="#94a3b8" font-size="8">DS3225: Black (GND_POWER) | Red (+6V_B) | White (PWM_SIG)</text>
+            </g>
+        </g>
+
+        <!-- Current & Power Budget Analysis Table -->
+        <g transform="translate(460, 410)">
+            <rect x="0" y="0" width="950" height="340" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="6"/>
+            <rect x="0" y="0" width="950" height="28" fill="#1e293b" rx="6 6 0 0"/>
+            <text x="20" y="19" fill="#e9d5ff" font-size="12" font-weight="bold">ACTUATION ELECTRICAL RATINGS, THERMAL BUDGET &amp; SAFETY MARGINS</text>
+
+            <g transform="translate(20, 45)">
+                <!-- Table Headers -->
+                <text x="0" y="0" fill="#94a3b8" font-size="10" font-weight="bold">SUBSYSTEM RAIL</text>
+                <text x="180" y="0" fill="#94a3b8" font-size="10" font-weight="bold">VOLTAGE</text>
+                <text x="280" y="0" fill="#94a3b8" font-size="10" font-weight="bold">TYPICAL CURRENT</text>
+                <text x="420" y="0" fill="#94a3b8" font-size="10" font-weight="bold">PEAK STALL CURRENT</text>
+                <text x="600" y="0" fill="#94a3b8" font-size="10" font-weight="bold">FUSE PROTECTION</text>
+                <text x="760" y="0" fill="#94a3b8" font-size="10" font-weight="bold">DECOUPLING CAP</text>
+                <line x1="0" y1="8" x2="910" y2="8" stroke="#334155" stroke-width="1"/>
+
+                <!-- Row 1: Rail A -->
+                <text x="0" y="30" fill="#fbbf24" font-size="10" font-weight="bold">Servo Rail A (Fingers 1-5)</text>
+                <text x="180" y="30" fill="#f8fafc" font-size="10">6.0 V DC (±3%)</text>
+                <text x="280" y="30" fill="#cbd5e1" font-size="10">2.2 A (Normal grasp)</text>
+                <text x="420" y="30" fill="#f87171" font-size="10" font-weight="bold">12.5 A (5x 2.5A Stall)</text>
+                <text x="600" y="30" fill="#fbbf24" font-size="10">15A ATO Blade (F2)</text>
+                <text x="760" y="30" fill="#38bdf8" font-size="10">2x 2200µF Low-ESR</text>
+
+                <!-- Row 2: Rail B -->
+                <text x="0" y="60" fill="#fb923c" font-size="10" font-weight="bold">Servo Rail B (Wrist &amp; Forearm)</text>
+                <text x="180" y="60" fill="#f8fafc" font-size="10">6.0 V DC (±3%)</text>
+                <text x="280" y="60" fill="#cbd5e1" font-size="10">1.8 A (Articulating)</text>
+                <text x="420" y="60" fill="#f87171" font-size="10" font-weight="bold">10.6 A (3x2.8A + 2.2A)</text>
+                <text x="600" y="60" fill="#fb923c" font-size="10">15A ATO Blade (F3)</text>
+                <text x="760" y="60" fill="#38bdf8" font-size="10">2x 2200µF Low-ESR</text>
+
+                <!-- Row 3: Logic 5V -->
+                <text x="0" y="90" fill="#06b6d4" font-size="10" font-weight="bold">Logic 5V (Jetson, D435i, ESP)</text>
+                <text x="180" y="90" fill="#f8fafc" font-size="10">5.05 V DC (±1%)</text>
+                <text x="280" y="90" fill="#cbd5e1" font-size="10">2.8 A (Vision + Compute)</text>
+                <text x="420" y="90" fill="#cbd5e1" font-size="10">4.5 A (Max Jetson Burst)</text>
+                <text x="600" y="90" fill="#06b6d4" font-size="10">6A Resettable PTC (F4)</text>
+                <text x="760" y="90" fill="#38bdf8" font-size="10">47µF Ceramic Array</text>
+
+                <!-- Row 4: Battery Bus -->
+                <text x="0" y="120" fill="#ef4444" font-size="10" font-weight="bold">Main Battery Total Feed</text>
+                <text x="180" y="120" fill="#f8fafc" font-size="10">11.1 - 12.6 V DC</text>
+                <text x="280" y="120" fill="#cbd5e1" font-size="10">3.5 A (Continuous draw)</text>
+                <text x="420" y="120" fill="#f87171" font-size="10" font-weight="bold">23.1 A (All-Stall Event)</text>
+                <text x="600" y="120" fill="#ef4444" font-size="10">30A ATO Blade (F1)</text>
+                <text x="760" y="120" fill="#38bdf8" font-size="10">BTS50015 PROFET Switch</text>
+                <line x1="0" y1="135" x2="910" y2="135" stroke="#334155" stroke-width="1"/>
+
+                <!-- Engineering notes on PWM control -->
+                <text x="0" y="160" fill="#e9d5ff" font-size="10" font-weight="bold">CRITICAL ACTUATOR CONTROL NON-NEGOTIABLES:</text>
+                <text x="10" y="180" fill="#cbd5e1" font-size="9">1. Arm Gate: Servos receive zero PWM pulses while system is disarmed or faulted.</text>
+                <text x="10" y="196" fill="#cbd5e1" font-size="9">2. Hardware OE Interlock: ESP32 supervisor controls /OE (Pin 23); tristates all 16 PWM lines in &lt;100 µs.</text>
+                <text x="10" y="212" fill="#cbd5e1" font-size="9">3. Slew Rate Limiter: All commanded position steps clamped to 4.5 rad/s (MG996R) and 3.0 rad/s (DS3225).</text>
+                <text x="10" y="228" fill="#cbd5e1" font-size="9">4. Dual PROFET Disconnect: Depressing E-stop physically severs 12V supply to both 6V buck stages in &lt; 35 µs.</text>
+                <text x="10" y="244" fill="#cbd5e1" font-size="9">5. Thermal Margin: BTS50015 junction temp monitored; auto-latches off at 175°C with hysteresis.</text>
+            </g>
+        </g>
+    </g>
+    
+
+    <!-- ==================== SECTION 4: FSR FORCE SENSING ==================== -->
+    <g transform="translate(60, 940)">
+        <rect x="0" y="0" width="760" height="980" fill="url(#icCard)" stroke="#84cc16" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="760" height="38" fill="#3f6212" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">4. FINGERTIP TACTILE FORCE SENSING (5x INTERLINK FSR402)</text>
+        <text x="590" y="25" fill="#d9f99d" font-size="12" font-weight="bold">ADC1 SENSORS</text>
+
+        <!-- Circuit Topology Diagram Callout -->
+        <g transform="translate(25, 55)">
+            <rect x="0" y="0" width="710" height="150" fill="#18181b" stroke="#4d7c0f" stroke-width="1.5" rx="6"/>
+            <text x="355" y="20" fill="#bef264" font-size="11" font-weight="bold" text-anchor="middle">PRECISION VOLTAGE DIVIDER &amp; ESD CLAMP SCHEMATIC TOPOLOGY (TYPICAL 1 OF 5)</text>
+
+            <!-- Schematic of single channel -->
+            <g transform="translate(40, 30)">
+                <!-- 3.3V Power rail -->
+                <line x1="0" y1="15" x2="60" y2="15" stroke="#3b82f6" stroke-width="2"/>
+                <text x="0" y="10" fill="#3b82f6" font-size="9" font-weight="bold">+3V3_LOGIC</text>
+
+                <!-- FSR Sensor (Variable Resistance) -->
+                <line x1="60" y1="15" x2="60" y2="35" stroke="#3b82f6" stroke-width="2"/>
+                <g transform="translate(60, 45)">
+                    <rect x="-15" y="-10" width="30" height="20" fill="#1e293b" stroke="#84cc16" stroke-width="1.5"/>
+                    <line x1="-20" y1="15" x2="20" y2="-15" stroke="#84cc16" stroke-width="1.5" marker-end="url(#arrowHead)"/>
+                    <text x="20" y="3" fill="#bef264" font-size="8" font-weight="bold">FSR 402</text>
+                    <text x="20" y="14" fill="#94a3b8" font-size="7">0.2N - 20N</text>
+                </g>
+                <line x1="60" y1="55" x2="60" y2="75" stroke="#84cc16" stroke-width="2"/>
+                <circle cx="60" cy="75" r="4" fill="#84cc16"/>
+
+                <!-- Precision Pull-Down Resistor R_div -->
+                <line x1="60" y1="75" x2="60" y2="90" stroke="#84cc16" stroke-width="2"/>
+                <g transform="translate(60, 98)">
+                    <rect x="-10" y="-8" width="20" height="16" fill="#1e293b" stroke="#bef264" stroke-width="1.5"/>
+                    <text x="16" y="3" fill="#bef264" font-size="8" font-weight="bold">R: 10.0k 0.1%</text>
+                    <text x="16" y="12" fill="#94a3b8" font-size="7">25 ppm/°C Metal Film</text>
+                </g>
+                <line x1="60" y1="106" x2="60" y2="120" stroke="#64748b" stroke-width="2"/>
+                <!-- Ground symbol -->
+                <line x1="50" y1="120" x2="70" y2="120" stroke="#64748b" stroke-width="2"/>
+                <line x1="54" y1="124" x2="66" y2="124" stroke="#64748b" stroke-width="1.5"/>
+                <line x1="58" y1="128" x2="62" y2="128" stroke="#64748b" stroke-width="1"/>
+                <text x="75" y="124" fill="#64748b" font-size="7">GND_LOGIC</text>
+
+                <!-- Node Branch to RC Filter & TVS Clamp -->
+                <line x1="60" y1="75" x2="220" y2="75" stroke="#84cc16" stroke-width="2"/>
+
+                <!-- Filter Cap C (0.1uF) to GND -->
+                <g transform="translate(130, 75)">
+                    <line x1="0" y1="0" x2="0" y2="20" stroke="#84cc16" stroke-width="1.5"/>
+                    <line x1="-8" y1="20" x2="8" y2="20" stroke="#bef264" stroke-width="2"/>
+                    <line x1="-8" y1="26" x2="8" y2="26" stroke="#bef264" stroke-width="2"/>
+                    <line x1="0" y1="26" x2="0" y2="45" stroke="#64748b" stroke-width="1.5"/>
+                    <text x="12" y="24" fill="#bef264" font-size="8">C: 0.1µF</text>
+                    <text x="12" y="34" fill="#94a3b8" font-size="7">fc = 318 Hz</text>
+                </g>
+
+                <!-- TVS Diode SP3002 to GND/3.3V -->
+                <g transform="translate(200, 75)">
+                    <line x1="0" y1="0" x2="0" y2="18" stroke="#84cc16" stroke-width="1.5"/>
+                    <polygon points="0,18 -6,26 6,26" fill="#1e293b" stroke="#f87171" stroke-width="1.5"/>
+                    <polygon points="0,34 -6,26 6,26" fill="#1e293b" stroke="#f87171" stroke-width="1.5"/>
+                    <line x1="0" y1="34" x2="0" y2="45" stroke="#64748b" stroke-width="1.5"/>
+                    <text x="10" y="26" fill="#f87171" font-size="8">TVS SP3002</text>
+                    <text x="10" y="36" fill="#94a3b8" font-size="7">±15kV ESD</text>
+                </g>
+
+                <!-- Output Signal line to ESP32 ADC1 -->
+                <line x1="220" y1="75" x2="340" y2="75" stroke="#84cc16" stroke-width="2" marker-end="url(#arrowHead)"/>
+                <text x="350" y="79" fill="#bef264" font-size="9" font-weight="bold">To ESP32 ADC1 (GPIO 32-36)</text>
+            </g>
+        </g>
+
+        <!-- 5 Distal Phalanx Channels (J16 to J20) -->
+        <!-- CH 1: Thumb -->
+        <g transform="translate(25, 220)">
+            <rect x="0" y="0" width="710" height="130" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="20" y="22" fill="#bef264" font-size="11" font-weight="bold">FSR CHANNEL 1: THUMB DISTAL PAD (J16 / FSR1)</text>
+            <text x="20" y="38" fill="#cbd5e1" font-size="9">Connector: 2-Pin Molex PicoBlade (1.25mm Pitch) | Wire: AWG 26 Ultra-Flex Silicone</text>
+            <text x="20" y="54" fill="#94a3b8" font-size="9">Components: R1 (10.0kΩ 0.1% 25ppm) + C7 (0.1µF X7R Ceramic) + TVS1 (SP3002-04UTG)</text>
+            <text x="20" y="70" fill="#94a3b8" font-size="9">Routing: Pin 1 -&gt; +3V3_LOGIC | Pin 2 -&gt; R1 Divider Node -&gt; Low-Pass Filter -&gt; TVS Clamp</text>
+            <rect x="520" y="15" width="170" height="35" fill="#1e1b4b" stroke="#84cc16" stroke-width="1" rx="3"/>
+            <text x="605" y="30" fill="#bef264" font-size="10" font-weight="bold" text-anchor="middle">ESP32 GPIO 32</text>
+            <text x="605" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">ADC1_CH4 (Thumb Force)</text>
+            <text x="20" y="95" fill="#f87171" font-size="9" font-weight="bold">Hardware Fault Diagnostics: Disconnect &lt; 10 counts (0.01V) | Crushed Sensor &#8805; 4090 counts (3.29V)</text>
+            <text x="20" y="112" fill="#4ade80" font-size="9">Dynamic Force Ceiling: Autonomous grasp slip backoff triggered at &gt; 350 grams force</text>
+        </g>
+
+        <!-- CH 2: Index -->
+        <g transform="translate(25, 365)">
+            <rect x="0" y="0" width="710" height="130" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="20" y="22" fill="#bef264" font-size="11" font-weight="bold">FSR CHANNEL 2: INDEX DISTAL PAD (J17 / FSR2)</text>
+            <text x="20" y="38" fill="#cbd5e1" font-size="9">Connector: 2-Pin Molex PicoBlade (1.25mm Pitch) | Wire: AWG 26 Ultra-Flex Silicone</text>
+            <text x="20" y="54" fill="#94a3b8" font-size="9">Components: R2 (10.0kΩ 0.1% 25ppm) + C8 (0.1µF X7R Ceramic) + TVS2 (SP3002-04UTG)</text>
+            <text x="20" y="70" fill="#94a3b8" font-size="9">Routing: Pin 1 -&gt; +3V3_LOGIC | Pin 2 -&gt; R2 Divider Node -&gt; Low-Pass Filter -&gt; TVS Clamp</text>
+            <rect x="520" y="15" width="170" height="35" fill="#1e1b4b" stroke="#84cc16" stroke-width="1" rx="3"/>
+            <text x="605" y="30" fill="#bef264" font-size="10" font-weight="bold" text-anchor="middle">ESP32 GPIO 33</text>
+            <text x="605" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">ADC1_CH5 (Index Force)</text>
+            <text x="20" y="95" fill="#f87171" font-size="9" font-weight="bold">Hardware Fault Diagnostics: Disconnect &lt; 10 counts (0.01V) | Crushed Sensor &#8805; 4090 counts (3.29V)</text>
+            <text x="20" y="112" fill="#4ade80" font-size="9">Dynamic Force Ceiling: Autonomous grasp slip backoff triggered at &gt; 350 grams force</text>
+        </g>
+
+        <!-- CH 3: Middle -->
+        <g transform="translate(25, 510)">
+            <rect x="0" y="0" width="710" height="130" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="20" y="22" fill="#bef264" font-size="11" font-weight="bold">FSR CHANNEL 3: MIDDLE DISTAL PAD (J18 / FSR3)</text>
+            <text x="20" y="38" fill="#cbd5e1" font-size="9">Connector: 2-Pin Molex PicoBlade (1.25mm Pitch) | Wire: AWG 26 Ultra-Flex Silicone</text>
+            <text x="20" y="54" fill="#94a3b8" font-size="9">Components: R3 (10.0kΩ 0.1% 25ppm) + C9 (0.1µF X7R Ceramic) + TVS3 (SP3002-04UTG)</text>
+            <text x="20" y="70" fill="#94a3b8" font-size="9">Routing: Pin 1 -&gt; +3V3_LOGIC | Pin 2 -&gt; R3 Divider Node -&gt; Low-Pass Filter -&gt; TVS Clamp</text>
+            <rect x="520" y="15" width="170" height="35" fill="#1e1b4b" stroke="#84cc16" stroke-width="1" rx="3"/>
+            <text x="605" y="30" fill="#bef264" font-size="10" font-weight="bold" text-anchor="middle">ESP32 GPIO 34</text>
+            <text x="605" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">ADC1_CH6 (Middle Force)</text>
+            <text x="20" y="95" fill="#f87171" font-size="9" font-weight="bold">Hardware Fault Diagnostics: Disconnect &lt; 10 counts (0.01V) | Crushed Sensor &#8805; 4090 counts (3.29V)</text>
+            <text x="20" y="112" fill="#4ade80" font-size="9">Dynamic Force Ceiling: Autonomous grasp slip backoff triggered at &gt; 350 grams force</text>
+        </g>
+
+        <!-- CH 4: Ring -->
+        <g transform="translate(25, 655)">
+            <rect x="0" y="0" width="710" height="130" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="20" y="22" fill="#bef264" font-size="11" font-weight="bold">FSR CHANNEL 4: RING DISTAL PAD (J19 / FSR4)</text>
+            <text x="20" y="38" fill="#cbd5e1" font-size="9">Connector: 2-Pin Molex PicoBlade (1.25mm Pitch) | Wire: AWG 26 Ultra-Flex Silicone</text>
+            <text x="20" y="54" fill="#94a3b8" font-size="9">Components: R4 (10.0kΩ 0.1% 25ppm) + C10 (0.1µF X7R Ceramic) + TVS4 (SP3002-04UTG)</text>
+            <text x="20" y="70" fill="#94a3b8" font-size="9">Routing: Pin 1 -&gt; +3V3_LOGIC | Pin 2 -&gt; R4 Divider Node -&gt; Low-Pass Filter -&gt; TVS Clamp</text>
+            <rect x="520" y="15" width="170" height="35" fill="#1e1b4b" stroke="#84cc16" stroke-width="1" rx="3"/>
+            <text x="605" y="30" fill="#bef264" font-size="10" font-weight="bold" text-anchor="middle">ESP32 GPIO 35</text>
+            <text x="605" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">ADC1_CH7 (Ring Force)</text>
+            <text x="20" y="95" fill="#f87171" font-size="9" font-weight="bold">Hardware Fault Diagnostics: Disconnect &lt; 10 counts (0.01V) | Crushed Sensor &#8805; 4090 counts (3.29V)</text>
+            <text x="20" y="112" fill="#4ade80" font-size="9">Dynamic Force Ceiling: Autonomous grasp slip backoff triggered at &gt; 350 grams force</text>
+        </g>
+
+        <!-- CH 5: Little -->
+        <g transform="translate(25, 800)">
+            <rect x="0" y="0" width="710" height="130" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="20" y="22" fill="#bef264" font-size="11" font-weight="bold">FSR CHANNEL 5: LITTLE DISTAL PAD (J20 / FSR5)</text>
+            <text x="20" y="38" fill="#cbd5e1" font-size="9">Connector: 2-Pin Molex PicoBlade (1.25mm Pitch) | Wire: AWG 26 Ultra-Flex Silicone</text>
+            <text x="20" y="54" fill="#94a3b8" font-size="9">Components: R5 (10.0kΩ 0.1% 25ppm) + C11 (0.1µF X7R Ceramic) + TVS5 (SP3002-04UTG)</text>
+            <text x="20" y="70" fill="#94a3b8" font-size="9">Routing: Pin 1 -&gt; +3V3_LOGIC | Pin 2 -&gt; R5 Divider Node -&gt; Low-Pass Filter -&gt; TVS Clamp</text>
+            <rect x="520" y="15" width="170" height="35" fill="#1e1b4b" stroke="#84cc16" stroke-width="1" rx="3"/>
+            <text x="605" y="30" fill="#bef264" font-size="10" font-weight="bold" text-anchor="middle">ESP32 GPIO 36 (VP)</text>
+            <text x="605" y="44" fill="#94a3b8" font-size="8" text-anchor="middle">ADC1_CH0 (Little Force)</text>
+            <text x="20" y="95" fill="#f87171" font-size="9" font-weight="bold">Hardware Fault Diagnostics: Disconnect &lt; 10 counts (0.01V) | Crushed Sensor &#8805; 4090 counts (3.29V)</text>
+            <text x="20" y="112" fill="#4ade80" font-size="9">Dynamic Force Ceiling: Autonomous grasp slip backoff triggered at &gt; 350 grams force</text>
+        </g>
+    </g>
+    
+
+    <!-- ==================== SECTION 5: ENCODERS & TCA9548A ==================== -->
+    <g transform="translate(850, 940)">
+        <rect x="0" y="0" width="1020" height="980" fill="url(#icCard)" stroke="#10b981" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="1020" height="38" fill="#065f46" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">5. CLOSED-LOOP ROTARY ENCODERS: TCA9548A MULTIPLEXER &amp; 4x AS5600</text>
+        <text x="850" y="25" fill="#a7f3d0" font-size="12" font-weight="bold">I2C BUS 0x71</text>
+
+        <!-- TCA9548A 8-Channel I2C Switch U4 -->
+        <g transform="translate(30, 60)">
+            <rect x="0" y="0" width="380" height="520" fill="#0f172a" stroke="#10b981" stroke-width="2" rx="6"/>
+            <rect x="0" y="0" width="380" height="30" fill="#064e3b" rx="6 6 0 0"/>
+            <text x="190" y="20" fill="#a7f3d0" font-size="12" font-weight="bold" text-anchor="middle">U4: TCA9548APWR I2C MULTIPLEXER</text>
+            <text x="190" y="46" fill="#34d399" font-size="10" text-anchor="middle">Base I2C Address: 0x71 (A0 strapped to 3.3V)</text>
+            <text x="190" y="60" fill="#94a3b8" font-size="9" text-anchor="middle">Prevents All-Call Clash with PCA9685 | 400kHz Fast-Mode</text>
+
+            <!-- Upstream & Control Pins -->
+            <g transform="translate(20, 80)">
+                <circle cx="0" cy="20" r="4" fill="#3b82f6"/>
+                <text x="12" y="24" fill="#3b82f6" font-size="10" font-weight="bold">Pin 24: VDD (+3V3_LOGIC)</text>
+                <circle cx="0" cy="45" r="4" fill="#64748b"/>
+                <text x="12" y="49" fill="#94a3b8" font-size="10">Pin 12: GND (GND_LOGIC)</text>
+
+                <!-- Jetson I2C Bus 7 Connections -->
+                <circle cx="0" cy="80" r="4" fill="#10b981"/>
+                <text x="12" y="84" fill="#4ade80" font-size="10" font-weight="bold">Pin 22: SCL (Jetson I2C-7)</text>
+                <circle cx="0" cy="105" r="4" fill="#eab308"/>
+                <text x="12" y="109" fill="#fde047" font-size="10" font-weight="bold">Pin 23: SDA (Jetson I2C-7)</text>
+
+                <!-- Address Strapping Block -->
+                <rect x="0" y="130" width="160" height="85" fill="#18181b" stroke="#334155" stroke-width="1" rx="4"/>
+                <text x="80" y="148" fill="#cbd5e1" font-size="9" font-weight="bold" text-anchor="middle">ADDRESS STRAPPING:</text>
+                <text x="80" y="164" fill="#38bdf8" font-size="8" font-weight="bold" text-anchor="middle">A0 (Pin 1) -&gt; 3.3V (HIGH)</text>
+                <text x="80" y="178" fill="#94a3b8" font-size="8" text-anchor="middle">A1 (Pin 2) -&gt; GND (LOW)</text>
+                <text x="80" y="192" fill="#94a3b8" font-size="8" text-anchor="middle">A2 (Pin 3) -&gt; GND (LOW)</text>
+                <text x="80" y="206" fill="#4ade80" font-size="8" font-weight="bold" text-anchor="middle">Result: Address 0x71</text>
+
+                <circle cx="0" cy="235" r="4" fill="#3b82f6"/>
+                <text x="12" y="239" fill="#3b82f6" font-size="9">Pin 4: /RESET -&gt; 3.3V</text>
+                <text x="12" y="258" fill="#94a3b8" font-size="8">Decoupling: C12 (0.1µF X7R)</text>
+            </g>
+
+            <!-- Downstream I2C Switch Channels (SC0/SD0 to SC3/SD3) -->
+            <g transform="translate(360, 80)">
+                <!-- CH 0 -->
+                <circle cx="0" cy="25" r="4" fill="#10b981"/>
+                <text x="-12" y="29" fill="#a7f3d0" font-size="10" font-weight="bold" text-anchor="end">SD0/SC0: CH 0 (Tendon Spool)</text>
+
+                <!-- CH 1 -->
+                <circle cx="0" cy="115" r="4" fill="#10b981"/>
+                <text x="-12" y="119" fill="#a7f3d0" font-size="10" font-weight="bold" text-anchor="end">SD1/SC1: CH 1 (Wrist Pitch)</text>
+
+                <!-- CH 2 -->
+                <circle cx="0" cy="205" r="4" fill="#10b981"/>
+                <text x="-12" y="209" fill="#a7f3d0" font-size="10" font-weight="bold" text-anchor="end">SD2/SC2: CH 2 (Wrist Roll)</text>
+
+                <!-- CH 3 -->
+                <circle cx="0" cy="295" r="4" fill="#10b981"/>
+                <text x="-12" y="299" fill="#a7f3d0" font-size="10" font-weight="bold" text-anchor="end">SD3/SC3: CH 3 (Forearm Rot)</text>
+
+                <!-- Spares -->
+                <text x="-12" y="380" fill="#64748b" font-size="9" text-anchor="end">CH 4-7: Reserved Spares</text>
+            </g>
+
+            <!-- Pull-Up Resistor Arrays RP1, RP2 -->
+            <rect x="20" y="390" width="340" height="110" fill="#111827" stroke="#334155" stroke-width="1" rx="4"/>
+            <text x="190" y="410" fill="#fde047" font-size="10" font-weight="bold" text-anchor="middle">RP1, RP2: 4x4.7kΩ I2C BUS PULL-UP RESISTOR ARRAYS</text>
+            <text x="30" y="430" fill="#cbd5e1" font-size="9">• RP1: 4x 4.7kΩ pull-up network tying SD0..SD3 to +3V3_LOGIC.</text>
+            <text x="30" y="446" fill="#cbd5e1" font-size="9">• RP2: 4x 4.7kΩ pull-up network tying SC0..SC3 to +3V3_LOGIC.</text>
+            <text x="30" y="462" fill="#cbd5e1" font-size="9">• Ensures crisp rise times (&lt; 300 ns) across high-flex joint harness.</text>
+            <text x="30" y="478" fill="#4ade80" font-size="9">• Cable shield grounded at TCA9548A ONLY (prevents ground loops).</text>
+        </g>
+
+        <!-- 4x AS5600 12-Bit Magnetic Encoders (S1 to S4) -->
+        <g transform="translate(460, 60)">
+            <!-- S1: Tendon Spool (CH 0) -->
+            <g transform="translate(0, 0)">
+                <rect x="0" y="0" width="530" height="85" fill="#18181b" stroke="#10b981" stroke-width="1.5" rx="4"/>
+                <text x="15" y="20" fill="#34d399" font-size="11" font-weight="bold">ENC_FING / S1: TENDON SPOOL ENCODER (AS5600 @ 0x36)</text>
+                <text x="15" y="36" fill="#cbd5e1" font-size="9">Channel: TCA9548A Mux CH 0 | Connector: J10 (4-Pin JST-SH 1.0mm Pitch)</text>
+                <text x="15" y="52" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3), Pin 2 (GND_LOGIC), Pin 3 (SCL_CH0), Pin 4 (SDA_CH0)</text>
+                <text x="15" y="68" fill="#38bdf8" font-size="9">Magnet: Diametric N52 Disc (6x2.5mm) | Resolution: 12-Bit (4096 counts/rev)</text>
+                <rect x="420" y="15" width="95" height="55" fill="#0f172a" stroke="#10b981" stroke-width="1" rx="3"/>
+                <text x="467" y="35" fill="#4ade80" font-size="10" font-weight="bold" text-anchor="middle">AS5600</text>
+                <text x="467" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Address 0x36</text>
+            </g>
+
+            <!-- S2: Wrist Flex Pitch (CH 1) -->
+            <g transform="translate(0, 95)">
+                <rect x="0" y="0" width="530" height="85" fill="#18181b" stroke="#10b981" stroke-width="1.5" rx="4"/>
+                <text x="15" y="20" fill="#34d399" font-size="11" font-weight="bold">ENC_WFLEX / S2: WRIST PITCH ENCODER (AS5600 @ 0x36)</text>
+                <text x="15" y="36" fill="#cbd5e1" font-size="9">Channel: TCA9548A Mux CH 1 | Connector: J11 (4-Pin JST-SH 1.0mm Pitch)</text>
+                <text x="15" y="52" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3), Pin 2 (GND_LOGIC), Pin 3 (SCL_CH1), Pin 4 (SDA_CH1)</text>
+                <text x="15" y="68" fill="#38bdf8" font-size="9">Magnet: Diametric N52 Disc (6x2.5mm) | Air Gap: 1.0 mm Nominal</text>
+                <rect x="420" y="15" width="95" height="55" fill="#0f172a" stroke="#10b981" stroke-width="1" rx="3"/>
+                <text x="467" y="35" fill="#4ade80" font-size="10" font-weight="bold" text-anchor="middle">AS5600</text>
+                <text x="467" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Address 0x36</text>
+            </g>
+
+            <!-- S3: Wrist Rotate Roll (CH 2) -->
+            <g transform="translate(0, 190)">
+                <rect x="0" y="0" width="530" height="85" fill="#18181b" stroke="#10b981" stroke-width="1.5" rx="4"/>
+                <text x="15" y="20" fill="#34d399" font-size="11" font-weight="bold">ENC_WROT / S3: WRIST ROLL ENCODER (AS5600 @ 0x36)</text>
+                <text x="15" y="36" fill="#cbd5e1" font-size="9">Channel: TCA9548A Mux CH 2 | Connector: J12 (4-Pin JST-SH 1.0mm Pitch)</text>
+                <text x="15" y="52" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3), Pin 2 (GND_LOGIC), Pin 3 (SCL_CH2), Pin 4 (SDA_CH2)</text>
+                <text x="15" y="68" fill="#38bdf8" font-size="9">Magnet: Diametric N52 Disc (6x2.5mm) | Gimbal Flex Bend Radius &gt; 15mm</text>
+                <rect x="420" y="15" width="95" height="55" fill="#0f172a" stroke="#10b981" stroke-width="1" rx="3"/>
+                <text x="467" y="35" fill="#4ade80" font-size="10" font-weight="bold" text-anchor="middle">AS5600</text>
+                <text x="467" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Address 0x36</text>
+            </g>
+
+            <!-- S4: Forearm Rotation (CH 3) -->
+            <g transform="translate(0, 285)">
+                <rect x="0" y="0" width="530" height="85" fill="#18181b" stroke="#10b981" stroke-width="1.5" rx="4"/>
+                <text x="15" y="20" fill="#34d399" font-size="11" font-weight="bold">ENC_FARM / S4: FOREARM ROTATION ENCODER (AS5600 @ 0x36)</text>
+                <text x="15" y="36" fill="#cbd5e1" font-size="9">Channel: TCA9548A Mux CH 3 | Connector: J13 (4-Pin JST-SH 1.0mm Pitch)</text>
+                <text x="15" y="52" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3), Pin 2 (GND_LOGIC), Pin 3 (SCL_CH3), Pin 4 (SDA_CH3)</text>
+                <text x="15" y="68" fill="#38bdf8" font-size="9">Magnet: Diametric N52 Disc (6x2.5mm) | Direct Joint Shaft Tracking</text>
+                <rect x="420" y="15" width="95" height="55" fill="#0f172a" stroke="#10b981" stroke-width="1" rx="3"/>
+                <text x="467" y="35" fill="#4ade80" font-size="10" font-weight="bold" text-anchor="middle">AS5600</text>
+                <text x="467" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Address 0x36</text>
+            </g>
+        </g>
+
+        <!-- Closed-Loop Position Verification Rules -->
+        <g transform="translate(30, 600)">
+            <rect x="0" y="0" width="960" height="350" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="6"/>
+            <rect x="0" y="0" width="960" height="28" fill="#1e293b" rx="6 6 0 0"/>
+            <text x="20" y="19" fill="#4ade80" font-size="12" font-weight="bold">CLOSED-LOOP FEEDBACK MONITORING &amp; JOINT SAFETY ENFORCEMENT</text>
+
+            <g transform="translate(20, 45)">
+                <text x="0" y="0" fill="#f8fafc" font-size="11" font-weight="bold">1. CLOSED-LOOP STALL DETECTION ALGORITHM:</text>
+                <text x="15" y="18" fill="#cbd5e1" font-size="10">• Continuously tracks tracking error: e_pos = |theta_cmd - theta_meas|.</text>
+                <text x="15" y="34" fill="#cbd5e1" font-size="10">• If e_pos &gt; 12.0° persists for &gt; 350 ms, safety controller flags STALL FAULT and relaxes tendon tension.</text>
+                <text x="15" y="50" fill="#cbd5e1" font-size="10">• Prevents mechanical gear stripping, tendon snapping, and motor thermal burnout under object jamming.</text>
+
+                <text x="0" y="80" fill="#f8fafc" font-size="11" font-weight="bold">2. UNCOMMANDED MOTION &amp; DRIFT SUPERVISION:</text>
+                <text x="15" y="98" fill="#cbd5e1" font-size="10">• In HOLD or STATIC GRASP mode, joint velocity omega = d(theta)/dt is computed at 100 Hz.</text>
+                <text x="15" y="114" fill="#cbd5e1" font-size="10">• If omega &gt; 20.0 deg/s while hold is asserted, flags UNCOMMANDED MOTION FAULT and alerts operator.</text>
+
+                <text x="0" y="145" fill="#f8fafc" font-size="11" font-weight="bold">3. HARDWARE BUS RECOVERY &amp; CLOCK STRETCHING MITIGATION:</text>
+                <text x="15" y="163" fill="#cbd5e1" font-size="10">• I2C Bus Lockup Recovery: If SDA is held LOW by a hung slave, Jetson bit-bangs 9 clock pulses on SCL.</text>
+                <text x="15" y="179" fill="#cbd5e1" font-size="10">• Redundant switch avoidance: HAL caches active multiplexer channel to avoid extraneous I2C bus traffic.</text>
+                <text x="15" y="195" fill="#cbd5e1" font-size="10">• Total 4-channel scan latency: 0.82 ms at 400 kHz Fast-Mode.</text>
+
+                <text x="0" y="225" fill="#f8fafc" font-size="11" font-weight="bold">4. PHYSICAL HARNESS INTEGRITY:</text>
+                <text x="15" y="243" fill="#cbd5e1" font-size="10">• Shielded twisted pair (STP) wiring with 30 twists/meter prevents inductive crosstalk from 6V servo rails.</text>
+                <text x="15" y="259" fill="#cbd5e1" font-size="10">• JST-SH positive latch connectors rated for &gt; 200,000 wrist gimbal articulation cycles.</text>
+            </g>
+        </g>
+    </g>
+    
+
+    <!-- ==================== SECTION 6: BIOMEDICAL ISOLATED EMG ==================== -->
+    <g transform="translate(1900, 940)">
+        <rect x="0" y="0" width="1440" height="980" fill="url(#icCard)" stroke="#06b6d4" stroke-width="2" rx="8" filter="url(#shadow)"/>
+        <rect x="0" y="0" width="1440" height="38" fill="#155e75" rx="8 8 0 0"/>
+        <text x="18" y="25" fill="#ffffff" font-size="15" font-weight="bold">6. BIOMEDICAL EMG INTERFACE &amp; GALVANIC ISOLATION BARRIER (IEC 60601-1 TYPE BF)</text>
+        <text x="1230" y="25" fill="#cffafe" font-size="12" font-weight="bold">ZONE 3: ISOLATED</text>
+
+        <!-- PHYSICAL GALVANIC ISOLATION BARRIER MOAT REPRESENTATION -->
+        <g transform="translate(30, 55)">
+            <rect x="0" y="0" width="1380" height="895" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="8,6" rx="6"/>
+            <!-- Moat Barrier Center Strip -->
+            <rect x="360" y="0" width="70" height="895" fill="#450a0a" opacity="0.35"/>
+            <line x1="395" y1="0" x2="395" y2="895" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,4"/>
+            <text x="395" y="450" fill="#fca5a5" font-size="12" font-weight="bold" transform="rotate(-90 395 450)" text-anchor="middle" letter-spacing="2">
+                1.5 kV GALVANIC ISOLATION BARRIER MOAT (CREEPAGE &gt; 5.5mm | ZERO COPPER)
+            </text>
+        </g>
+
+        <!-- Non-Isolated Side: Supplies & Logic -->
+        <g transform="translate(50, 75)">
+            <text x="0" y="20" fill="#38bdf8" font-size="12" font-weight="bold">NON-ISOLATED LOGIC DOMAIN (ZONE 2)</text>
+            <text x="0" y="38" fill="#94a3b8" font-size="10">Connected to System Logic Ground (GND_LOGIC)</text>
+
+            <!-- Mornsun B0505S-1WR3 Isolated DC-DC (U7) -->
+            <g transform="translate(15, 60)">
+                <rect x="0" y="0" width="310" height="150" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5" rx="4"/>
+                <text x="155" y="22" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">U7: MORNSUN B0505S-1WR3</text>
+                <text x="155" y="38" fill="#cbd5e1" font-size="9" text-anchor="middle">1W Medical-Grade Isolated DC-DC Converter</text>
+
+                <!-- Input Pins (Non-isolated) -->
+                <circle cx="10" cy="70" r="4" fill="#06b6d4"/>
+                <text x="22" y="74" fill="#06b6d4" font-size="10" font-weight="bold">Pin 1: Vin+ (+5V_LOGIC)</text>
+                <circle cx="10" cy="110" r="4" fill="#64748b"/>
+                <text x="22" y="114" fill="#94a3b8" font-size="10">Pin 2: Vin- (GND_LOGIC)</text>
+
+                <!-- Output Pins (Isolated) -->
+                <circle cx="300" cy="70" r="4" fill="#14b8a6"/>
+                <text x="288" y="74" fill="#2dd4bf" font-size="10" font-weight="bold" text-anchor="end">Pin 4: Vout+ (+5V_ISO)</text>
+                <circle cx="300" cy="110" r="4" fill="#c084fc"/>
+                <text x="288" y="114" fill="#e9d5ff" font-size="10" text-anchor="end">Pin 3: Vout- (GND_ISO)</text>
+
+                <text x="155" y="140" fill="#f87171" font-size="9" font-weight="bold" text-anchor="middle">1500 VDC Isolation | C_barrier &lt; 2.2 pF</text>
+            </g>
+
+            <!-- TI ISO1540DR Bidirectional I2C Digital Isolator (U6) -->
+            <g transform="translate(15, 240)">
+                <rect x="0" y="0" width="310" height="170" fill="#0f172a" stroke="#06b6d4" stroke-width="2" rx="4"/>
+                <text x="155" y="22" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">U6: TI ISO1540DR I2C ISOLATOR</text>
+                <text x="155" y="38" fill="#cbd5e1" font-size="9" text-anchor="middle">2.5 kVrms Bidirectional Digital Bus Isolator</text>
+
+                <!-- Side 1: Logic Domain -->
+                <text x="15" y="60" fill="#38bdf8" font-size="10" font-weight="bold">SIDE 1 (ESP32 Master):</text>
+                <circle cx="10" cy="80" r="4" fill="#3b82f6"/>
+                <text x="22" y="84" fill="#3b82f6" font-size="9">Pin 1: VCC1 (+3V3_ESP)</text>
+                <circle cx="10" cy="105" r="4" fill="#64748b"/>
+                <text x="22" y="109" fill="#94a3b8" font-size="9">Pin 4: GND1 (GND_LOGIC)</text>
+                <circle cx="10" cy="130" r="4" fill="#10b981"/>
+                <text x="22" y="134" fill="#4ade80" font-size="9">Pin 2: SDA1 (ESP32 GPIO21)</text>
+                <circle cx="10" cy="155" r="4" fill="#eab308"/>
+                <text x="22" y="159" fill="#fde047" font-size="9">Pin 3: SCL1 (ESP32 GPIO22)</text>
+
+                <!-- Side 2: Isolated Domain -->
+                <text x="295" y="60" fill="#14b8a6" font-size="10" font-weight="bold" text-anchor="end">SIDE 2 (Isolated):</text>
+                <circle cx="300" cy="80" r="4" fill="#14b8a6"/>
+                <text x="288" y="84" fill="#2dd4bf" font-size="9" text-anchor="end">Pin 8: VCC2 (+3V3_ISO)</text>
+                <circle cx="300" cy="105" r="4" fill="#c084fc"/>
+                <text x="288" y="109" fill="#e9d5ff" font-size="9" text-anchor="end">Pin 5: GND2 (GND_ISO)</text>
+                <circle cx="300" cy="130" r="4" fill="#10b981"/>
+                <text x="288" y="134" fill="#4ade80" font-size="9" text-anchor="end">Pin 7: SDA2 (ADS1115)</text>
+                <circle cx="300" cy="155" r="4" fill="#eab308"/>
+                <text x="288" y="159" fill="#fde047" font-size="9" text-anchor="end">Pin 6: SCL2 (ADS1115)</text>
+            </g>
+
+            <!-- Biomedical Safety Compliance Callout -->
+            <g transform="translate(15, 435)">
+                <rect x="0" y="0" width="310" height="240" fill="#18181b" stroke="#eab308" stroke-width="1.5" rx="4"/>
+                <text x="155" y="22" fill="#fde047" font-size="11" font-weight="bold" text-anchor="middle">IEC 60601-1 TYPE BF MANDATES</text>
+                <g transform="translate(15, 45)">
+                    <text x="0" y="0" fill="#cbd5e1" font-size="9">• Dielectric Test: 1500 VDC for 60s.</text>
+                    <text x="0" y="18" fill="#cbd5e1" font-size="9">• Patient Leakage: &lt; 2.0 µA (Limit 100µA).</text>
+                    <text x="0" y="36" fill="#cbd5e1" font-size="9">• Creepage Gap: 5.5 mm on raw PCB.</text>
+                    <text x="0" y="54" fill="#cbd5e1" font-size="9">• Clearance Gap: 4.8 mm air distance.</text>
+                    <text x="0" y="72" fill="#cbd5e1" font-size="9">• Barrier Capacitance: &#8804; 2.2 pF.</text>
+                    <text x="0" y="90" fill="#f87171" font-size="9" font-weight="bold">• Fault Isolation: High-voltage battery</text>
+                    <text x="10" y="106" fill="#f87171" font-size="9">short CANNOT conduct to user skin.</text>
+                    <text x="0" y="130" fill="#4ade80" font-size="9" font-weight="bold">• User intent supremacy guaranteed.</text>
+                </g>
+            </g>
+        </g>
+
+        <!-- Isolated Patient Domain: LDO, ADS1115, MyoWare Sensors -->
+        <g transform="translate(480, 75)">
+            <text x="0" y="20" fill="#14b8a6" font-size="12" font-weight="bold">ISOLATED PATIENT CONTACT DOMAIN (ZONE 3 — FLOATING BODY BF)</text>
+            <text x="0" y="38" fill="#cbd5e1" font-size="10">Connected to Galvanically Isolated Ground (GND_ISO) | Zero Direct Current to Battery</text>
+
+            <!-- Ultra-Low Noise Isolated LDO U9: TI TPS79333 -->
+            <g transform="translate(15, 60)">
+                <rect x="0" y="0" width="260" height="90" fill="#0f172a" stroke="#14b8a6" stroke-width="1.5" rx="4"/>
+                <text x="130" y="18" fill="#2dd4bf" font-size="10" font-weight="bold" text-anchor="middle">U9: TI TPS79333 LDO</text>
+                <text x="130" y="32" fill="#94a3b8" font-size="8" text-anchor="middle">Ultra-Low-Noise 200mA LDO (32µVrms)</text>
+                <circle cx="10" cy="50" r="3" fill="#14b8a6"/>
+                <text x="18" y="54" fill="#2dd4bf" font-size="9">IN: +5V_ISO (from U7)</text>
+                <circle cx="250" cy="50" r="3" fill="#14b8a6"/>
+                <text x="242" y="54" fill="#2dd4bf" font-size="9" text-anchor="end">OUT: +3V3_ISO</text>
+                <text x="130" y="75" fill="#c084fc" font-size="8" text-anchor="middle">GND_ISO (Floating)</text>
+            </g>
+
+            <!-- Isolated ADS1115 16-Bit ADC U5 -->
+            <g transform="translate(300, 60)">
+                <rect x="0" y="0" width="340" height="230" fill="#0f172a" stroke="#06b6d4" stroke-width="2" rx="6"/>
+                <rect x="0" y="0" width="340" height="28" fill="#0e7490" rx="6 6 0 0"/>
+                <text x="170" y="19" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">U5: TI ADS1115IDGS (16-BIT ADC)</text>
+                <text x="170" y="42" fill="#67e8f9" font-size="9" text-anchor="middle">Address 0x48 (ADDR tied to GND_ISO) | 860 SPS</text>
+
+                <!-- Left Pins: Power & I2C -->
+                <g transform="translate(15, 55)">
+                    <circle cx="0" cy="15" r="4" fill="#14b8a6"/>
+                    <text x="12" y="19" fill="#2dd4bf" font-size="9" font-weight="bold">Pin 8: VDD (+3V3_ISO)</text>
+                    <circle cx="0" cy="40" r="4" fill="#c084fc"/>
+                    <text x="12" y="44" fill="#e9d5ff" font-size="9">Pin 3: GND (GND_ISO)</text>
+                    <circle cx="0" cy="65" r="4" fill="#eab308"/>
+                    <text x="12" y="69" fill="#fde047" font-size="9" font-weight="bold">Pin 10: SCL (from U6)</text>
+                    <circle cx="0" cy="90" r="4" fill="#10b981"/>
+                    <text x="12" y="94" fill="#4ade80" font-size="9" font-weight="bold">Pin 9: SDA (from U6)</text>
+                    <circle cx="0" cy="115" r="4" fill="#c084fc"/>
+                    <text x="12" y="119" fill="#e9d5ff" font-size="9">Pin 1: ADDR -&gt; GND_ISO</text>
+                </g>
+
+                <!-- Right Pins: Analog Inputs AIN0-AIN3 -->
+                <g transform="translate(325, 55)">
+                    <circle cx="0" cy="20" r="4" fill="#38bdf8"/>
+                    <text x="-12" y="24" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="end">Pin 4: AIN0 (Flexor EMG)</text>
+                    <circle cx="0" cy="50" r="4" fill="#38bdf8"/>
+                    <text x="-12" y="54" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="end">Pin 5: AIN1 (Extensor EMG)</text>
+                    <circle cx="0" cy="80" r="4" fill="#a78bfa"/>
+                    <text x="-12" y="84" fill="#a78bfa" font-size="9" text-anchor="end">Pin 6: AIN2 (Aux EEG)</text>
+                    <circle cx="0" cy="110" r="4" fill="#64748b"/>
+                    <text x="-12" y="114" fill="#94a3b8" font-size="9" text-anchor="end">Pin 7: AIN3 (Chassis Ref)</text>
+                </g>
+
+                <text x="170" y="200" fill="#cbd5e1" font-size="9" text-anchor="middle">Differential / Single-Ended Ingestion | Internal 2.048V Ref</text>
+            </g>
+
+            <!-- MYOWARE 2.0 SENSORS & PATIENT FOREARM CONTACT (J14, J15, J21) -->
+            <g transform="translate(15, 310)">
+                <!-- J14: Flexor Carpi Radialis -->
+                <g transform="translate(0, 0)">
+                    <rect x="0" y="0" width="625" height="110" fill="#18181b" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
+                    <text x="15" y="20" fill="#38bdf8" font-size="11" font-weight="bold">J14 / EMG1: MYOWARE 2.0 MUSCLE SENSOR #1 (FLEXOR CARPI RADIALIS)</text>
+                    <text x="15" y="38" fill="#cbd5e1" font-size="9">Biological Role: HAND CLOSE INTENT | Envelope Filter: 15 Hz Rectified &amp; Integrated</text>
+                    <text x="15" y="54" fill="#94a3b8" font-size="9">Connector: 3-Pin JST-XH (2.54mm Pitch) | Cable: Shielded 3-Conductor Medical Cable</text>
+                    <text x="15" y="70" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3_ISO), Pin 2 (GND_ISO), Pin 3 (EMG1_ENV Output to ADS1115 A0)</text>
+                    <rect x="500" y="15" width="110" height="40" fill="#1e1b4b" stroke="#38bdf8" stroke-width="1" rx="3"/>
+                    <text x="555" y="32" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">CLOSE INTENT</text>
+                    <text x="555" y="46" fill="#94a3b8" font-size="8" text-anchor="middle">Threshold: 0.55V</text>
+                    <text x="15" y="94" fill="#4ade80" font-size="9">Patient Contact: Ag/AgCl Gel Snap Electrodes on Mid-Forearm Muscle Belly</text>
+                </g>
+
+                <!-- J15: Extensor Digitorum -->
+                <g transform="translate(0, 125)">
+                    <rect x="0" y="0" width="625" height="110" fill="#18181b" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
+                    <text x="15" y="20" fill="#38bdf8" font-size="11" font-weight="bold">J15 / EMG2: MYOWARE 2.0 MUSCLE SENSOR #2 (EXTENSOR DIGITORUM)</text>
+                    <text x="15" y="38" fill="#fca5a5" font-size="9" font-weight="bold">Biological Role: UNCONDITIONAL HAND OPEN OVERRIDE (HIGH-PRIORITY SAFETY GATED)</text>
+                    <text x="15" y="54" fill="#94a3b8" font-size="9">Connector: 3-Pin JST-XH (2.54mm Pitch) | Cable: Shielded 3-Conductor Medical Cable</text>
+                    <text x="15" y="70" fill="#94a3b8" font-size="9">Pinout: Pin 1 (+3V3_ISO), Pin 2 (GND_ISO), Pin 3 (EMG2_ENV Output to ADS1115 A1)</text>
+                    <rect x="500" y="15" width="110" height="40" fill="#7f1d1d" stroke="#ef4444" stroke-width="1" rx="3"/>
+                    <text x="555" y="32" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">OPEN OVERRIDE</text>
+                    <text x="555" y="46" fill="#fecaca" font-size="8" text-anchor="middle">Threshold: 0.65V (&#8804;15ms)</text>
+                    <text x="15" y="94" fill="#4ade80" font-size="9">Safety Guarantee: Triggering Extensor Digitorum unconditionally opens hand within &#8804; 15 ms.</text>
+                </g>
+
+                <!-- J21: Auxiliary EEG / Cranial Input -->
+                <g transform="translate(0, 250)">
+                    <rect x="0" y="0" width="625" height="90" fill="#18181b" stroke="#a78bfa" stroke-width="1.5" rx="4"/>
+                    <text x="15" y="20" fill="#a78bfa" font-size="11" font-weight="bold">J21 / AUX: AUXILIARY CRANIAL / EEG ELECTRODE INPUT (RESERVED)</text>
+                    <text x="15" y="38" fill="#cbd5e1" font-size="9">Channel: ADS1115 Analog Input A2 | Connector: 3-Pin JST-XH (2.54mm Pitch)</text>
+                    <text x="15" y="54" fill="#94a3b8" font-size="9">Intended for future BCI (Brain-Computer Interface) intent expansion or sensory feedback.</text>
+                    <rect x="500" y="15" width="110" height="40" fill="#1e1b4b" stroke="#a78bfa" stroke-width="1" rx="3"/>
+                    <text x="555" y="32" fill="#c084fc" font-size="10" font-weight="bold" text-anchor="middle">AUX / BCI</text>
+                    <text x="555" y="46" fill="#94a3b8" font-size="8" text-anchor="middle">Analog AIN2</text>
+                    <text x="15" y="74" fill="#94a3b8" font-size="8">Fully protected behind the 1500 VDC galvanic isolation barrier.</text>
+                </g>
+            </g>
+        </g>
+    </g>
+    
+</svg>

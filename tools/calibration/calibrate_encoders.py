@@ -106,7 +106,13 @@ def main():
         i2c_bus = int(data.get("jetson", {}).get("i2c_bus", 7))
         mux = RealTCA9548A(bus_num=i2c_bus, address=mux_addr)
         if not mux.initialize():
-            print(f"ERROR: Failed to connect to TCA9548A multiplexer at 0x{mux_addr:02X}.")
+            err = getattr(mux, "last_error", "Device not responding")
+            print(f"ERROR: Failed to connect to TCA9548A multiplexer at 0x{mux_addr:02X} on /dev/i2c-{i2c_bus}: {err}")
+            print("DIAGNOSTIC CHECKS:")
+            print("  1. User permissions: sudo usermod -aG i2c $USER")
+            print("  2. Correct I2C bus: run 'i2cdetect -l' and check config/hardware.yaml")
+            print("  3. Wiring: Jetson Pin 17 (3.3V) -> TCA9548A VCC, Pins 3 & 5 -> SDA & SCL")
+            print("  4. Address strapping: A0, A1, A2 to GND = 0x70 (or A0 to 3.3V = 0x71)")
             sys.exit(1)
         as5600 = RealAS5600(mux=mux, bus_num=i2c_bus, address=0x36, joint_config=channels)
 

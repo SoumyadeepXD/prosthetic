@@ -110,15 +110,30 @@ def main():
 
     servos = data.get("servos", {})
 
+    hw_config_path = Path("config/hardware.yaml")
+    bus_num = 7
+    pca_addr = 0x40
+    if hw_config_path.exists():
+        with open(hw_config_path, "r") as f:
+            hw_data = yaml.safe_load(f) or {}
+            jetson_cfg = hw_data.get("jetson", {})
+            bus_num = int(jetson_cfg.get("i2c_bus", 7))
+            pca_addr = int(jetson_cfg.get("pca9685", {}).get("address", 0x40))
+
     if args.mock:
         from vapa.hal import MockPCA9685
         pca = MockPCA9685()
     else:
         from vapa.hal import RealPCA9685
-        pca = RealPCA9685(bus_num=7, address=0x40, frequency_hz=50)
+        pca = RealPCA9685(bus_num=bus_num, address=pca_addr, frequency_hz=50)
 
     if not pca.initialize():
-        print("ERROR: Failed to initialize PCA9685.")
+        err = getattr(pca, "last_error", "Device not responding")
+        print(f"ERROR: Failed to initialize PCA9685 at 0x{pca_addr:02X} on /dev/i2c-{bus_num}: {err}")
+        print("DIAGNOSTIC CHECKS:")
+        print("  1. User permissions: sudo usermod -aG i2c $USER (then re-login)")
+        print("  2. Correct I2C bus: run 'i2cdetect -l' and verify i2c_bus in config/hardware.yaml")
+        print("  3. Wiring: Jetson Pin 1 (3.3V) -> PCA9685 VCC, Pin 6 (GND) -> GND, Pins 3 & 5 -> SDA & SCL")
         sys.exit(1)
 
     # Backup configuration

@@ -197,6 +197,7 @@ class RealESPLink(AbstractESPLink):
         self._thread: Optional[threading.Thread] = None
         self._tx_seq = 0
         self._lock = threading.Lock()
+        self.last_error: Optional[str] = None
 
     def initialize(self) -> bool:
         try:
@@ -229,8 +230,9 @@ class RealESPLink(AbstractESPLink):
             self._thread = threading.Thread(target=self._rx_loop, daemon=True)
             self._thread.start()
             return True
-        except Exception:
+        except Exception as e:
             self._running = False
+            self.last_error = f"{type(e).__name__}: {e}"
             return False
 
     def close(self) -> None:

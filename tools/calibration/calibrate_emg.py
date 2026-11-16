@@ -105,9 +105,25 @@ def main():
 
     if not args.mock:
         from vapa.hal import RealESPLink
-        esp_link = RealESPLink(port="/dev/ttyTHS1", baudrate=115200)
+        hw_config_path = Path("config/hardware.yaml")
+        port = "/dev/ttyTHS1"
+        baud = 115200
+        if hw_config_path.exists():
+            with open(hw_config_path, "r") as f:
+                hw_data = yaml.safe_load(f) or {}
+                jetson_cfg = hw_data.get("jetson", {})
+                port = jetson_cfg.get("uart_port", "/dev/ttyTHS1")
+                baud = int(jetson_cfg.get("uart_baudrate", 115200))
+
+        esp_link = RealESPLink(port=port, baudrate=baud)
         if not esp_link.initialize():
-            print("ERROR: Failed to connect to ESP32 on /dev/ttyTHS1.")
+            err = getattr(esp_link, "last_error", "Serial port not opening")
+            print(f"ERROR: Failed to connect to ESP32 on {port} @ {baud} baud: {err}")
+            print("DIAGNOSTIC CHECKS:")
+            print("  1. User permissions: sudo usermod -aG dialout $USER")
+            print("  2. nvgetty collision: sudo systemctl stop nvgetty && sudo systemctl disable nvgetty")
+            print("  3. Cross-wiring: Jetson Pin 8 (TXD) -> ESP32 GPIO16 (RX2), Pin 10 (RXD) -> GPIO17 (TX2), Pin 9 -> GND")
+            print("  4. Is ESP32 powered on and flashed with firmware? (bash scripts/flash_esp32.sh)")
             sys.exit(1)
     else:
         from vapa.hal import MockESPLink

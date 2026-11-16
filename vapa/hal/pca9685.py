@@ -82,6 +82,7 @@ class RealPCA9685(AbstractPCA9685):
         self.frequency_hz = frequency_hz
         self._bus = None
         self._healthy = False
+        self.last_error: Optional[str] = None
 
     def initialize(self) -> bool:
         try:
@@ -103,8 +104,9 @@ class RealPCA9685(AbstractPCA9685):
             self.disable_all()
             self._healthy = True
             return True
-        except Exception:
+        except Exception as e:
             self._healthy = False
+            self.last_error = f"{type(e).__name__}: {e}"
             return False
 
     def close(self) -> None:

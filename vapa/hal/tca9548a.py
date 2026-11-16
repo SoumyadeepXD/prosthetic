@@ -53,6 +53,7 @@ class RealTCA9548A(AbstractTCA9548A):
         self.address = address
         self._bus = None
         self._healthy = False
+        self.last_error: Optional[str] = None
 
     def initialize(self) -> bool:
         try:
@@ -61,8 +62,9 @@ class RealTCA9548A(AbstractTCA9548A):
             self.deselect()
             self._healthy = True
             return True
-        except Exception:
+        except Exception as e:
             self._healthy = False
+            self.last_error = f"{type(e).__name__}: {e}"
             return False
 
     def close(self) -> None:

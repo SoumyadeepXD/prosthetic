@@ -185,7 +185,7 @@ class MockESPLink(AbstractESPLink):
 class RealESPLink(AbstractESPLink):
     """Real serial port implementation communicating with ESP32 over UART2."""
 
-    def __init__(self, port: str = "/dev/ttyTHS1", baudrate: int = 460800):
+    def __init__(self, port: str = "/dev/ttyTHS1", baudrate: int = 115200):
         self.port = port
         self.baudrate = baudrate
         self._serial = None

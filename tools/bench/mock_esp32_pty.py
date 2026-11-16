@@ -21,7 +21,7 @@ def main():
     print(f"\n[+] Mock ESP32 is running on virtual serial port: {slave_port}")
     print("You can connect another terminal or test tool to this port:")
     print(f"    python tools/bench/esp_link_monitor.py (configured with {slave_port})")
-    print(f"    minicom -D {slave_port} -b 460800")
+    print(f"    minicom -D {slave_port} -b 115200")
     print("\nPress Ctrl+C to terminate the virtual peer...")
 
     def handle_exit(sig, frame):

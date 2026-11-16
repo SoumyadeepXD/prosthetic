@@ -70,7 +70,7 @@ def collect_samples(link, duration_s: float, label: str) -> Tuple[np.ndarray, np
 def main():
     parser = argparse.ArgumentParser(description="Calibrate EMG baseline and MVC thresholds.")
     parser.add_argument("--port", type=str, default="/dev/ttyTHS1", help="Jetson UART device")
-    parser.add_argument("--baud", type=int, default=460800, help="UART baud rate")
+    parser.add_argument("--baud", type=int, default=115200, help="UART baud rate")
     parser.add_argument("--mock", action="store_true", help="Use virtual mock ESP link for dry run")
     args = parser.parse_args()
 

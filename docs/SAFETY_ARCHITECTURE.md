@@ -179,7 +179,7 @@ Before transitioning from `DISARMED` to `ARMED_IDLE`, the system performs an exh
 - [ ] **No Latched Supervisor Fault**: ESP32 supervisor status byte confirms `latched_fault == 0`.
 - [ ] **Bidirectional UART Link Synchronized**: Valid CRC-verified sensor telemetry received within the last 100 ms (`rx_age < 100 ms`).
 - [ ] **PCA9685 Responding**: I2C `0x40` responds to `MODE1` interrogation with `ALLCALL` disabled.
-- [ ] **TCA9548A Multiplexer Responding**: I2C `0x71` responds and passes channel selection test.
+- [ ] **TCA9548A Multiplexer Responding**: I2C `0x70` responds and passes channel selection test.
 - [ ] **Magnetic Encoders Operational**: All configured AS5600 sensors report `MD == 1`, `ML == 0`, `MH == 0`.
 - [ ] **FSR Sensor Baselines Plausible**: All 5 fingertips report resting ADC between 20 and 200 counts (no open or short circuits).
 - [ ] **EMG Baselines Plausible**: Both flexor and extensor channels report baseline envelope between 100 mV and 800 mV (electrodes making valid conductive skin contact).

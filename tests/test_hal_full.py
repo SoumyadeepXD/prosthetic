@@ -32,7 +32,7 @@ def test_pca9685_mock_and_math():
         pca.set_pulse_us(16, 1500.0)
 
 def test_tca9548a_mux():
-    mux = MockTCA9548A(address=0x71)
+    mux = MockTCA9548A(address=0x70)
     assert mux.initialize() is True
 
     mux.select_channel(3)

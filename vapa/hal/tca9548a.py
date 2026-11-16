@@ -20,7 +20,7 @@ class AbstractTCA9548A(BaseDevice):
 class MockTCA9548A(AbstractTCA9548A):
     """Mock TCA9548A multiplexer for testing."""
 
-    def __init__(self, address: int = 0x71):
+    def __init__(self, address: int = 0x70):
         self.address = address
         self.active_channel: Optional[int] = None
         self._initialized = False
@@ -48,7 +48,7 @@ class MockTCA9548A(AbstractTCA9548A):
 class RealTCA9548A(AbstractTCA9548A):
     """Real TCA9548A driver using smbus2."""
 
-    def __init__(self, bus_num: int = 7, address: int = 0x71):
+    def __init__(self, bus_num: int = 7, address: int = 0x70):
         self.bus_num = bus_num
         self.address = address
         self._bus = None

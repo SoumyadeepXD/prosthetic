@@ -9,13 +9,13 @@
 ## 2. Specification Alignment (Hardware Connection Guide Rev 2)
 Since the repository is initialized clean:
 - **No legacy conflicts exist** with previous revisions.
-- **I2C Architecture:** TCA9548A mux configured at `0x71` (avoiding the `0x70` PCA9685 All-Call clash), PCA9685 at `0x40` (All-Call disabled at initialization).
+- **I2C Architecture:** TCA9548A mux configured at `0x70` (with PCA9685 All-Call disabled at initialization, or `0x71` if A0 strapped to 3.3V), PCA9685 at `0x40`.
 - **ESP32 Pins:**
-  - GPIO25: PCA9685 `OE` active-low (default HIGH / disabled via hardware 1k pull-up; initialized HIGH immediately on ESP32 boot).
+  - GPIO25: PCA9685 `OE` active-low (default HIGH / disabled via hardware pull-up; initialized HIGH immediately on ESP32 boot).
   - GPIO27: E-stop NC/NO to GND (`INPUT_PULLUP`, LOW = pressed).
   - GPIO32-36: FSR 1-5 (ADC1 with 11dB attenuation). Higher count indicates higher force.
   - GPIO21/22: I2C (ADS1115 at `0x48`).
-  - GPIO16/17: UART2 (460800 baud).
+  - GPIO16/17: UART2 (115200 baud).
 - **Control & Safety Model:**
   - Independent FreeRTOS supervisor on ESP32.
   - Fail-closed Jetson state machine (`BOOT -> DISARMED -> ARMED_IDLE -> ACTIVE -> FAULT`).

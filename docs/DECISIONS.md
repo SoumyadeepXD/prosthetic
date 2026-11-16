@@ -32,10 +32,10 @@ This document records safety and architectural design choices, alternatives cons
 
 ---
 
-### DEC-005: TCA9548A I2C Address Relocation to 0x71
-- **Decision:** Configure TCA9548A hardware address to `0x71` by pulling A0 to 3.3V.
-- **Alternatives Considered:** Leaving TCA9548A at default `0x70`.
-- **Reason:** PCA9685 responds to the I2C All-Call broadcast address `0x70`. Placing the mux at `0x70` causes bus conflicts whenever the All-Call address is acknowledged.
+### DEC-005: TCA9548A I2C Address at 0x70 with PCA9685 All-Call Disabled
+- **Decision:** Configure TCA9548A hardware address to `0x70` (A0, A1, A2 tied to Star Ground Bus per Hardware Connection Guide). In software, PCA9685 initialization unconditionally clears the All-Call bit in `MODE1` to ensure zero bus contention. Alternatively, pulling A0 to 3.3V moves TCA9548A to `0x71` if hardware isolation is preferred.
+- **Alternatives Considered:** Leaving PCA9685 All-Call enabled (causes bus collision at 0x70).
+- **Reason:** PCA9685 responds to the I2C All-Call broadcast address `0x70` by default. Disabling All-Call during PCA9685 initialization allows standard 0x70 TCA9548A operation with clean bus transactions.
 
 ---
 

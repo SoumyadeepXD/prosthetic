@@ -105,7 +105,7 @@ def main():
 
     if not args.mock:
         from vapa.hal import RealESPLink
-        esp_link = RealESPLink(port="/dev/ttyTHS1", baudrate=460800)
+        esp_link = RealESPLink(port="/dev/ttyTHS1", baudrate=115200)
         if not esp_link.initialize():
             print("ERROR: Failed to connect to ESP32 on /dev/ttyTHS1.")
             sys.exit(1)

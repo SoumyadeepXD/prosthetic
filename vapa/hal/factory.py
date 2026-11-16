@@ -73,7 +73,7 @@ def create_hal(
             frequency_hz=jetson_cfg.get("pca9685", {}).get("frequency_hz", 50),
         )
         mux = MockTCA9548A(
-            address=jetson_cfg.get("tca9548a", {}).get("address", 0x71),
+            address=jetson_cfg.get("tca9548a", {}).get("address", 0x70),
         )
         enc = MockAS5600(
             joint_config=jetson_cfg.get("as5600", {}).get("channels"),
@@ -87,7 +87,7 @@ def create_hal(
         i2c_bus = int(jetson_cfg.get("i2c_bus", 7))
         pca_addr = int(jetson_cfg.get("pca9685", {}).get("address", 0x40))
         freq = int(jetson_cfg.get("pca9685", {}).get("frequency_hz", 50))
-        mux_addr = int(jetson_cfg.get("tca9548a", {}).get("address", 0x71))
+        mux_addr = int(jetson_cfg.get("tca9548a", {}).get("address", 0x70))
         as5600_addr = int(jetson_cfg.get("as5600", {}).get("address", 0x36))
         as5600_channels = jetson_cfg.get("as5600", {}).get("channels")
         as5600_retries = int(jetson_cfg.get("as5600", {}).get("max_retries", 3))
@@ -103,7 +103,7 @@ def create_hal(
         )
         esp = RealESPLink(
             port=jetson_cfg.get("uart_port", "/dev/ttyTHS1"),
-            baudrate=jetson_cfg.get("uart_baudrate", 460800),
+            baudrate=jetson_cfg.get("uart_baudrate", 115200),
         )
         rs = RealRealSense() if cam_active else None
     else:

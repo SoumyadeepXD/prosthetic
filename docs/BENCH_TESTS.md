@@ -40,13 +40,13 @@
 [ Checkpoint 1: ESP32 Firmware & ADS1115 FSRs ]
          │
          ▼
-[ Checkpoint 2: 460800 Baud UART Link & CRC16 ]
+[ Checkpoint 2: 115200 Baud UART Link & CRC16 ]
          │
          ▼
 [ Checkpoint 3: Hardware E-Stop & Relay Interlock ]
          │
          ▼
-[ Checkpoint 4: Jetson I2C Scan (0x40 PCA9685, 0x71 TCA9548A) ]
+[ Checkpoint 4: Jetson I2C Scan (0x40 PCA9685, 0x70 TCA9548A) ]
          │
          ▼
 [ Checkpoint 5: PCA9685 Hardware OE Gating ]
@@ -80,7 +80,7 @@
 - **Execution Command:**
   ```bash
   pio run -d firmware/esp32 -t upload
-  pio device monitor -d firmware/esp32 -b 460800
+  pio device monitor -d firmware/esp32 -b 115200
   ```
 - **Multimeter Checks:**
   - Verify ESP32 3.3V rail: **3.28 V to 3.33 V**.
@@ -100,7 +100,7 @@
   - Jetson Pin 6 / Pin 9 (GND) -> ESP32 Common Ground
 - **Execution Command:**
   ```bash
-  python3 tools/bench/esp_link_monitor.py --port /dev/ttyTHS1 --baud 460800 --duration 60
+  python3 tools/bench/esp_link_monitor.py --port /dev/ttyTHS1 --baud 115200 --duration 60
   ```
 - **Pass/Fail Criteria:**
   - **PASS:** 100 Hz frame delivery rate (5,950 to 6,050 frames in 60 s). CRC error rate = **0.00%** (0 bad frames). Jitter standard deviation < 1.0 ms.
@@ -133,21 +133,20 @@
 
 ### Checkpoint 4: Jetson I2C Bus Scan
 
-- **Objective:** Confirm detection of PCA9685 at `0x40` and TCA9548A multiplexer at `0x71` on Jetson I2C Bus 1.
+- **Objective:** Confirm detection of PCA9685 at `0x40` and TCA9548A multiplexer at `0x70` on Jetson I2C Bus.
 - **Physical Wiring:**
-  - Jetson Pin 3 (I2C1 SDA) -> Level Shifter -> PCA9685 SDA & TCA9548A SDA
-  - Jetson Pin 5 (I2C1 SCL) -> Level Shifter -> PCA9685 SCL & TCA9548A SCL
-  - TCA9548A Address Pin A0 connected to 3.3V, A1/A2 to GND (`0x71`).
+  - Jetson Pin 3 (I2C SDA) -> PCA9685 SDA & TCA9548A SDA
+  - Jetson Pin 5 (I2C SCL) -> PCA9685 SCL & TCA9548A SCL
+  - TCA9548A Address Pins A0, A1, A2 connected to GND (`0x70`), with PCA9685 All-Call disabled.
 - **Execution Command:**
   ```bash
-  python3 tools/bench/i2c_scan.py --bus 1
+  python3 tools/bench/i2c_scan.py --bus 7
   ```
 - **Pass/Fail Criteria:**
-  - **PASS:** Scan outputs exactly:
+  - **PASS:** Scan outputs:
     - Address `0x40`: PCA9685 16-Channel PWM Driver.
-    - Address `0x71`: TCA9548A 8-Channel I2C Multiplexer.
-    - Address `0x70` is NOT present or disabled (PCA9685 All-Call disabled).
-  - **FAIL:** Missing `0x40` or `0x71`. Multiplexer appears at `0x70` (A0 pulled to ground instead of 3.3V).
+    - Address `0x70`: TCA9548A 8-Channel I2C Multiplexer (or `0x71` if A0 strapped).
+  - **FAIL:** Missing `0x40` or `0x70`/`0x71`.
 
 ---
 
@@ -278,9 +277,9 @@
 | Checkpoint | Description | Operator Name | Date | Result (PASS / FAIL) |
 | :--- | :--- | :--- | :--- | :--- |
 | **CP-01** | ESP32 Firmware & ADS1115 FSRs | | | |
-| **CP-02** | 460800 Baud UART Link & CRC16 | | | |
+| **CP-02** | 115200 Baud UART Link & CRC16 | | | |
 | **CP-03** | Hardware E-Stop & Relay Interlock | | | |
-| **CP-04** | Jetson I2C Scan (0x40 & 0x71) | | | |
+| **CP-04** | Jetson I2C Scan (0x40 & 0x70) | | | |
 | **CP-05** | PCA9685 Hardware OE Gating | | | |
 | **CP-06** | Interactive Servo Range Calibration | | | |
 | **CP-07** | AS5600 Magnetic Encoders (Ch 0..3) | | | |

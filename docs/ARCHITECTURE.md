@@ -19,14 +19,14 @@ VAPA is a vision-assisted prosthetic arm controlled via an autonomous dual-proce
 |        |                                                                         |
 |        v                                                                         |
 |  [PCA9685 HAL] --(I2C: /dev/i2c-7)--> PCA9685 (0x40) ----+                       |
-|  [AS5600 HAL]  --(I2C: /dev/i2c-7)--> TCA9548A (0x71)    |                       |
+|  [AS5600 HAL]  --(I2C: /dev/i2c-7)--> TCA9548A (0x70)    |                       |
 +--------------------------------------------|-------------|-----------------------+
-                     UART2 (460800 baud)     |             |
+                     UART2 (115200 baud)     |             |
                                              v             | PWM Signals
 +-------------------------------------------------------+  |
 |                    ESP32-WROOM-32                     |  |
 |                                                       |  |
-|  - ADS1115 (0x48): MyoWare ENV (A0, A1), EEG (A2)     |  |
+|  - ADS1115 (0x48): MyoWare EMG (A0), EEG (A1)         |  |
 |  - FSR 1..5: GPIO 32-36 (ADC1)                        |  |
 |  - E-Stop NO: GPIO27 (Input Pullup, Active LOW)       |  |
 |  - Watchdog & Safety Supervisor                       |  |
@@ -41,17 +41,17 @@ VAPA is a vision-assisted prosthetic arm controlled via an autonomous dual-proce
 - **GPIO27:** Emergency Stop contact. `INPUT_PULLUP`. Low = Active / Pressed.
 - **GPIO32-36:** FSR Analog Inputs (ADC1 only). Thumb, Index, Middle, Ring, Little. Higher ADC counts = higher force.
 - **GPIO21/22:** I2C SDA/SCL connected to ADS1115 (`0x48`).
-  - A0: Flexor EMG Envelope
-  - A1: Extensor EMG Envelope
-  - A2: EEG Analog Signal (experimental)
-  - A3: Spare
-- **GPIO16/17:** UART2 RX2/TX2 connected to Jetson UART header.
+  - A0: MyoWare 2.0 EMG Envelope (Forearm Flexor)
+  - A1: EEG Analog Signal
+  - A2: Spare (Not connected)
+  - A3: Spare (Not connected)
+- **GPIO16/17:** UART2 RX2/TX2 connected to Jetson UART header (115200 baud).
 
 ### Jetson Orin Nano Pin Map
 - **I2C Bus (`/dev/i2c-7`):**
   - Pin 3 (SDA), Pin 5 (SCL)
   - `0x40`: PCA9685 PWM Driver (50 Hz). `ALLCALL` disabled.
-  - `0x71`: TCA9548A I2C Multiplexer (A0 tied to 3.3V).
+  - `0x70`: TCA9548A I2C Multiplexer (A0, A1, A2 tied to GND; or 0x71 if strapped).
     - Port 0: AS5600 Finger group encoder (`0x36`)
     - Port 1: AS5600 Wrist flex encoder (`0x36`)
     - Port 2: AS5600 Wrist rotate encoder (`0x36`)

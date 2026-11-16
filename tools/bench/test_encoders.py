@@ -17,7 +17,7 @@ def main():
     print("Pre-conditions:")
     print("1. 6V servo power rail is switched OFF (E-Stop active or relay open).")
     print("2. 3.3V logic connected to Jetson I2C bus (Pins 3 & 5).")
-    print("3. TCA9548A address is 0x71 (A0 to 3.3V).")
+    print("3. TCA9548A address is 0x70 (A0-A2 to GND per Connection Guide; or 0x71 if strapped).")
     input("\nPress Enter to begin encoder diagnostics...")
 
     try:

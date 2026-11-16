@@ -2,13 +2,13 @@ jetson:
   backend: mock
   i2c_bus: 7
   uart_port: /dev/ttyTHS1
-  uart_baudrate: 460800
+  uart_baudrate: 115200
   pca9685:
     address: 64
     frequency_hz: 50
     disable_allcall: true
   tca9548a:
-    address: 113
+    address: 112
   as5600:
     address: 54
     max_retries: 3
@@ -55,10 +55,10 @@ esp32:
     address: 72
     sample_rate_sps: 860
     channels:
-      emg_flexor: 0
-      emg_extensor: 1
-      eeg_analog: 2
-      spare: 3
+      emg_flexor: 0   # A0: MyoWare 2.0 EMG SIG pin (analog 0-3.3V flexor)
+      eeg_analog: 1   # A1: EEG module analog OUT pin
+      spare_1: 2      # A2: Not connected
+      spare_2: 3      # A3: Not connected
 timing:
   sensor_publish_rate_hz: 100
   heartbeat_rate_hz: 50

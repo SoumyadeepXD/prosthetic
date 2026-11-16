@@ -1,6 +1,6 @@
 # ESP32 <-> Jetson Communication Protocol Specification
 
-**Interface:** UART2, 460800 baud, 8N1. Little-endian byte order.
+**Interface:** UART2, 115200 baud, 8N1. Little-endian byte order.
 
 ## 1. Frame Structure
 

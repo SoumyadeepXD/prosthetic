@@ -54,7 +54,7 @@ i2cdetect -y -r 7
 ```
 Expected devices on bus 7:
 - `0x40` (PCA9685 PWM Controller)
-- `0x71` (TCA9548A I2C Multiplexer, A0 strapped to 3.3V)
+- `0x70` (TCA9548A I2C Multiplexer, A0, A1, A2 strapped to GND; or 0x71 if strapped to 3.3V)
 
 ### UART Configuration
 Disable the default Linux serial login console on `/dev/ttyTHS1` (Pins 8 and 10 of 40-pin header):

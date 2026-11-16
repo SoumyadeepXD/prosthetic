@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Interactive AS5600 Magnetic Rotary Encoder Calibration Tool for VAPA Rev 2.
 
-Calibrates joint position encoders via the TCA9548A multiplexer (address 0x71):
+Calibrates joint position encoders via the TCA9548A multiplexer (address 0x70):
 1. Verifies magnet presence and magnetic field health diagnostics (MD, ML, MH bits).
 2. Sets mechanical zero-angle offsets at joint home posture.
 3. Validates positive joint rotation direction (+1 or -1).
@@ -102,11 +102,13 @@ def main():
         as5600 = MockAS5600(joint_config=channels)
     else:
         from vapa.hal import RealAS5600, RealTCA9548A
-        mux = RealTCA9548A(bus_num=7, address=0x71)
+        mux_addr = int(data.get("jetson", {}).get("tca9548a", {}).get("address", 0x70))
+        i2c_bus = int(data.get("jetson", {}).get("i2c_bus", 7))
+        mux = RealTCA9548A(bus_num=i2c_bus, address=mux_addr)
         if not mux.initialize():
-            print("ERROR: Failed to connect to TCA9548A multiplexer at 0x71.")
+            print(f"ERROR: Failed to connect to TCA9548A multiplexer at 0x{mux_addr:02X}.")
             sys.exit(1)
-        as5600 = RealAS5600(mux=mux, bus_num=7, address=0x36, joint_config=channels)
+        as5600 = RealAS5600(mux=mux, bus_num=i2c_bus, address=0x36, joint_config=channels)
 
     if not as5600.initialize():
         print("ERROR: Failed to initialize AS5600 array.")

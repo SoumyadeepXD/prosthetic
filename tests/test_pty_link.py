@@ -13,7 +13,7 @@ def test_pty_serial_end_to_end():
 
     try:
         # 2. Connect RealESPLink to virtual serial port
-        link = RealESPLink(port=slave_port, baudrate=460800)
+        link = RealESPLink(port=slave_port, baudrate=115200)
         assert link.initialize() is True
 
         # Wait briefly for initial frames to arrive

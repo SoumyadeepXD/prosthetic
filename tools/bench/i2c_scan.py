@@ -3,8 +3,8 @@
 
 Expected devices on Hardware Connection Guide Rev 2:
 - 0x40: PCA9685 PWM Driver
-- 0x71: TCA9548A I2C Multiplexer (A0 tied to 3.3V)
-- Note: 0x70 is PCA9685 All-Call address (disabled in software)
+- 0x70: TCA9548A I2C Multiplexer (A0, A1, A2 tied to GND; or 0x71 if A0 strapped to 3.3V)
+- Note: PCA9685 All-Call address 0x70 is disabled during initialization
 """
 
 import sys
@@ -49,10 +49,8 @@ def main():
             notes = []
             if addr == 0x40:
                 notes.append("PCA9685 (Expected)")
-            elif addr == 0x71:
-                notes.append("TCA9548A Mux (Expected)")
-            elif addr == 0x70:
-                notes.append("PCA9685 All-Call (Expected until disabled)")
+            elif addr in (0x70, 0x71):
+                notes.append(f"TCA9548A Mux (Expected at 0x{addr:02X})")
             elif addr == 0x36:
                 notes.append("AS5600 (Visible if mux channel active)")
             note_str = f" <-- {', '.join(notes)}" if notes else ""
@@ -60,7 +58,7 @@ def main():
 
     print("\nVerification checklist:")
     print(f"  [ {'X' if 0x40 in found else ' '} ] 0x40 PCA9685 present")
-    print(f"  [ {'X' if 0x71 in found else ' '} ] 0x71 TCA9548A Mux present")
+    print(f"  [ {'X' if (0x70 in found or 0x71 in found) else ' '} ] 0x70/0x71 TCA9548A Mux present")
 
 if __name__ == "__main__":
     main()

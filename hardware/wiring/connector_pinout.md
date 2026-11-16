@@ -14,10 +14,10 @@ The Jetson Orin Nano connects to the VAPA carrier motherboard via its standard 4
 | **Pin 2** | `5V_IN` | Power Input | PDB 5V / 6A Buck Converter | 5.0 V DC ($\pm 3\%$) | **RED** | High-current logic supply |
 | **Pin 4** | `5V_IN` | Power Input | PDB 5V / 6A Buck Converter | 5.0 V DC ($\pm 3\%$) | **RED** | Paralleled with Pin 2 for 4A capability |
 | **Pin 6** | `GND` | Ground | System Logic Ground (GND_LOGIC) | 0.0 V | **BLACK** | Star-ground return |
-| **Pin 3** | `I2C_SDA` | Bidirectional | TCA9548A (0x71) & PCA9685 (0x40) | 3.3 V Logic | **GREEN** | Jetson I2C Bus 7 (400 kHz) |
-| **Pin 5** | `I2C_SCL` | Bidirectional | TCA9548A (0x71) & PCA9685 (0x40) | 3.3 V Logic | **YELLOW** | Jetson I2C Bus 7 (400 kHz) |
-| **Pin 8** | `UART1_TXD` | Output | ESP32 GPIO16 (`UART2_RX2`) | 3.3 V CMOS | **ORANGE** | 460800 baud binary telemetry |
-| **Pin 10** | `UART1_RXD` | Input | ESP32 GPIO17 (`UART2_TX2`) | 3.3 V CMOS | **BLUE** | 460800 baud binary telemetry |
+| **Pin 3** | `I2C_SDA` | Bidirectional | TCA9548A (0x70) & PCA9685 (0x40) | 3.3 V Logic | **GREEN** | Jetson I2C Bus 7 (400 kHz) |
+| **Pin 5** | `I2C_SCL` | Bidirectional | TCA9548A (0x70) & PCA9685 (0x40) | 3.3 V Logic | **YELLOW** | Jetson I2C Bus 7 (400 kHz) |
+| **Pin 8** | `UART1_TXD` | Output | ESP32 GPIO16 (`UART2_RX2`) | 3.3 V CMOS | **ORANGE** | 115200 baud binary telemetry |
+| **Pin 10** | `UART1_RXD` | Input | ESP32 GPIO17 (`UART2_TX2`) | 3.3 V CMOS | **BLUE** | 115200 baud binary telemetry |
 | **Pin 9** | `GND` | Ground | ESP32 Digital Ground | 0.0 V | **BLACK** | Serial signal reference return |
 
 ---
@@ -30,8 +30,8 @@ The Jetson Orin Nano connects to the VAPA carrier motherboard via its standard 4
 | **GPIO27** | Digital Input | Input | `ESTOP_SENSE` | Pull-up Enabled | Reads LOW when Emergency Stop is activated. Optocoupled to physical E-stop switch. |
 | **GPIO21** | Open Drain | Bidirectional | `I2C_SDA_LOCAL` | High-Z | Fast I2C Bus to ISO1540 (Isolated ADS1115). 4.7k pull-up to 3.3V. |
 | **GPIO22** | Open Drain | Output | `I2C_SCL_LOCAL` | High-Z | Fast I2C Clock to ISO1540 (Isolated ADS1115). 4.7k pull-up to 3.3V. |
-| **GPIO16** | Digital Input | Input | `UART2_RX2` | High-Z | Serial RX from Jetson Pin 8 (TXD). 460800 baud. |
-| **GPIO17** | Digital Output | Output | `UART2_TX2` | Driven | Serial TX to Jetson Pin 10 (RXD). 460800 baud. |
+| **GPIO16** | Digital Input | Input | `UART2_RX2` | High-Z | Serial RX from Jetson Pin 8 (TXD). 115200 baud. |
+| **GPIO17** | Digital Output | Output | `UART2_TX2` | Driven | Serial TX to Jetson Pin 10 (RXD). 115200 baud. |
 | **GPIO32** | Analog ADC1_4 | Input | `FSR_THUMB` | Analog Input | Voltage divider from FSR402 Thumb (10k pull-down). |
 | **GPIO33** | Analog ADC1_5 | Input | `FSR_INDEX` | Analog Input | Voltage divider from FSR402 Index (10k pull-down). |
 | **GPIO34** | Analog ADC1_6 | Input | `FSR_MIDDLE` | Analog Input | Voltage divider from FSR402 Middle (10k pull-down, Input Only). |

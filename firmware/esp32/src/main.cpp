@@ -7,7 +7,7 @@
  * - ADS1115 (0x48) round-robin envelope sampling (A0, A1, A2).
  * - 5x FSR402 ADC1 sampling (GPIO32-36) with median-of-3 + EMA filter.
  * - Hardware E-stop monitoring on GPIO27 with immediate OE drop.
- * - Binary framing at 460800 baud (100 Hz SENSOR, 2 Hz STATUS).
+ * - Binary framing at 115200 baud (100 Hz SENSOR, 2 Hz STATUS).
  */
 
 #include <Arduino.h>
@@ -166,17 +166,15 @@ void SensorSamplingTask(void *pvParameters) {
         }
         sample_idx = (sample_idx + 1) % 3;
 
-        // 2. Non-blocking ADS1115 sampling (cycles A0->A1->A2 at 2ms interval; 2ms > 1.16ms conv time)
+        // 2. Non-blocking ADS1115 sampling (cycles A0 [MyoWare EMG] -> A1 [EEG analog] at 2ms interval)
         uint16_t conv_val = 0;
         if (ads1115_read_conversion(&conv_val)) {
             consecutive_ads_errors = 0;
             ads_ok = true;
             if (ads_active_channel == 0) {
-                emg[0] = conv_val;
+                emg[0] = conv_val; // A0: MyoWare 2.0 EMG
             } else if (ads_active_channel == 1) {
-                emg[1] = conv_val;
-            } else if (ads_active_channel == 2) {
-                eeg = conv_val;
+                eeg = conv_val;    // A1: EEG analog OUT
             }
         } else {
             consecutive_ads_errors++;
@@ -188,8 +186,8 @@ void SensorSamplingTask(void *pvParameters) {
             }
         }
 
-        // Trigger next channel conversion
-        ads_active_channel = (ads_active_channel + 1) % 3;
+        // Trigger next channel conversion (cycle channels 0 and 1 per connection guide)
+        ads_active_channel = (ads_active_channel + 1) % 2;
         if (!ads1115_start_conversion(ads_active_channel)) {
             consecutive_ads_errors++;
             g_ads_err_count++;
@@ -354,8 +352,8 @@ void setup() {
     // 4. Initialize I2C bus for ADS1115 (Fast mode: 400 kHz)
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
 
-    // 5. Initialize UART2 at 460800 baud
-    Serial2.begin(460800, SERIAL_8N1, PIN_UART_RX, PIN_UART_TX);
+    // 5. Initialize UART2 at 115200 baud
+    Serial2.begin(115200, SERIAL_8N1, PIN_UART_RX, PIN_UART_TX);
 
     // 6. Initialize supervisor state
     supervisor_init(&g_supervisor, &g_config);

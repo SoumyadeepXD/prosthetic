@@ -50,7 +50,7 @@ VAPA is an advanced multi-modal active transradial robotic prosthetic arm combin
                        | - Shared-Control Arbitrator & Slew Limiter    |
                        +-----------------------------------------------+
                                   |                      |
-               (I2C-7, Addr 0x40) v                      v (I2C-7, Addr 0x71 Mux)
+               (I2C-7, Addr 0x40) v                      v (I2C-7, Addr 0x70 Mux)
                        +-------------------+  +-------------------+
                        |  PCA9685 16-Ch    |  | TCA9548A Mux      |
                        |  12-bit PWM Driver|  | 4x AS5600 Encoders|
@@ -89,7 +89,7 @@ Deliverables located in [`hardware/`](hardware/):
   - `servo_controller.kicad_sch` (PCA9685 at 0x40, dual servo power split rails)
   - `emg_interface.kicad_sch` (IEC 60601-1 Type BF isolation barrier, Mornsun B0505S, ISO1540 isolator)
   - `fsr_interface.kicad_sch` (5x 10k 0.1% dividers, 0.1uF filter caps, SP3002 TVS diodes)
-  - `encoder_interface.kicad_sch` (TCA9548A at 0x71, 4x AS5600 headers)
+  - `encoder_interface.kicad_sch` (TCA9548A at 0x70, 4x AS5600 headers)
 - **Wiring Diagrams (`hardware/diagrams/`)**:
   - `complete_wiring_diagram.svg` and high-res `complete_wiring_diagram.png` (2048px)
   - `power_distribution.svg` and `signal_flow.svg`

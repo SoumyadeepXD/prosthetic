@@ -50,7 +50,7 @@ def main():
             esp = MockESPLink()
         else:
             from vapa.hal.esp_link import RealESPLink
-            esp = RealESPLink(port="/dev/ttyTHS1", baudrate=460800)
+            esp = RealESPLink(port="/dev/ttyTHS1", baudrate=115200)
 
         if not esp.initialize():
             raise RuntimeError("Could not initialize ESP32 serial link.")
@@ -79,14 +79,14 @@ def main():
     # ------------------------------------------------------------------
     # Step 2: I2C Multiplexer & Magnetic Encoders
     # ------------------------------------------------------------------
-    print("\n[STEP 2/6] Verifying TCA9548A (0x71) and AS5600 Encoders...")
+    print("\n[STEP 2/6] Verifying TCA9548A (0x70) and AS5600 Encoders...")
     try:
         if args.mock:
             from vapa.hal.as5600 import MockAS5600
             as5600 = MockAS5600()
         else:
             from vapa.hal.as5600 import RealAS5600
-            as5600 = RealAS5600(bus_num=7, mux_address=0x71)
+            as5600 = RealAS5600(bus_num=7, mux_address=0x70)
 
         if not as5600.initialize():
             raise RuntimeError("AS5600 encoder array initialization failed.")

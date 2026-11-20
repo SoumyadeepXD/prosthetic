@@ -19,7 +19,6 @@ VAPA is a vision-assisted prosthetic arm controlled via an autonomous dual-proce
 |        |                                                                         |
 |        v                                                                         |
 |  [PCA9685 HAL] --(I2C: /dev/i2c-7)--> PCA9685 (0x40) ----+                       |
-|  [AS5600 HAL]  --(I2C: /dev/i2c-7)--> TCA9548A (0x71)    |                       |
 +--------------------------------------------|-------------|-----------------------+
                      UART2 (460800 baud)     |             |
                                              v             | PWM Signals
@@ -51,12 +50,6 @@ VAPA is a vision-assisted prosthetic arm controlled via an autonomous dual-proce
 - **I2C Bus (`/dev/i2c-7`):**
   - Pin 3 (SDA), Pin 5 (SCL)
   - `0x40`: PCA9685 PWM Driver (50 Hz). `ALLCALL` disabled.
-  - `0x71`: TCA9548A I2C Multiplexer (A0 tied to 3.3V).
-    - Port 0: AS5600 Finger group encoder (`0x36`)
-    - Port 1: AS5600 Wrist flex encoder (`0x36`)
-    - Port 2: AS5600 Wrist rotate encoder (`0x36`)
-    - Port 3: AS5600 Forearm rotation encoder (`0x36`)
-    - Port 4: Reserved for 5th encoder
 - **UART2:**
   - Pin 8 (TXD), Pin 10 (RXD) connected cross-wired to ESP32 UART2.
 - **USB3:** Intel RealSense D435i.

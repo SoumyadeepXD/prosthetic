@@ -14,6 +14,10 @@ import time
 import argparse
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 
 def main():
     parser = argparse.ArgumentParser(description="VAPA HIL Master System Qualification Tool")
@@ -39,11 +43,12 @@ def main():
         print("[MOCK MODE ACTIVATED] Running automated mock verification...")
 
     results = {}
+    esp = None
 
     # ------------------------------------------------------------------
     # Step 1: ESP32 Link & Protocol Verification
     # ------------------------------------------------------------------
-    print("\n[STEP 1/6] Verifying ESP32 UART Link & Protocol CRC...")
+    print("\n[STEP 1/5] Verifying ESP32 UART Link & Protocol CRC...")
     try:
         if args.mock:
             from vapa.hal.esp_link import MockESPLink
@@ -77,35 +82,9 @@ def main():
         print(f" -> ESP32 Link: [FAILED] ({e})")
 
     # ------------------------------------------------------------------
-    # Step 2: I2C Multiplexer & Magnetic Encoders
+    # Step 2: FSR Fingertip Force Sensors
     # ------------------------------------------------------------------
-    print("\n[STEP 2/6] Verifying TCA9548A (0x71) and AS5600 Encoders...")
-    try:
-        if args.mock:
-            from vapa.hal.as5600 import MockAS5600
-            as5600 = MockAS5600()
-        else:
-            from vapa.hal.as5600 import RealAS5600
-            as5600 = RealAS5600(bus_num=7, mux_address=0x71)
-
-        if not as5600.initialize():
-            raise RuntimeError("AS5600 encoder array initialization failed.")
-
-        for joint in ["finger_group", "wrist_flex", "wrist_rotate", "forearm_rotation"]:
-            st = as5600.read_joint_status(joint)
-            print(f" -> Joint {joint:16s}: Angle={st.joint_angle_degrees:6.1f}°, Magnet={st.magnet_detected}, Valid={st.is_valid}")
-            assert st.is_valid, f"Invalid status on joint {joint}"
-
-        results["AS5600_Encoders"] = "PASS"
-        print(" -> AS5600 Encoders: [PASSED]")
-    except Exception as e:
-        results["AS5600_Encoders"] = f"FAIL: {e}"
-        print(f" -> AS5600 Encoders: [FAILED] ({e})")
-
-    # ------------------------------------------------------------------
-    # Step 3: FSR Fingertip Force Sensors
-    # ------------------------------------------------------------------
-    print("\n[STEP 3/6] Verifying 5x FSR402 Fingertip Force Sensors...")
+    print("\n[STEP 2/5] Verifying 5x FSR402 Fingertip Force Sensors...")
     try:
         sensor = esp.get_latest_sensor()
         assert sensor is not None, "No sensor message available"
@@ -124,9 +103,9 @@ def main():
         print(f" -> FSR402 Sensors: [FAILED] ({e})")
 
     # ------------------------------------------------------------------
-    # Step 4: Two-Channel MyoWare EMG Envelope
+    # Step 3: Two-Channel MyoWare EMG Envelope
     # ------------------------------------------------------------------
-    print("\n[STEP 4/6] Verifying ADS1115 Two-Channel EMG Baselines...")
+    print("\n[STEP 3/5] Verifying ADS1115 Two-Channel EMG Baselines...")
     try:
         sensor = esp.get_latest_sensor()
         flex_raw = sensor.emg[0]
@@ -146,35 +125,58 @@ def main():
         print(f" -> MyoWare EMG: [FAILED] ({e})")
 
     # ------------------------------------------------------------------
-    # Step 5: Intel RealSense D435i Camera
+    # Step 4: Camera / Vision Subsystem (Webcam or RealSense)
     # ------------------------------------------------------------------
-    print("\n[STEP 5/6] Verifying RealSense D435i RGB-D Frames...")
+    print("\n[STEP 4/5] Verifying Camera Video Acquisition...")
     try:
+        import yaml
+        v_dev = "webcam"
+        v_path = Path("config/vision.yaml")
+        if v_path.exists():
+            with open(v_path) as vf:
+                v_cfg = yaml.safe_load(vf) or {}
+                v_dev = v_cfg.get("camera", {}).get("device", "webcam").lower()
+
+        is_webcam = "webcam" in v_dev or "usb" in v_dev
+
         if args.mock:
-            from vapa.hal.realsense import MockRealSense
-            cam = MockRealSense()
+            if is_webcam:
+                from vapa.hal.webcam import MockWebcam
+                cam = MockWebcam()
+            else:
+                from vapa.hal.realsense import MockRealSense
+                cam = MockRealSense()
         else:
-            from vapa.hal.realsense import RealRealSense
-            cam = RealRealSense()
+            if is_webcam:
+                from vapa.hal.webcam import GenericWebcam
+                cam = GenericWebcam(device_index=0)
+            else:
+                from vapa.hal.realsense import RealRealSense
+                cam = RealRealSense()
 
         if not cam.initialize():
-            raise RuntimeError("RealSense D435i initialization failed.")
+            raise RuntimeError(f"Camera ({v_dev}) initialization failed.")
 
-        color, depth, ts = cam.capture_frame()
-        print(f" -> Captured Color Frame: {color.shape}, Depth Frame: {depth.shape}")
-        assert color.shape[0] > 0 and depth.shape[0] > 0, "Empty frame captured"
+        if is_webcam:
+            color, ts = cam.capture_frame()
+            print(f" -> Captured USB Webcam Color Frame: {color.shape}")
+            assert color.shape[0] > 0, "Empty frame captured"
+        else:
+            color, depth, ts = cam.capture_frame()
+            print(f" -> Captured Color Frame: {color.shape}, Depth Frame: {depth.shape}")
+            assert color.shape[0] > 0 and depth.shape[0] > 0, "Empty frame captured"
         cam.close()
 
-        results["RealSense_D435i"] = "PASS"
-        print(" -> RealSense D435i: [PASSED]")
+        results["Camera_Subsystem"] = "PASS"
+        print(f" -> Camera ({v_dev}): [PASSED]")
     except Exception as e:
-        results["RealSense_D435i"] = f"FAIL: {e}"
-        print(f" -> RealSense D435i: [FAILED] ({e})")
+        results["Camera_Subsystem"] = f"FAIL: {e}"
+        print(f" -> Camera: [FAILED] ({e})")
 
     # ------------------------------------------------------------------
-    # Step 6: PCA9685 PWM Controller & Gated Actuation
+    # Step 5: PCA9685 PWM Controller & Gated Actuation
     # ------------------------------------------------------------------
-    print("\n[STEP 6/6] Verifying PCA9685 (0x40) PWM Actuation & Gate...")
+    print("\n[STEP 5/5] Verifying PCA9685 (0x40) PWM Actuation & Gate...")
     try:
         if args.mock:
             from vapa.hal.pca9685 import MockPCA9685
@@ -196,7 +198,6 @@ def main():
             estop_released=True,
             no_latched_fault=True,
             pca9685_healthy=True,
-            encoders_healthy=True,
             emg_plausible=True,
             fsr_plausible=True,
         )
@@ -216,7 +217,8 @@ def main():
         print(f" -> PCA9685 Actuation: [FAILED] ({e})")
 
     # Clean up esp
-    esp.close()
+    if esp is not None:
+        esp.close()
 
     # ------------------------------------------------------------------
     # Summary Certificate

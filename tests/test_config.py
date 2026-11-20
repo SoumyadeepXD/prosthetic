@@ -11,8 +11,6 @@ def test_hardware_config():
 
     assert cfg["jetson"]["pca9685"]["address"] == 0x40
     assert cfg["jetson"]["pca9685"]["disable_allcall"] is True
-    assert cfg["jetson"]["tca9548a"]["address"] == 0x71
-    assert cfg["jetson"]["as5600"]["address"] == 0x36
     assert cfg["esp32"]["pins"]["pca9685_oe"] == 25
     assert cfg["esp32"]["pins"]["estop_pin"] == 27
     assert cfg["esp32"]["ads1115"]["address"] == 0x48
@@ -26,7 +24,6 @@ def test_servos_config():
     assert "wrist_flex" in servos
     assert "wrist_bend" in servos
     assert "forearm_rotation" in servos
-    assert servos["wrist_bend"]["has_encoder"] is False
 
     # Check conservative default pulse limits
     for name, s in servos.items():

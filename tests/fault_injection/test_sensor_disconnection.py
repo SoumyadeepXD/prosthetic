@@ -31,7 +31,6 @@ def test_fsr_open_circuit_disconnection(fsr_calibrator):
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )

@@ -127,9 +127,10 @@ class SafetyStateMachine:
         estop_released: bool,
         no_latched_fault: bool,
         pca9685_healthy: bool,
-        encoders_healthy: bool,
-        emg_plausible: bool,
-        fsr_plausible: bool,
+        emg_plausible: bool = True,
+        fsr_plausible: bool = True,
+        *args,
+        **kwargs,
     ) -> bool:
         """Attempt to arm the system. Returns True if armed successfully."""
         if self._state in (SafetyState.FAULT, SafetyState.EMERGENCY_STOP):
@@ -150,8 +151,6 @@ class SafetyStateMachine:
             failed_checks.append("Supervisor reports latched fault")
         if not pca9685_healthy:
             failed_checks.append("PCA9685 PWM driver not responding")
-        if not encoders_healthy:
-            failed_checks.append("One or more AS5600 encoders missing magnet")
         if not emg_plausible:
             failed_checks.append("EMG envelope baseline not plausible")
         if not fsr_plausible:

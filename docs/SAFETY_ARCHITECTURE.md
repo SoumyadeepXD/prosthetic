@@ -86,12 +86,12 @@ stateDiagram-v2
 | Source State | Target State | Trigger Condition | Guard / Preconditions | Hardware / Software Action |
 | :--- | :--- | :--- | :--- | :--- |
 | `BOOT` | `DISARMED` | Power-on init finished | None | Drive `/OE` HIGH; initialize data structures; set `arm_request = 0`. |
-| `DISARMED` | `SELF_TEST` | Operator command | None | Run I2C bus scan, check AS5600 magnet presence, verify ADC noise floor. |
+| `DISARMED` | `SELF_TEST` | Operator command | None | Run I2C bus scan, verify ADC noise floor. |
 | `SELF_TEST` | `DISARMED` | Test passed | All checks nominal | Log success certificate; record sensor baselines. |
 | `SELF_TEST` | `FAULT` | Test failed | Any sensor abnormal | Latch specific fault reason; refuse arming. |
 | `DISARMED` | `CALIBRATION` | Operator command | `initial_state == DISARMED` | Isolate autonomous control loops; enable manual pulse generation. |
 | `CALIBRATION` | `DISARMED` | Operator exit | Calibration complete | Save updated YAML config; disable PWM gate. |
-| `DISARMED` | `ARMED_IDLE` | Explicit Arm command | **ALL** pre-conditions satisfied: <br>1. ESP link healthy (`rx_age < 500 ms`)<br>2. Physical E-stop released<br>3. Supervisor reports `latched_fault == False`<br>4. PCA9685 I2C responding<br>5. AS5600 magnets detected on all joints<br>6. EMG baseline in [100..800] mV<br>7. FSR baseline < 250 counts | Set `arm_request = 1`; enable 50 Hz heartbeat thread; enable `PWMGate`. |
+| `DISARMED` | `ARMED_IDLE` | Explicit Arm command | **ALL** pre-conditions satisfied: <br>1. ESP link healthy (`rx_age < 500 ms`)<br>2. Physical E-stop released<br>3. Supervisor reports `latched_fault == False`<br>4. PCA9685 I2C responding<br>5. EMG baseline in [100..800] mV<br>6. FSR baseline < 250 counts | Set `arm_request = 1`; enable 50 Hz heartbeat thread; enable `PWMGate`. |
 | `ARMED_IDLE` | `ACTIVE` | Motion intent detected | `arm_request == 1` AND valid EMG intent | Enable trajectory generator; begin slew-rate controlled position updates. |
 | `ACTIVE` | `ARMED_IDLE` | Motion completed | Hand reached target or intent dropped | Maintain stationary commanded holding pulse. |
 | `ACTIVE` / `ARMED_IDLE` | `DISARMED` | Operator Disarm | None | Set `arm_request = 0`; disable PWM gate; send disarm heartbeat to ESP32. |
@@ -104,7 +104,7 @@ stateDiagram-v2
 
 ## 4. Comprehensive Fault Reaction Matrix
 
-The following matrix defines the exact deterministic detection mechanism, detection latency, safe reaction, and recovery criteria for all 14 physical and software failure modes:
+The following matrix defines the exact deterministic detection mechanism, detection latency, safe reaction, and recovery criteria for physical and software failure modes:
 
 | # | Failure Mode | Detection Mechanism | Worst-Case Latency | Immediate Safe Reaction | Recovery Protocol |
 | :---: | :--- | :--- | :--- | :--- | :--- |
@@ -115,13 +115,9 @@ The following matrix defines the exact deterministic detection mechanism, detect
 | **5** | **FSR Short Circuit** | `FSRCalibrator` detects raw ADC ≥ 4090 counts (shorted to 3.3V rail). | 10 ms (1 cycle) | Immediate transition to `FAULT`; finger motion halted. | Check sensor lead insulation for pinching against metal chassis; repair short. |
 | **6** | **EMG Rail Saturation** | `EnvelopeNormalizer` detects envelope voltage > 3200 mV. | 10 ms (1 cycle) | Arming refused or immediate `FAULT`; closing motion blocked. | Re-attach surface Ag/AgCl electrodes with fresh conductive gel; verify skin impedance. |
 | **7** | **EMG Electrode Flatline** | `EnvelopeNormalizer` detects identical ADC value (noise variance = 0) for > 3.0 s. | 3.0 s | System flags sensor detachment fault; disarms active grasp. | Re-apply electrodes to skin; verify battery power on isolated EMG rail. |
-| **8** | **Encoder Missing Magnet** | AS5600 `STATUS` register bit 5 (`MD == 0`) polled over TCA9548A I2C mux. | 20 ms | Precondition failure: system refuses to arm; if active, trips to `FAULT`. | Re-align N52 diametric disc magnet to 1.0 mm nominal air gap above AS5600 IC. |
-| **9** | **Encoder Weak/Strong Field** | AS5600 `STATUS` bits `ML == 1` (field too weak) or `MH == 1` (field too strong). | 20 ms | Precondition failure; logs magnet alignment diagnostic error. | Adjust axial spacing of magnet using feeler gauges to maintain 30–80 mT field strength. |
-| **10**| **Joint Mechanical Stall** | `EncoderMonitor` detects positional error > 12° with measured velocity < 3°/s for > 350 ms. | 350 ms | Immediate transition to `FAULT`; PWM outputs zeroed to prevent servo motor burnout. | Inspect tendon routing, pulleys, and finger pivots for physical obstruction or binding. |
-| **11**| **Uncommanded Joint Runaway** | `EncoderMonitor` detects joint velocity > 20°/s while commanded stationary for > 250 ms. | 250 ms | Immediate transition to `FAULT`; servo outputs clamped. | Check tendon cable tension; verify servo horn spline engagement. |
-| **12**| **Excessive Grip Force** | FSR measured force exceeds grip profile `force_cap_grams` (e.g. 350g default, 120g cup). | 10 ms (1 cycle) | `FingerForceController` actively backs off servo command by 0.05 units per cycle. | Proportional back-off stabilizes force at ceiling without requiring full disarm. |
-| **13**| **Control Loop Thread Hang** | Jetson `HeartbeatThread` monitors loop feed interval (`stall_timeout_s = 50 ms`). | 50 ms | Dedicated thread halts heartbeat transmission and emits `arm_request = 0`. ESP32 trips in 250 ms. | Inspect Linux thread scheduling, CPU affinity, and GPU pipeline bottlenecks. |
-| **14**| **FreeRTOS Task Hang** | ESP32 Task Watchdog Timer (TWDT) configured with 350 ms hardware timeout. | 350 ms | Hardware watchdog triggers chip reset. Hardware pull-up holds `/OE` HIGH during reboot. | Firmware automatically recovers to fail-safe `BOOT` -> `DISARMED` state. |
+| **8** | **Excessive Grip Force** | FSR measured force exceeds grip profile `force_cap_grams` (e.g. 350g default, 120g cup). | 10 ms (1 cycle) | `FingerForceController` actively backs off servo command by 0.05 units per cycle. | Proportional back-off stabilizes force at ceiling without requiring full disarm. |
+| **9** | **Control Loop Thread Hang** | Jetson `HeartbeatThread` monitors loop feed interval (`stall_timeout_s = 50 ms`). | 50 ms | Dedicated thread halts heartbeat transmission and emits `arm_request = 0`. ESP32 trips in 250 ms. | Inspect Linux thread scheduling, CPU affinity, and GPU pipeline bottlenecks. |
+| **10**| **FreeRTOS Task Hang** | ESP32 Task Watchdog Timer (TWDT) configured with 350 ms hardware timeout. | 350 ms | Hardware watchdog triggers chip reset. Hardware pull-up holds `/OE` HIGH during reboot. | Firmware automatically recovers to fail-safe `BOOT` -> `DISARMED` state. |
 
 ---
 
@@ -179,8 +175,6 @@ Before transitioning from `DISARMED` to `ARMED_IDLE`, the system performs an exh
 - [ ] **No Latched Supervisor Fault**: ESP32 supervisor status byte confirms `latched_fault == 0`.
 - [ ] **Bidirectional UART Link Synchronized**: Valid CRC-verified sensor telemetry received within the last 100 ms (`rx_age < 100 ms`).
 - [ ] **PCA9685 Responding**: I2C `0x40` responds to `MODE1` interrogation with `ALLCALL` disabled.
-- [ ] **TCA9548A Multiplexer Responding**: I2C `0x71` responds and passes channel selection test.
-- [ ] **Magnetic Encoders Operational**: All configured AS5600 sensors report `MD == 1`, `ML == 0`, `MH == 0`.
 - [ ] **FSR Sensor Baselines Plausible**: All 5 fingertips report resting ADC between 20 and 200 counts (no open or short circuits).
 - [ ] **EMG Baselines Plausible**: Both flexor and extensor channels report baseline envelope between 100 mV and 800 mV (electrodes making valid conductive skin contact).
 - [ ] **Calibration Loaded**: Valid `servos.yaml`, `fsr.yaml`, and `emg.yaml` configurations loaded with calibrated pulse limits.

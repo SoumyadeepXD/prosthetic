@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Master Calibration Orchestrator & System Verification Wizard for VAPA Rev 2.
 
-Runs all five subsystem calibration modules in orderly engineering sequence:
+Runs subsystem calibration modules in orderly engineering sequence:
 1. Servos: 9-channel pulse width bounds, neutral, and direction calibration.
-2. Encoders: AS5600 zero offsets and magnetic diagnostics.
-3. FSRs: 5-fingertip force response curves and open/short plausibility bounds.
-4. EMG: Flexor & Extensor resting baseline and MVC contraction thresholds.
-5. Vision: RealSense D435i temporal depth precision and workspace transform.
+2. FSRs: 5-fingertip force response curves and open/short plausibility bounds.
+3. EMG: Flexor & Extensor resting baseline and MVC contraction thresholds.
+4. Vision: RealSense D435i temporal depth precision and workspace transform.
 
 Generates a unified system calibration certificate upon completion.
 """
@@ -18,6 +17,10 @@ import time
 from pathlib import Path
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 CERTIFICATE_PATH = Path("config/calibration_certificate.yaml")
 
 def print_master_banner():
@@ -25,11 +28,10 @@ def print_master_banner():
     print("   VAPA MASTER SYSTEM CALIBRATION & HARDWARE COMMISSIONING WIZARD")
     print("=" * 76)
     print("This wizard will guide you through full bench calibration of the arm:")
-    print("  [Step 1/5] Servo Controller & Actuators (9 Channels)")
-    print("  [Step 2/5] AS5600 Magnetic Rotary Encoders (4 Channels)")
-    print("  [Step 3/5] FSR402 Fingertip Force Sensors (5 Channels)")
-    print("  [Step 4/5] MyoWare 2.0 Isolated EMG Envelope Acquisition (2 Channels)")
-    print("  [Step 5/5] Intel RealSense D435i Camera & Workspace Calibration")
+    print("  [Step 1/4] Servo Controller & Actuators (9 Channels)")
+    print("  [Step 2/4] FSR402 Fingertip Force Sensors (5 Channels)")
+    print("  [Step 3/4] MyoWare 2.0 Isolated EMG Envelope Acquisition (2 Channels)")
+    print("  [Step 4/4] Intel RealSense D435i Camera & Workspace Calibration")
     print("=" * 76)
 
 def run_step(step_num: int, total_steps: int, script_name: str, description: str, mock_flag: bool) -> bool:
@@ -71,7 +73,6 @@ def main():
 
     steps = [
         ("calibrate_servos.py", "Servo Controller & Actuator Limits", not args.skip_servos),
-        ("calibrate_encoders.py", "AS5600 Magnetic Rotary Encoders", True),
         ("calibrate_fsr.py", "FSR402 Fingertip Force Sensors", True),
         ("calibrate_emg.py", "Two-Channel EMG Baseline & MVC", not args.skip_emg),
         ("calibrate_camera.py", "RealSense D435i Camera Alignment", include_camera),

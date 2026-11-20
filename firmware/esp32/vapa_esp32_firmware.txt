@@ -1,0 +1,736 @@
+/**
+ * ==============================================================================
+ * VAPA -- Biomimetic Prosthetic System: ESP32 Multi-Sensor & Supervisor Firmware
+ * ==============================================================================
+ * Single-file standalone firmware for Arduino IDE or PlatformIO.
+ *
+ * SENSORS & PERIPHERALS:
+ *   - EMG A0/A1 & EEG A2: ADS1115 (0x48) via I2C (SDA=GPIO21, SCL=GPIO22)
+ *   - 5x FSR402: GPIO 32 (Thumb), 33 (Index), 34 (Middle), 35 (Ring), 36 (Little)
+ *   - E-Stop Switch: GPIO 27 (Active LOW, INPUT_PULLUP)
+ *   - PCA9685 Servo OE: GPIO 25 (Active LOW, fail-closed; HIGH on boot)
+ *   - High-Speed UART2 to Jetson: TX=GPIO17, RX=GPIO16 @ 460800 baud (Binary protocol)
+ *   - USB Serial Monitor (to Laptop): 115200 baud diagnostics
+ *
+ * NOTE: TCA9548A multiplexer and AS5600 encoders have been fully removed.
+ * ==============================================================================
+ */
+
+#include <Arduino.h>
+#include <Wire.h>
+#include <esp_task_wdt.h>
+#include <esp_idf_version.h>
+
+// ==============================================================================
+// 1. PIN DEFINITIONS & CONSTANTS
+// ==============================================================================
+#define PIN_PCA9685_OE      25      // Active LOW (HIGH = servos disabled)
+#define PIN_ESTOP           27      // Active LOW (INPUT_PULLUP)
+#define PIN_FSR_THUMB       32
+#define PIN_FSR_INDEX       33
+#define PIN_FSR_MID         34
+#define PIN_FSR_RING        35
+#define PIN_FSR_LITTLE      36
+#define PIN_I2C_SDA         21
+#define PIN_I2C_SCL         22
+#define PIN_UART_TX         17      // ESP32 TX2 -> Jetson Pin 10 (RXD)
+#define PIN_UART_RX         16      // ESP32 RX2 <- Jetson Pin 8  (TXD)
+
+#define FW_VERSION          0x0200
+#define UART_BAUD_JETSON    460800  // High-speed VAPA binary link
+#define USB_BAUD_LAPTOP     115200  // Diagnostic monitor to laptop
+#define SENSOR_INTERVAL_MS  10      // 100 Hz sensor streaming
+#define STATUS_INTERVAL_MS  500     // 2 Hz supervisor status packet
+#define WATCHDOG_TIMEOUT_MS 500     // Hardware task watchdog timeout
+
+// ADS1115 Registers
+#define ADS1115_ADDR        0x48
+#define ADS_REG_CONV        0x00
+#define ADS_REG_CFG         0x01
+
+// ==============================================================================
+// 2. VAPA BINARY PROTOCOL DEFINITION
+// ==============================================================================
+#define VAPA_SYNC0          0xA5
+#define VAPA_SYNC1          0x5A
+#define VAPA_HEADER_SIZE    5
+#define VAPA_FOOTER_SIZE    2
+
+#define MSG_TYPE_SENSOR      0x01
+#define MSG_TYPE_STATUS      0x02
+#define MSG_TYPE_HEARTBEAT   0x10
+#define MSG_TYPE_CONFIG      0x11
+#define MSG_TYPE_CLEAR_FAULT 0x12
+#define MSG_TYPE_ACK_NACK    0x7F
+
+#define FLAG_ESTOP_PRESSED  (1 << 0)
+#define FLAG_OE_ENABLED     (1 << 1)
+#define FLAG_ARMED          (1 << 2)
+#define FLAG_HEARTBEAT_OK   (1 << 3)
+#define FLAG_FORCE_FAULT    (1 << 4)
+#define FLAG_ADS_FAULT      (1 << 5)
+#define FLAG_LATCHED_FAULT  (1 << 6)
+
+#pragma pack(push, 1)
+
+struct sensor_payload_t {
+    uint32_t t_ms;
+    uint16_t emg[2];
+    uint16_t eeg;
+    uint16_t fsr[5];
+    uint16_t flags;
+};
+
+struct status_payload_t {
+    uint16_t fw_version;
+    uint8_t  reset_reason;
+    uint8_t  fault_code;
+    uint16_t rx_err;
+    uint16_t ads_err;
+    uint16_t hb_age_ms;
+};
+
+struct heartbeat_payload_t {
+    uint8_t arm_request;
+    uint8_t jetson_state;
+};
+
+struct config_payload_t {
+    uint16_t force_ceiling;
+    uint16_t hb_timeout_ms;
+    uint16_t force_hold_ms;
+};
+
+struct ack_nack_payload_t {
+    uint8_t ref_type;
+    uint8_t ref_seq;
+    uint8_t code;
+};
+
+#pragma pack(pop)
+
+// CRC16-CCITT Lookup Table (poly 0x1021, init 0xFFFF)
+static const uint16_t crc16_table[256] = {
+    0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
+    0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
+    0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
+    0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C, 0xF3FF, 0xE3DE,
+    0x2462, 0x3443, 0x0420, 0x1401, 0x64E6, 0x74C7, 0x44A4, 0x5485,
+    0xA56A, 0xB54B, 0x8528, 0x9509, 0xE5EE, 0xF5CF, 0xC5AC, 0xD58D,
+    0x3653, 0x2672, 0x1611, 0x0630, 0x76D7, 0x66F6, 0x5695, 0x46B4,
+    0xB75B, 0xA77A, 0x9719, 0x8738, 0xF7DF, 0xE7FE, 0xD79D, 0xC7BC,
+    0x48C4, 0x58E5, 0x6886, 0x78A7, 0x0840, 0x1861, 0x2802, 0x3823,
+    0xC9CC, 0xD9ED, 0xE98E, 0xF9AF, 0x8948, 0x9969, 0xA90A, 0xB92B,
+    0x5AF5, 0x4AD4, 0x7AB7, 0x6A96, 0x1A71, 0x0A50, 0x3A33, 0x2A12,
+    0xDBFD, 0xCBDC, 0xFBBF, 0xEB9E, 0x9B79, 0x8B58, 0xBB3B, 0xAB1A,
+    0x6CA6, 0x7C87, 0x4CE4, 0x5CC5, 0x2C22, 0x3C03, 0x0C60, 0x1C41,
+    0xEDAE, 0xFD8F, 0xCDEC, 0xDDCD, 0xAD2A, 0xBD0B, 0x8D68, 0x9D49,
+    0x7E97, 0x6EB6, 0x5ED5, 0x4EF4, 0x3E13, 0x2E32, 0x1E51, 0x0E70,
+    0xFF9F, 0xEFBE, 0xDFDD, 0xCFFC, 0xBF1B, 0xAF3A, 0x9F59, 0x8F78,
+    0x9188, 0x81A9, 0xB1CA, 0xA1EB, 0xD10C, 0xC12D, 0xF14E, 0xE16F,
+    0x1080, 0x00A1, 0x30C2, 0x20E3, 0x5004, 0x4025, 0x7046, 0x6067,
+    0x83B9, 0x9398, 0xA3FB, 0xB3DA, 0xC33D, 0xD31C, 0xE37F, 0xF35E,
+    0x02B1, 0x1290, 0x22F3, 0x32D2, 0x4235, 0x5214, 0x6277, 0x7256,
+    0xB5EA, 0xA5CB, 0x95A8, 0x8589, 0xF56E, 0xE54F, 0xD52C, 0xC50D,
+    0x34E2, 0x24C3, 0x14A0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405,
+    0xA7DB, 0xB7FA, 0x8799, 0x97B8, 0xE75F, 0xF77E, 0xC71D, 0xD73C,
+    0x26D3, 0x36F2, 0x0691, 0x16B0, 0x6657, 0x7676, 0x4615, 0x5634,
+    0xD94C, 0xC96D, 0xF90E, 0xE92F, 0x99C8, 0x89E9, 0xB98A, 0xA9AB,
+    0x5844, 0x4865, 0x7806, 0x6827, 0x18C0, 0x08E1, 0x3882, 0x28A3,
+    0xCB7D, 0xDB5C, 0xEB3F, 0xFB1E, 0x8BF9, 0x9BD8, 0xABBB, 0xBB9A,
+    0x4A75, 0x5A54, 0x6A37, 0x7A16, 0x0AF1, 0x1AD0, 0x2AB3, 0x3A92,
+    0xFD2E, 0xED0F, 0xDD6C, 0xCD4D, 0xBDAA, 0xAD8B, 0x9DE8, 0x8DC9,
+    0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
+    0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
+    0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
+};
+
+static inline uint16_t crc16_ccitt(const uint8_t *data, size_t len) {
+    uint16_t crc = 0xFFFF;
+    for (size_t i = 0; i < len; ++i) {
+        crc = (uint16_t)(((crc << 8) & 0xFFFF) ^ crc16_table[((crc >> 8) ^ data[i]) & 0xFF]);
+    }
+    return crc;
+}
+
+static size_t frame_encode(uint8_t type, uint8_t seq, const uint8_t *payload, uint8_t p_len, uint8_t *out_frame, size_t max_len) {
+    size_t total = VAPA_HEADER_SIZE + p_len + VAPA_FOOTER_SIZE;
+    if (total > max_len || !out_frame) return 0;
+
+    out_frame[0] = VAPA_SYNC0;
+    out_frame[1] = VAPA_SYNC1;
+    out_frame[2] = p_len;
+    out_frame[3] = type;
+    out_frame[4] = seq;
+
+    if (payload && p_len > 0) {
+        memcpy(&out_frame[5], payload, p_len);
+    }
+
+    uint16_t crc = crc16_ccitt(&out_frame[2], 3 + p_len);
+    out_frame[5 + p_len] = (uint8_t)(crc & 0xFF);
+    out_frame[6 + p_len] = (uint8_t)((crc >> 8) & 0xFF);
+    return total;
+}
+
+// Streaming Parser
+enum parser_state_t {
+    P_WAIT_SYNC0 = 0,
+    P_WAIT_SYNC1,
+    P_WAIT_LEN,
+    P_WAIT_TYPE,
+    P_WAIT_SEQ,
+    P_WAIT_PAYLOAD,
+    P_WAIT_CRC_L,
+    P_WAIT_CRC_H
+};
+
+struct frame_parser_t {
+    parser_state_t state;
+    uint8_t payload_len;
+    uint8_t msg_type;
+    uint8_t seq;
+    uint8_t payload_idx;
+    uint8_t payload_buf[256];
+    uint16_t crc_received;
+    uint16_t crc_errors;
+
+    void init() {
+        memset(this, 0, sizeof(frame_parser_t));
+        state = P_WAIT_SYNC0;
+    }
+
+    bool feed(uint8_t b, uint8_t *out_type, uint8_t *out_seq, const uint8_t **out_payload, uint8_t *out_len) {
+        switch (state) {
+            case P_WAIT_SYNC0:
+                if (b == VAPA_SYNC0) state = P_WAIT_SYNC1;
+                break;
+            case P_WAIT_SYNC1:
+                if (b == VAPA_SYNC1) state = P_WAIT_LEN;
+                else if (b == VAPA_SYNC0) state = P_WAIT_SYNC1;
+                else state = P_WAIT_SYNC0;
+                break;
+            case P_WAIT_LEN:
+                payload_len = b;
+                state = P_WAIT_TYPE;
+                break;
+            case P_WAIT_TYPE:
+                msg_type = b;
+                state = P_WAIT_SEQ;
+                break;
+            case P_WAIT_SEQ:
+                seq = b;
+                payload_idx = 0;
+                state = (payload_len == 0) ? P_WAIT_CRC_L : P_WAIT_PAYLOAD;
+                break;
+            case P_WAIT_PAYLOAD:
+                payload_buf[payload_idx++] = b;
+                if (payload_idx >= payload_len) state = P_WAIT_CRC_L;
+                break;
+            case P_WAIT_CRC_L:
+                crc_received = (uint16_t)b;
+                state = P_WAIT_CRC_H;
+                break;
+            case P_WAIT_CRC_H: {
+                crc_received |= ((uint16_t)b << 8);
+                state = P_WAIT_SYNC0;
+
+                uint8_t check_buf[3 + 256];
+                check_buf[0] = payload_len;
+                check_buf[1] = msg_type;
+                check_buf[2] = seq;
+                if (payload_len > 0) {
+                    memcpy(&check_buf[3], payload_buf, payload_len);
+                }
+                uint16_t calc = crc16_ccitt(check_buf, 3 + payload_len);
+                if (calc == crc_received) {
+                    if (out_type) *out_type = msg_type;
+                    if (out_seq) *out_seq = seq;
+                    if (out_payload) *out_payload = payload_buf;
+                    if (out_len) *out_len = payload_len;
+                    return true;
+                } else {
+                    crc_errors++;
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+// ==============================================================================
+// 3. SAFETY SUPERVISOR STATE MACHINE
+// ==============================================================================
+struct supervisor_config_t {
+    uint16_t force_ceiling;
+    uint16_t hb_timeout_ms;
+    uint16_t force_hold_ms;
+};
+
+struct supervisor_state_t {
+    bool estop_pressed;
+    bool oe_enabled;
+    bool armed;
+    bool heartbeat_ok;
+    bool force_fault;
+    bool ads_fault;
+    bool latched_fault;
+    bool had_first_heartbeat;
+    bool arm_request_transitioned;
+    uint8_t arm_request;
+    uint32_t last_heartbeat_time_ms;
+    uint32_t force_fault_start_ms;
+
+    void init() {
+        memset(this, 0, sizeof(supervisor_state_t));
+    }
+
+    void process_heartbeat(uint8_t arm_req, uint32_t now) {
+        last_heartbeat_time_ms = now;
+        if (!had_first_heartbeat) {
+            had_first_heartbeat = true;
+            arm_request_transitioned = false; // Require fresh 0 -> 1 transition
+        } else {
+            if (arm_request == 0 && arm_req == 1) {
+                arm_request_transitioned = true;
+            } else if (arm_req == 0) {
+                arm_request_transitioned = false;
+            }
+        }
+        arm_request = arm_req;
+    }
+
+    void update(const supervisor_config_t *cfg, uint32_t now, const uint16_t fsr[5], bool ads_ok) {
+        // 1. Heartbeat check
+        if (had_first_heartbeat) {
+            if ((now - last_heartbeat_time_ms) > cfg->hb_timeout_ms) {
+                heartbeat_ok = false;
+                latched_fault = true; // Latched on timeout
+            } else {
+                heartbeat_ok = true;
+            }
+        } else {
+            heartbeat_ok = false;
+        }
+
+        // 2. E-Stop check
+        if (estop_pressed) {
+            latched_fault = true;
+        }
+
+        // 3. ADS check
+        ads_fault = !ads_ok;
+
+        // 4. Force ceiling
+        bool over = false;
+        for (int i = 0; i < 5; ++i) {
+            if (fsr[i] >= cfg->force_ceiling) { over = true; break; }
+        }
+        if (over) {
+            if (force_fault_start_ms == 0) {
+                force_fault_start_ms = now;
+            } else {
+                uint32_t dur = now - force_fault_start_ms;
+                if (dur >= cfg->force_hold_ms) force_fault = true;
+                if (dur >= 500) latched_fault = true;
+            }
+        } else {
+            force_fault_start_ms = 0;
+            force_fault = false;
+        }
+
+        // 5. Output Enable (OE) Evaluation
+        if (arm_request == 1 &&
+            arm_request_transitioned &&
+            heartbeat_ok &&
+            !estop_pressed &&
+            !latched_fault &&
+            !ads_fault &&
+            !force_fault) {
+            oe_enabled = true;
+            armed = true;
+        } else {
+            oe_enabled = false;
+            armed = false;
+        }
+    }
+
+    bool clear_fault() {
+        if (!estop_pressed && arm_request == 0) {
+            latched_fault = false;
+            force_fault = false;
+            force_fault_start_ms = 0;
+            arm_request_transitioned = false;
+            return true;
+        }
+        return false;
+    }
+
+    uint16_t get_flags() const {
+        uint16_t flags = 0;
+        if (estop_pressed) flags |= FLAG_ESTOP_PRESSED;
+        if (oe_enabled)    flags |= FLAG_OE_ENABLED;
+        if (armed)         flags |= FLAG_ARMED;
+        if (heartbeat_ok)  flags |= FLAG_HEARTBEAT_OK;
+        if (force_fault)   flags |= FLAG_FORCE_FAULT;
+        if (ads_fault)     flags |= FLAG_ADS_FAULT;
+        if (latched_fault) flags |= FLAG_LATCHED_FAULT;
+        return flags;
+    }
+};
+
+static supervisor_state_t  g_supervisor;
+static supervisor_config_t g_config = {
+    .force_ceiling = 3500,
+    .hb_timeout_ms = 250,
+    .force_hold_ms = 100,
+};
+
+static inline void set_hardware_oe(bool enable) {
+    digitalWrite(PIN_PCA9685_OE, enable ? LOW : HIGH); // LOW = Enabled
+}
+
+// ==============================================================================
+// 4. SHARED DATA & ADS1115 DRIVER
+// ==============================================================================
+static SemaphoreHandle_t g_data_mutex = NULL;
+static uint16_t g_shared_emg[2] = {0, 0};
+static uint16_t g_shared_eeg = 0;
+static uint16_t g_shared_fsr[5] = {0, 0, 0, 0, 0};
+static bool     g_shared_ads_ok = false;
+static uint16_t g_ads_err_count = 0;
+static uint8_t  g_tx_seq = 0;
+
+static void i2c_bus_recover() {
+    Wire.end();
+    pinMode(PIN_I2C_SDA, INPUT_PULLUP);
+    pinMode(PIN_I2C_SCL, OUTPUT);
+    digitalWrite(PIN_I2C_SCL, HIGH);
+    delayMicroseconds(5);
+    for (int i = 0; i < 9; i++) {
+        digitalWrite(PIN_I2C_SCL, LOW);
+        delayMicroseconds(5);
+        digitalWrite(PIN_I2C_SCL, HIGH);
+        delayMicroseconds(5);
+    }
+    pinMode(PIN_I2C_SDA, OUTPUT);
+    digitalWrite(PIN_I2C_SDA, LOW);
+    delayMicroseconds(5);
+    digitalWrite(PIN_I2C_SCL, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(PIN_I2C_SDA, HIGH);
+    delayMicroseconds(5);
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
+}
+
+static bool ads1115_start_conversion(uint8_t channel) {
+    if (channel > 3) return false;
+    uint16_t mux_bits = (0x04 | channel) << 12;
+    uint16_t config = 0x8000 | mux_bits | 0x0200 | 0x0100 | 0x00E0 | 0x0003;
+    Wire.beginTransmission(ADS1115_ADDR);
+    Wire.write(ADS_REG_CFG);
+    Wire.write((uint8_t)(config >> 8));
+    Wire.write((uint8_t)(config & 0xFF));
+    return (Wire.endTransmission() == 0);
+}
+
+static bool ads1115_read_conversion(uint16_t *out_val) {
+    Wire.beginTransmission(ADS1115_ADDR);
+    Wire.write(ADS_REG_CONV);
+    if (Wire.endTransmission() != 0) return false;
+    if (Wire.requestFrom((uint8_t)ADS1115_ADDR, (uint8_t)2) != 2) return false;
+    uint16_t raw = (Wire.read() << 8) | Wire.read();
+    if ((int16_t)raw < 0) raw = 0;
+    *out_val = raw;
+    return true;
+}
+
+static inline uint16_t median_of_3(uint16_t a, uint16_t b, uint16_t c) {
+    if ((a <= b && b <= c) || (c <= b && b <= a)) return b;
+    if ((b <= a && a <= c) || (c <= a && a <= b)) return a;
+    return c;
+}
+
+// ==============================================================================
+// 5. FREERTOS TASKS
+// ==============================================================================
+void SensorSamplingTask(void *pvParameters) {
+    esp_task_wdt_add(NULL);
+
+    static uint16_t fsr_history[5][3] = {{0}};
+    static float fsr_ema[5] = {0};
+    uint8_t sample_idx = 0;
+
+    uint8_t ads_channel = 0;
+    uint16_t emg[2] = {0, 0};
+    uint16_t eeg = 0;
+    bool ads_ok = true;
+    uint8_t consecutive_errors = 0;
+
+    for (;;) {
+        esp_task_wdt_reset();
+
+        // 1. Read FSRs (ADC1: GPIO 32-36)
+        uint16_t raw_fsr[5];
+        raw_fsr[0] = analogRead(PIN_FSR_THUMB);
+        raw_fsr[1] = analogRead(PIN_FSR_INDEX);
+        raw_fsr[2] = analogRead(PIN_FSR_MID);
+        raw_fsr[3] = analogRead(PIN_FSR_RING);
+        raw_fsr[4] = analogRead(PIN_FSR_LITTLE);
+
+        uint16_t filtered_fsr[5];
+        for (int i = 0; i < 5; ++i) {
+            fsr_history[i][sample_idx] = raw_fsr[i];
+            uint16_t med = median_of_3(fsr_history[i][0], fsr_history[i][1], fsr_history[i][2]);
+            fsr_ema[i] = 0.6f * med + 0.4f * fsr_ema[i];
+            filtered_fsr[i] = (uint16_t)fsr_ema[i];
+        }
+        sample_idx = (sample_idx + 1) % 3;
+
+        // 2. Non-blocking ADS1115 read & cycle
+        uint16_t conv_val = 0;
+        if (ads1115_read_conversion(&conv_val)) {
+            consecutive_errors = 0;
+            ads_ok = true;
+            if (ads_channel == 0) emg[0] = conv_val;
+            else if (ads_channel == 1) emg[1] = conv_val;
+            else if (ads_channel == 2) eeg = conv_val;
+        } else {
+            consecutive_errors++;
+            g_ads_err_count++;
+            if (consecutive_errors >= 3) {
+                ads_ok = false;
+                set_hardware_oe(false); // Fail closed immediately
+                i2c_bus_recover();
+            }
+        }
+
+        ads_channel = (ads_channel + 1) % 3;
+        if (!ads1115_start_conversion(ads_channel)) {
+            consecutive_errors++;
+            g_ads_err_count++;
+            if (consecutive_errors >= 3) {
+                ads_ok = false;
+                set_hardware_oe(false);
+            }
+        }
+
+        // 3. Check physical E-stop immediately
+        if (digitalRead(PIN_ESTOP) == LOW) {
+            set_hardware_oe(false);
+        }
+
+        // 4. Update shared data block
+        if (xSemaphoreTake(g_data_mutex, pdMS_TO_TICKS(2)) == pdTRUE) {
+            g_shared_emg[0] = emg[0];
+            g_shared_emg[1] = emg[1];
+            g_shared_eeg = eeg;
+            for (int i = 0; i < 5; ++i) g_shared_fsr[i] = filtered_fsr[i];
+            g_shared_ads_ok = ads_ok;
+            xSemaphoreGive(g_data_mutex);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(2));
+    }
+}
+
+void SupervisorUartTask(void *pvParameters) {
+    esp_task_wdt_add(NULL);
+
+    frame_parser_t parser;
+    parser.init();
+
+    uint32_t last_sensor_tx_ms = 0;
+    uint32_t last_status_tx_ms = 0;
+    uint32_t last_usb_debug_ms = 0;
+    uint8_t tx_buf[64];
+
+    for (;;) {
+        esp_task_wdt_reset();
+        uint32_t now = millis();
+
+        // 1. Process UART2 Incoming from Jetson
+        while (Serial2.available() > 0) {
+            uint8_t b = Serial2.read();
+            uint8_t msg_type = 0;
+            uint8_t seq = 0;
+            const uint8_t *payload = NULL;
+            uint8_t len = 0;
+
+            if (parser.feed(b, &msg_type, &seq, &payload, &len)) {
+                if (msg_type == MSG_TYPE_HEARTBEAT && len == 2) {
+                    const heartbeat_payload_t *hb = (const heartbeat_payload_t *)payload;
+                    g_supervisor.process_heartbeat(hb->arm_request, now);
+                } else if (msg_type == MSG_TYPE_CONFIG && len == 6) {
+                    const config_payload_t *cfg = (const config_payload_t *)payload;
+                    g_config.force_ceiling = cfg->force_ceiling;
+                    g_config.hb_timeout_ms = cfg->hb_timeout_ms;
+                    g_config.force_hold_ms = cfg->force_hold_ms;
+                    ack_nack_payload_t ack = {.ref_type = MSG_TYPE_CONFIG, .ref_seq = seq, .code = 0};
+                    size_t enc_len = frame_encode(MSG_TYPE_ACK_NACK, g_tx_seq++, (const uint8_t *)&ack, sizeof(ack), tx_buf, sizeof(tx_buf));
+                    Serial2.write(tx_buf, enc_len);
+                } else if (msg_type == MSG_TYPE_CLEAR_FAULT && len == 0) {
+                    bool cleared = g_supervisor.clear_fault();
+                    ack_nack_payload_t ack = {
+                        .ref_type = MSG_TYPE_CLEAR_FAULT,
+                        .ref_seq = seq,
+                        .code = (uint8_t)(cleared ? 0 : 1)
+                    };
+                    size_t enc_len = frame_encode(MSG_TYPE_ACK_NACK, g_tx_seq++, (const uint8_t *)&ack, sizeof(ack), tx_buf, sizeof(tx_buf));
+                    Serial2.write(tx_buf, enc_len);
+                }
+            }
+        }
+
+        // 2. Read E-Stop switch
+        g_supervisor.estop_pressed = (digitalRead(PIN_ESTOP) == LOW);
+        if (g_supervisor.estop_pressed) {
+            set_hardware_oe(false);
+        }
+
+        // 3. Snapshot shared sensor data
+        uint16_t local_emg[2] = {0};
+        uint16_t local_eeg = 0;
+        uint16_t local_fsr[5] = {0};
+        bool local_ads_ok = false;
+
+        if (xSemaphoreTake(g_data_mutex, pdMS_TO_TICKS(2)) == pdTRUE) {
+            local_emg[0] = g_shared_emg[0];
+            local_emg[1] = g_shared_emg[1];
+            local_eeg = g_shared_eeg;
+            for (int i = 0; i < 5; ++i) local_fsr[i] = g_shared_fsr[i];
+            local_ads_ok = g_shared_ads_ok;
+            xSemaphoreGive(g_data_mutex);
+        }
+
+        // 4. Update Supervisor State Machine & OE
+        g_supervisor.update(&g_config, now, local_fsr, local_ads_ok);
+        set_hardware_oe(g_supervisor.oe_enabled);
+
+        // 5. Send 100 Hz SENSOR packet to Jetson
+        if (now - last_sensor_tx_ms >= SENSOR_INTERVAL_MS) {
+            last_sensor_tx_ms = now;
+            sensor_payload_t s_msg;
+            s_msg.t_ms = now;
+            s_msg.emg[0] = local_emg[0];
+            s_msg.emg[1] = local_emg[1];
+            s_msg.eeg = local_eeg;
+            for (int i = 0; i < 5; ++i) s_msg.fsr[i] = local_fsr[i];
+            s_msg.flags = g_supervisor.get_flags();
+
+            size_t enc_len = frame_encode(MSG_TYPE_SENSOR, g_tx_seq++, (const uint8_t *)&s_msg, sizeof(s_msg), tx_buf, sizeof(tx_buf));
+            if (enc_len > 0) Serial2.write(tx_buf, enc_len);
+        }
+
+        // 6. Send 2 Hz STATUS packet to Jetson
+        if (now - last_status_tx_ms >= STATUS_INTERVAL_MS) {
+            last_status_tx_ms = now;
+            uint32_t hb_age = (g_supervisor.last_heartbeat_time_ms > 0) ? (now - g_supervisor.last_heartbeat_time_ms) : 65535;
+            if (hb_age > 65535) hb_age = 65535;
+
+            status_payload_t st_msg;
+            st_msg.fw_version = FW_VERSION;
+            st_msg.reset_reason = (uint8_t)esp_reset_reason();
+            st_msg.fault_code = (uint8_t)(g_supervisor.latched_fault ? 1 : 0);
+            st_msg.rx_err = parser.crc_errors;
+            st_msg.ads_err = g_ads_err_count;
+            st_msg.hb_age_ms = (uint16_t)hb_age;
+
+            size_t enc_len = frame_encode(MSG_TYPE_STATUS, g_tx_seq++, (const uint8_t *)&st_msg, sizeof(st_msg), tx_buf, sizeof(tx_buf));
+            if (enc_len > 0) Serial2.write(tx_buf, enc_len);
+        }
+
+        // 7. Periodic USB Monitor to Laptop (1 Hz)
+        if (now - last_usb_debug_ms >= 1000) {
+            last_usb_debug_ms = now;
+            uint32_t hb_age = (g_supervisor.last_heartbeat_time_ms > 0) ? (now - g_supervisor.last_heartbeat_time_ms) : 9999;
+            Serial.printf("[VAPA DIAG] Seq:%u | HB_Age:%lums | Armed:%d | OE:%d | EStop:%d | Fault:%d | ADS:%s | FSR:[%u,%u,%u,%u,%u]\n",
+                          g_tx_seq, (unsigned long)hb_age,
+                          g_supervisor.armed, g_supervisor.oe_enabled,
+                          g_supervisor.estop_pressed, g_supervisor.latched_fault,
+                          local_ads_ok ? "OK" : "ERR",
+                          local_fsr[0], local_fsr[1], local_fsr[2], local_fsr[3], local_fsr[4]);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(2));
+    }
+}
+
+// ==============================================================================
+// 6. SETUP & LOOP
+// ==============================================================================
+void setup() {
+    // 1. CRITICAL FAIL-CLOSED ACTION: Immediately disable PCA9685 OE
+    pinMode(PIN_PCA9685_OE, OUTPUT);
+    digitalWrite(PIN_PCA9685_OE, HIGH); // HIGH = all servo PWM lines disabled
+
+    // 2. Hardware E-Stop pin (pullup)
+    pinMode(PIN_ESTOP, INPUT_PULLUP);
+
+    // 3. FSR ADC1 Configuration (0-3.3V range)
+    analogSetAttenuation(ADC_11db);
+
+    // 4. USB Debug Serial to Laptop
+    Serial.begin(USB_BAUD_LAPTOP);
+    delay(100);
+    Serial.println("\n========================================================");
+    Serial.println("  VAPA ESP32 Multi-Sensor & Supervisor (Rev 2 - Updated)");
+    Serial.println("========================================================");
+    Serial.println("  - TCA9548A & AS5600 Encoders: REMOVED");
+    Serial.println("  - Protocol: High-Speed VAPA Binary Frame (460,800 baud)");
+    Serial.println("  - Safety: Dual-core FreeRTOS supervisor with Watchdog");
+    Serial.println("  - UART2: GPIO 17 (TX) -> Jetson Pin 10, GPIO 16 (RX) <- Pin 8");
+    Serial.println("========================================================\n");
+
+    // 5. I2C Initialization for ADS1115 (Fast mode: 400 kHz)
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
+
+    // 6. High-Speed UART2 to Jetson Orin Nano
+    Serial2.begin(UART_BAUD_JETSON, SERIAL_8N1, PIN_UART_RX, PIN_UART_TX);
+
+    // 7. Supervisor State & Mutex Initialization
+    g_supervisor.init();
+    g_data_mutex = xSemaphoreCreateMutex();
+
+    // 8. Configure Hardware Task Watchdog (Core 2.x and 3.x compatible)
+#if defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
+    esp_task_wdt_config_t twdt_config = {
+        .timeout_ms = WATCHDOG_TIMEOUT_MS,
+        .idle_core_mask = 0,
+        .trigger_panic = true,
+    };
+    esp_task_wdt_init(&twdt_config);
+#else
+    esp_task_wdt_init(WATCHDOG_TIMEOUT_MS / 1000, true);
+#endif
+
+    // 9. Prime ADS1115 conversion
+    ads1115_start_conversion(0);
+
+    // 10. Launch FreeRTOS Tasks on Separate Cores
+    xTaskCreatePinnedToCore(
+        SensorSamplingTask,
+        "SensorTask",
+        4096,
+        NULL,
+        2,
+        NULL,
+        0 // Core 0: Sensor ADC sampling
+    );
+
+    xTaskCreatePinnedToCore(
+        SupervisorUartTask,
+        "SupervisorTask",
+        4096,
+        NULL,
+        3,
+        NULL,
+        1 // Core 1: Supervisor State Machine & 460800 UART Link
+    );
+}
+
+void loop() {
+    // Execution handled by FreeRTOS tasks; idle loop
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}

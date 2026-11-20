@@ -1,0 +1,764 @@
+================================================================================
+VAPA PROSTHETIC ARM — MINOR DECISIONS & COMMISSIONING LOG
+File: minor_decisions.txt
+Reference: README.md, docs/DECISIONS.md, VAPA_Robotic_Arm_Connection_Guide.pdf
+Date: 2026-11-18
+Platform: NVIDIA Jetson Orin Nano Super + ESP32 Safety Supervisor
+================================================================================
+
+1. OVERVIEW & SCOPE
+--------------------------------------------------------------------------------
+This document records bench troubleshooting observations, hardware verification
+findings, and minor engineering decisions established during the physical
+commissioning of the VAPA robotic arm stack against the Hardware Connection Guide
+Rev 2 and VAPA_Robotic_Arm_Connection_Guide.pdf.
+
+
+2. HARDWARE FINDINGS & PHYSICAL I2C BUS VERIFICATION
+--------------------------------------------------------------------------------
+
+[DEC-M01] PCA9685 Output Enable (/OE) Pin Behavior:
+- Question: Does tying PCA9685 /OE to GND prevent or disrupt I2C communication?
+- Finding: NO. /OE (pin 23 of PCA9685) is strictly an active-LOW gate for the
+  16 PWM output stages. When /OE is LOW, servo outputs are enabled; when HIGH,
+  outputs are High-Z.
+- Decision: /OE has zero effect on the internal I2C logic, register bank, or
+  ACK response. Grounding /OE for bench testing is acceptable for manual PWM
+  validation. In the final system, /OE is strictly controlled by ESP32 GPIO25
+  as an independent safety interlock (AGENTS.md Rule 8).
+
+[DEC-M02] Jetson Orin Nano 40-Pin Header I2C Bus Mapping:
+- Finding: The 40-pin header pins 3 and 5 correspond to Tegra controller
+  c250000.i2c, registered in the Linux kernel as /dev/i2c-7.
+- Pin Mapping:
+    Pin 1: 3.3V Logic Power
+    Pin 3: I2C1_SDA (Data)
+    Pin 5: I2C1_SCL (Clock)
+    Pin 6 / Pin 9: GND (System Ground)
+- Bus Scan: i2cdetect -y -r 7 successfully detected:
+    0x40: PCA9685 Primary Device Address
+    0x70: PCA9685 Power-On Default All-Call Broadcast Address
+
+[DEC-M03] Pin Order Discrepancy on PCA9685 Breakout vs Jetson:
+- Finding: The PCA9685 6-pin input header sequence is:
+    [GND, OE, SCL, SDA, VCC, V+]
+  Notice that SCL is pin 3 and SDA is pin 4 on the breakout.
+- On the Jetson 40-pin header:
+    Pin 3 is SDA, and Pin 5 is SCL.
+- Connecting pin 3 to pin 3 directly swaps SDA and SCL. Both lines will still
+  measure ~3.0V due to pull-up resistors, but i2cdetect will return all '--'.
+- Verification: Correcting the SDA/SCL swap with direct female-to-female jumper
+  wires immediately brought 0x40 and 0x70 online on /dev/i2c-7.
+
+[DEC-M04] TCA9548A Address Conflict vs Connection Guide Rev 1 (DEC-005):
+- Context: Section 9A and Step 16 of VAPA_Robotic_Arm_Connection_Guide.pdf
+  originally specified connecting TCA9548A A0, A1, A2 all to GND (address 0x70).
+- Finding: Because the PCA9685 boots with the All-Call address 0x70 enabled in
+  hardware, placing the TCA9548A at 0x70 causes an immediate address collision.
+  Both chips respond to 0x70 simultaneously, corrupting multiplexer switching.
+- Decision:
+  * Primary Path (Recommended / DEC-005): Separate pin A0 from A1/A2 and pull
+    A0 to 3.3V (setting TCA9548A address to 0x71). Pins A1 and A2 remain at GND.
+  * Safety Warning: Never tie 3.3V to A0 while A0 is bridged to A1/A2. Doing so
+    creates a direct 3.3V-to-GND dead short!
+  * Fallback Path (Software Workaround): If desoldering is impractical on bench,
+    the PCA9685 driver disables All-Call in MODE1, and config/hardware.yaml is
+    updated to address 112 (0x70).
+
+[DEC-M05] Soldered Main Board Diagnosis & Isolation:
+- Finding: Direct F-F jumpers from Jetson Pins 3/5 to the PCA9685 detect cleanly.
+  Routing through the soldered main board failed to detect any device.
+- Root Cause Checklist for Bench Technician:
+    1. Mirrored soldering: Perfboard bottom-side soldering mirrors left/right,
+       frequently swapping SDA and SCL on socket headers.
+    2. Solder whiskers/bridges between adjacent SDA and SCL socket pads.
+    3. Bus clamping: Another unpowered or improperly oriented module (e.g.,
+       TCA9548A, ADS1115, ESP32) pulling SDA/SCL to ground via ESD protection diodes.
+
+
+3. SOFTWARE RUNTIME CORRECTIONS APPLIED
+--------------------------------------------------------------------------------
+
+[DEC-M06] Bench & Calibration Import Path Resolution:
+- Added automatic repository root injection to sys.path across all 17 scripts
+  in tools/bench/ and tools/calibration/ so they run directly via standard
+  'python3 tools/bench/<script>.py' without needing manual PYTHONPATH exports.
+
+[DEC-M07] Application Arguments & Systemd Service Alignment:
+- Added '--log-level' CLI argument to vapa/app/main.py.
+- Updated scripts/systemd/vapa.service to pass '--headless' and '--log-level INFO'
+  for clean background daemon execution.
+
+[DEC-M08] HIL Check Script Exception Handling:
+- Fixed uninitialized 'esp' variable reference in tools/bench/hil_system_check.py
+  when UART connection fails, preventing unhandled UnboundLocalError crashes.
+
+[DEC-M09] Headless ASCII Dashboard Support:
+- Enabled ASCII text-based dashboard rendering in vapa/ui/status_screen.py
+  when running in headless mode (--headless), allowing real-time monitoring
+  via SSH terminals without requiring X11 display forwarding.
+
+
+4. TCA9548A MULTIPLEXER RESOLUTION & ADDRESSING
+--------------------------------------------------------------------------------
+
+[DEC-M10] Solder-Bridged TCA9548A A0/A1/A2 Handling (Hardware vs Software Paths):
+- Bench Finding: Operator confirmed that pins A0, A1, and A2 on the physical
+  TCA9548A breakout board are soldered together and pulled to ground.
+- Conflict Mechanism: When A0, A1, and A2 are grounded, TCA9548A selects I2C
+  address 0x70. Because the PCA9685 power-on default hardware configuration has
+  the All-Call broadcast address 0x70 enabled in MODE1, both chips acknowledge
+  address 0x70 simultaneously. This results in bus contention, garbled ACK bits,
+  and failure to route sensor channels.
+- Resolution Options:
+  * Primary Path (Recommended / DEC-005):
+    1. Mechanically desolder or sever the bridge between A0 and A1/A2 using solder
+       wick or a precision hobby knife.
+    2. DMM Verification: With power off, verify open circuit (> 100 kΩ) between
+       pin A0 and GND.
+    3. Connect pin A0 to 3.3V logic power (VCC). Leave A1 and A2 tied to GND.
+    4. CRITICAL SAFETY WARNING: Under NO circumstances apply 3.3V directly to A0
+       while A0 is still bridged to A1/A2. Doing so creates a direct dead short
+       from the 3.3V rail to GND, risking destruction of the Jetson's power rail!
+    5. Outcome: TCA9548A moves permanently to address 0x71 (113 decimal).
+  * Fallback Path (Software Workaround without Desoldering):
+    1. In config/hardware.yaml, set tca9548a.address to 112 (0x70):
+         jetson:
+           tca9548a:
+             address: 112
+    2. Enforce Strict Initialization Sequencing: The PCA9685 driver MUST be
+       initialized first at address 0x40 to clear MODE1 bit 0 (ALLCALL disabled).
+       Once All-Call is cleared, PCA9685 unhooks from 0x70, allowing subsequent
+       access to TCA9548A at 0x70 without collision.
+    3. Tooling Compatibility: tools/calibration/calibrate_encoders.py and
+       tools/bench/test_encoders.py have been updated to dynamically query
+       config/hardware.yaml so both 0x71 and 0x70 work transparently.
+
+[DEC-M11] TCA9548A Multiplexer Downstream Topology & AS5600 Encoders:
+- Downstream Channel Topology:
+    Channel 0: Finger Group AS5600 Magnetic Rotary Encoder (Address 0x36)
+    Channel 1: Wrist Flexion/Extension AS5600 Magnetic Rotary Encoder (Address 0x36)
+    Channel 2: Wrist Pronation/Supination AS5600 Magnetic Rotary Encoder (Address 0x36)
+    Channel 3: Forearm Rotation AS5600 Magnetic Rotary Encoder (Address 0x36)
+    Channels 4-7: Reserved / Unused
+- Mux Switching Safety Invariant: The TCA9548A control register must only have
+  at most one channel bit enabled at any time (1 << ch). Enabling multiple
+  channels simultaneously shorts downstream I2C sub-buses together, causing
+  address collisions between the four identical 0x36 AS5600 encoders.
+
+[DEC-M18] TCA9548A /RESET Pin Float Behavior (1.749V) & Address Pin Grounding:
+- Bench Observation: Multimeter measurement revealed the TCA9548A /RESET pin sitting
+  at 1.749V while connected to the system.
+- Root Cause: On 3.3V CMOS logic, an unconnected input floats near half-rail (~1.65V
+  to 1.75V) due to internal ESD protection diode balance. The TCA9548A /RESET pin is
+  active-LOW with a minimum input HIGH threshold (V_IH) of 0.7 * VCC = 2.31V.
+  At 1.749V (< 2.31V), the internal reset circuitry remains asserted or in an
+  indeterminate state, completely disabling the I2C interface so the chip never
+  sends an ACK to 0x71 or 0x70.
+- Mandatory Action: /RESET MUST be pulled solidly to 3.3V (VCC) via a direct tie
+  or a 10 kΩ pull-up resistor, bringing its voltage to 3.30V.
+- Address Pin Grounding Rule (A1 & A2): Do NOT disconnect A1 and A2 from ground!
+  High-impedance CMOS address lines must never be left floating. Floating address
+  lines pick up RF noise, oscillate, and cause the I2C address to jump randomly
+  between 0x70, 0x71, 0x73, and 0x77. For reliable address 0x71, A0 must be tied
+  to 3.3V, and A1 and A2 MUST remain solidly tied to GND.
+
+[DEC-M19] Connection Guide Rev 1 Omission of TCA9548A /RESET vs Breakout Clones:
+- Discrepancy: Section 9A of VAPA_Robotic_Arm_Connection_Guide.pdf lists VCC, GND,
+  SDA, SCL, A0, A1, A2, and channel pins, but omits the /RESET pin entirely.
+- Cause: The guide assumed an official Adafruit TCA9548A breakout board, which has
+  an onboard 10 kΩ pull-up resistor pre-soldered between /RESET and VIN. On Adafruit
+  boards, leaving /RESET disconnected works because the onboard resistor automatically
+  pulls it to 3.3V.
+- Clone Board Hazard: Generic / clone breakout boards (e.g. purple CJMCU modules)
+  often omit the onboard pull-up resistor or leave the footprint unpopulated.
+  Consequently, leaving /RESET disconnected leaves it floating at 1.749V, shutting
+  down the multiplexer.
+- 3.3V Rail Sharing Rule: It is 100% electrically safe and standard engineering practice
+  to connect /RESET to the exact same 3.3V rail/wire where A0 and VCC are connected.
+  Both A0 and /RESET are high-impedance CMOS inputs drawing < 1 µA of leakage current.
+  The connection can be made either by wiring /RESET to Jetson 3.3V alongside A0, or
+  by placing a small solder jumper directly between the /RESET and VCC header pins
+  on the TCA9548A module.
+
+[DEC-M20] Diagnostic Protocol for Total I2C Inactivity Following /RESET Pull-Up:
+- Bench Observation: After connecting the TCA9548A /RESET pin to the Jetson 3.3V rail,
+  executing 'i2cdetect -y -r 7' returned all null values (all '--' from 0x03 to 0x77).
+- Low-Level Kernel Analysis: Direct SMBus byte probing across target addresses (0x40,
+  0x70, 0x71) confirmed OSError [Errno 121] Remote I/O error (standard NACK).
+  SCL is pulsing normally and SDA is pulled HIGH, but no device on the bus is pulling
+  SDA LOW during the 9th clock pulse to acknowledge.
+- Root Cause Differential:
+    1. Common Ground Disconnection: GND jumper between Jetson (Pin 6/9) and the module
+       came loose during rewiring. Without a common 0V reference, the chip cannot pull
+       SDA low relative to Jetson GND, causing all addresses to return NACK.
+    2. Reset Pin Voltage Ineffective: If the wire has a cold joint or is plugged into
+       an inactive header pin, /RESET may still be floating at 1.75V or grounded (< 2.31V).
+    3. 3.3V Power Rail Clamping / Short: If 3.3V was accidentally connected to a pin
+       bridged to GND (such as A0 while still soldered to A1/A2/GND), the Jetson 3.3V
+       rail drops to 0V, unpowering all I2C logic.
+    4. Upstream vs Downstream Port Inversion: Jumper wires mistakenly connected to
+       downstream channel pins (SD0/SC0) instead of main upstream SDA/SCL. Because all
+       channels boot disabled, upstream remains completely silent.
+    5. Pin Displacement / Offset: Breakout pin sequence [VIN, GND, SDA, SCL, RST, A0, A1, A2]
+       has RST immediately adjacent to SCL and A0; inserting the wire may have shifted
+       SCL or SDA off by one pin.
+- Systematic 4-Point DMM Triage Protocol:
+    Step 1 (With Power ON): Measure DC voltage from Jetson Pin 6 (GND) to:
+      * Jetson Pin 1 (3.3V Rail): Must read 3.25V – 3.33V (confirms 3.3V rail is alive).
+      * TCA9548A VCC Pin: Must read 3.25V – 3.33V (confirms chip has power).
+      * TCA9548A /RESET Pin: Must read 3.25V – 3.33V (must be > 2.31V V_IH threshold).
+      * TCA9548A SDA & SCL: Must read ~3.3V idle.
+    Step 2 (With Power OFF): Measure continuity (Ohms) from Jetson Pin 6 (GND) to:
+      * TCA9548A GND Pin: Must read < 1.0 Ω (confirms solid ground return).
+    Step 3 (Isolation Check): Temporarily disconnect ONLY the new /RESET wire.
+      * If PCA9685 (0x40) reappears, the /RESET wire was touching a shorted node or
+        clamping the rail.
+      * If all '--' persists, inspect physical seating of common GND and SDA/SCL.
+
+[DEC-M26] Flying-Lead TCA9548A Multiplexer Re-Integration & Dual-Device Coexistence:
+- Objective: Re-integrate TCA9548A multiplexer onto Jetson I2C Bus 7 in complete mid-air
+  isolation (bypassing the damaged soldered board) alongside the verified PCA9685.
+- 6-Pin Flying Wire Topology for TCA9548A:
+    1. Jetson Pin 17 (3.3V Aux) --> TCA9548A Pin 1 (VIN)
+    2. Jetson Pin 9 (GND Aux)   --> TCA9548A Pin 2 (GND)
+    3. Jetson Pin 3 (SDA)       --> TCA9548A Pin 3 (SDA) [Paralleled with PCA9685 Pin 4]
+    4. Jetson Pin 5 (SCL)       --> TCA9548A Pin 4 (SCL) [Paralleled with PCA9685 Pin 3]
+    5. TCA9548A Pin 5 (/RESET)  --> Jumpered to Pin 1 (VIN / 3.3V) [Mandatory for clone boards, DEC-M18]
+    6. TCA9548A Pin 6 (A0)      --> Jumpered to Pin 1 (VIN / 3.3V) [Sets Address to 0x71, DEC-005]
+    7. TCA9548A Pins 7 & 8 (A1, A2) --> Jumpered to Pin 2 (GND) [Solid low reference]
+- Bus Coexistence Validation:
+    * Run 'i2cdetect -y -r 7'.
+    * Expected Output:
+        - 0x40: PCA9685 PWM Controller
+        - 0x71: TCA9548A I2C Multiplexer
+    * Pass Criteria: Both devices ACK reliably across 10 consecutive scans without bus lockup
+      or clock stretching errors. Address 0x70 remains suppressed (DEC-M25).
+
+[DEC-M27] Downstream AS5600 Magnetic Rotary Encoder Bus & Magnet Alignment Diagnostics:
+- Downstream Channel Routing (TCA9548A Channels 0..3):
+    * Channel 0: Finger Group AS5600 (tendon capstan spool angle)
+    * Channel 1: Wrist Flexion/Extension AS5600
+    * Channel 2: Wrist Pronation/Supination AS5600
+    * Channel 3: Forearm Rotation AS5600
+- Channel Switching Safety Invariant:
+    * The control register (written to 0x71) must contain strictly a 1-hot bitmask (1 << ch).
+    * Writing 0x00 deselects all channels immediately to isolate downstream branches.
+- AS5600 Magnetic Alignment Status Register (Address 0x36, Register 0x0B):
+    * Bit 5 (MD - Magnet Detected): Must be 1.
+    * Bit 4 (ML - Magnet too Low): Must be 0 (if 1, magnet is too far away; air gap > 2.0 mm).
+    * Bit 3 (MH - Magnet too High): Must be 0 (if 1, magnet is too close; air gap < 0.5 mm).
+- Interactive Verification Tool:
+    * Human operator command: python3 tools/bench/test_encoders.py
+    * Interactive readout prints angle in degrees, MD status, and automatic gain control (AGC)
+      value (register 0x1A, optimal range 64..192 counts).
+    * Calibration offsets (zero mechanical position) are saved to config/hardware.yaml
+      via tools/calibration/calibrate_encoders.py.
+
+
+5. SOLDERED MAIN BOARD COMMISSIONING & DIAGNOSTIC MATRIX
+--------------------------------------------------------------------------------
+
+[DEC-M12] Systematic Soldered Board Continuity & Isolation Matrix:
+- Finding: Direct female-to-female jumper wires from Jetson Pins 3 & 5 to PCA9685
+  successfully detected 0x40 and 0x70. When connected through the soldered main
+  board socket, i2cdetect returned all '--'.
+- DMM Continuity Check Protocol (Perform with system powered OFF and Jetson disconnected):
+  +----------------------+--------------------+--------------------+-------------------------------+
+  | Source (Jetson 40P)  | Target (PCA9685)   | Expected Reading   | Failure Root Cause            |
+  +----------------------+--------------------+--------------------+-------------------------------+
+  | Pin 1 (3.3V Logic)   | Pin 5 (VCC)        | < 1.0 Ω (Beep)     | Broken VCC trace / cold joint |
+  | Pin 6 / 9 (GND)      | Pin 1 (GND)        | < 1.0 Ω (Beep)     | Broken ground trace           |
+  | Pin 3 (I2C1_SDA)     | Pin 4 (SDA)        | < 1.0 Ω (Beep)     | Trace swapped or broken       |
+  | Pin 5 (I2C1_SCL)     | Pin 3 (SCL)        | < 1.0 Ω (Beep)     | Trace swapped or broken       |
+  | Pin 4 (PCA SDA)      | Pin 3 (PCA SCL)    | > 10 kΩ (OL / Open)| Solder whisker / bridge       |
+  | Pin 1 (3.3V Logic)   | Pin 6 (GND)        | > 1 kΩ (Open)      | Direct power-to-ground short  |
+  +----------------------+--------------------+--------------------+-------------------------------+
+
+[DEC-M13] Multi-Module Subtraction & Bus Clamping Isolation:
+- Root Cause Analysis: Direct jumpers confirmed the PCA9685 IC is functional.
+  Failure on the soldered board typically stems from:
+    1. Bottom-Side Perfboard Pin Mirroring: Viewing female header sockets from
+       underneath reverses left/right pin order, frequently swapping SDA and SCL.
+    2. Unpowered Module Clamping: If another module (e.g. TCA9548A, ADS1115, or
+       ESP32) is seated in a socket with an open or unpowered VCC pin, the chip's
+       internal ESD protection diodes will clamp SDA and SCL to ~0.5V to 0.7V,
+       preventing any I2C communication across the entire bus.
+- Progressive Subtraction Isolation Protocol:
+    1. Power down and remove all IC modules from sockets (PCA9685, TCA9548A, ADS1115).
+    2. Power on Jetson and measure voltage at Pin 3 (SDA) and Pin 5 (SCL):
+       both must read 3.2V to 3.3V (pull-up resistors healthy).
+    3. Plug in ONLY PCA9685 into its socket. Run 'i2cdetect -y -r 7'.
+       Expected: 0x40 and 0x70 appear.
+    4. If Step 3 succeeds, power down and insert TCA9548A. Power on and re-scan.
+       Expected: 0x40 and 0x71 (or 0x70).
+    5. If the bus locks up after inserting any module, that specific socket has
+       an inverted pinout, missing VCC rail, or defective IC.
+
+[DEC-M21] Soldered Board I2C Inversion & Routing Discontinuity Confirmation:
+- Bench Observations & Elimination Findings:
+    1. Multimeter confirmed /RESET pin reads 3.30V when tied to Jetson 3.3V rail.
+    2. Continuity test between module GND and Jetson Pin 6 verified solid at < 1.0 Ω.
+    3. Disconnecting /RESET produced identical scan output (all '--' on /dev/i2c-7).
+- Invariant Deduction:
+    * The /RESET pin was NOT the root cause of the silent bus. The 3.30V reading confirmed
+      the reset circuit was satisfied.
+    * Because PCA9685 previously verified fully operational at 0x40 and 0x70 when connected
+      via direct female-to-female jumpers (DEC-M03 / DEC-M12), the failure of BOTH PCA9685
+      and TCA9548A when routed through the soldered board isolates the defect to the
+      physical board's I2C signal lines (SDA/SCL).
+- Critical Pinout Inversion Between PCA9685 and TCA9548A Breakouts:
+    * PCA9685 6-pin Header: [GND, OE, SCL, SDA, VCC, V+]  --> Pin 3 is SCL, Pin 4 is SDA.
+    * TCA9548A 8-pin Header: [VIN, GND, SDA, SCL, RST, A0, A1, A2] --> Pin 3 is SDA, Pin 4 is SCL.
+    * Jetson 40-pin Header: Pin 3 is SDA, Pin 5 is SCL.
+    * Notice: SCL and SDA are physically INVERTED between the two breakout boards. If the
+      soldered board routed pin 3 to pin 3 and pin 4 to pin 4 between sockets, or mirrored
+      pins during bottom-side perfboard soldering, SDA and SCL are crossed.
+- Mandatory Actionable DMM Diagnostic Protocol:
+    1. Short Test (Power OFF): Measure resistance between SDA and SCL on the board.
+       Target: > 10 kΩ (OL). If < 10 Ω, adjacent pads are bridged with solder.
+    2. End-to-End Trace Mapping (Power OFF):
+       - Jetson Pin 3 (SDA) -> PCA9685 Pin 4 (SDA) AND TCA9548A Pin 3 (SDA).
+       - Jetson Pin 5 (SCL) -> PCA9685 Pin 3 (SCL) AND TCA9548A Pin 4 (SCL).
+    3. Direct Jumper Bypass Test: Connect TCA9548A directly to Jetson Pins 3 & 5 using
+       jumper wires (bypassing the soldered board). Both 0x71 and 0x40 will be confirmed.
+
+[DEC-M22] Isolation of PCA9685 & Residual Perfboard Wire Stub Hazards:
+- Bench Action: Operator cut all wiring to the TCA9548A multiplexer module to
+  isolate the PCA9685 PWM driver directly to the Jetson I2C bus (Pins 3 & 5).
+  Cut wire stubs remain soldered to the perfboard.
+- Critical Electrical Hazards & Mitigations:
+    1. Short-Circuit Hazard on Perfboard Stubs: Exposed copper strands on cut
+       wire stubs can easily bridge adjacent pads, 3.3V/5V/6V power rails, or GND.
+       A short between 3.3V and GND will collapse the Jetson power rail.
+       * Mandatory Action: Trim all wire stubs flush with the perfboard, desolder
+         them, or insulate each exposed end with heat shrink or electrical tape.
+    2. Parallel Trace Interference: If the PCA9685 remains plugged into its
+       perfboard socket while flying jumper leads are attached, any existing
+       short or solder bridge on the perfboard traces remains in parallel with
+       the bus lines.
+       * Recommendation: Remove the PCA9685 breakout entirely from the perfboard
+         socket and connect it purely via flying jumper wires in mid-air.
+    3. Mandatory 4-Wire Connection for PCA9685:
+       Connecting ONLY SDA and SCL is insufficient; common GND and VCC logic
+       power are mandatory:
+         * Jetson Pin 1 (3.3V)   --> PCA9685 Pin 5 (VCC)
+         * Jetson Pin 6/9 (GND)  --> PCA9685 Pin 1 (GND)
+         * Jetson Pin 3 (SDA)    --> PCA9685 Pin 4 (SDA)
+         * Jetson Pin 5 (SCL)    --> PCA9685 Pin 3 (SCL)
+    4. Expected Bus Response: With TCA9548A removed and PCA9685 wired cleanly,
+       'i2cdetect -y -r 7' should immediately detect 0x40 (and 0x70).
+
+[DEC-M23] PCA9685 Standalone Power Failure Triage & Jetson 3.3V Rail Recovery:
+- Bench Observation: Connecting the PCA9685 breakout board directly via jumper
+  wires resulted in zero power (onboard PWR LED remains unlit).
+- Root Cause Differential:
+    1. VCC vs V+ Pin Confusion: The PCA9685 breakout board's onboard green Power
+       LED and logic circuitry are powered strictly from Pin 5 (VCC). The green
+       screw terminal and Pin 6 (V+) power only the servos, not the chip logic.
+       Connecting 3.3V to V+ leaves the chip unpowered.
+    2. Jetson PMIC 3.3V Rail Overcurrent Trip: If exposed perfboard wire stubs
+       shorted 3.3V to GND during wire cutting, the Tegra PMIC shuts off the
+       3.3V rail. Voltage between Pin 1 and Pin 6 drops to 0V.
+       * Recovery: Full power cycle (unplug barrel jack for 15s) resets PMIC latch.
+    3. Dual 3.3V Pin Redundancy: If Jetson Pin 1 was damaged or tripped, Pin 17
+       is an independent 3.3V logic supply on the 40-pin header.
+    4. 40-Pin Header Zigzag Counting Error: Pin 1 and Pin 3 are on Row 1 (inner),
+       while Pin 2, 4, 6 are on Row 2 (outer). Linear row-wise counting connects
+       to incorrect pins (e.g. Pin 3 instead of Pin 2, Pin 5 instead of Pin 3).
+
+[DEC-M24] PCA9685 Standalone 3.3V Power Restoration & Bus Recognition (0x40 & 0x70):
+- Bench Observation & Triage:
+    * Follow-up to DEC-M23: Multimeter probe across Jetson Pin 1 (3.3V) and Pin 6 (GND).
+    * If 0.0V measured: Confirmed Tegra PMIC short-circuit shutdown latch caused by
+      exposed perfboard wire-cutting stubs.
+    * Latch Clearing Action: Disconnect 19V DC barrel jack power to Jetson for 15-20 seconds
+      to allow internal bulk capacitors to fully discharge. Re-insert power barrel jack and
+      allow JetPack to boot. Confirm Pin 1 reads 3.30V ± 0.05V with DMM.
+    * Header Zigzag Count Verification:
+      Inner Row 1 (pins closer to SoC heatsink):
+        Pin 1 (3.3V), Pin 3 (I2C1_SDA), Pin 5 (I2C1_SCL), Pin 7 (GPIO), Pin 9 (GND), Pin 17 (3.3V Aux).
+      Outer Row 2 (pins closer to board edge):
+        Pin 2 (5.0V), Pin 4 (5.0V), Pin 6 (GND), Pin 8 (UART TX), Pin 10 (UART RX).
+- Dedicated 4-Wire Flying Jumper Connections (Mid-Air Isolation):
+    1. Jetson Pin 1 (3.3V)   --> PCA9685 Pin 5 (VCC) [Confirm Onboard Green PWR LED lights up].
+    2. Jetson Pin 6 (GND)    --> PCA9685 Pin 1 (GND).
+    3. Jetson Pin 3 (SDA)    --> PCA9685 Pin 4 (SDA).
+    4. Jetson Pin 5 (SCL)    --> PCA9685 Pin 3 (SCL).
+    * Note: PCA9685 Pin 2 (/OE) and Pin 6 (V+) are left DISCONNECTED during initial bus scan.
+- Confirmed Bus Recognition:
+    * Run 'i2cdetect -y -r 7'.
+    * Expected Output:
+        - Address 0x40: PCA9685 PWM Driver active.
+        - Address 0x70: PCA9685 Default Power-On All-Call Address active.
+
+[DEC-M25] PCA9685 All-Call Address Suppression & Register Verification:
+- Problem: The power-on default All-Call broadcast address 0x70 conflicts with TCA9548A
+  if its address pins are pulled to ground.
+- Root Cause: PCA9685 register 0x00 (MODE1) powers on with bit 0 (ALLCALL) set to 1.
+- Invariant & Mitigation:
+    * The VAPA PCA9685 driver ('vapa/hal/pca9685.py') explicitly suppresses All-Call during
+      initialization when 'disable_allcall: true' is configured in config/hardware.yaml.
+    * Manual Register Clear Command (via SMBus / i2c-tools):
+        i2cset -y 7 0x40 0x00 0x00
+      Writing 0x00 to MODE1 clears ALLCALL, SLEEP, and restart bits, disabling 0x70.
+    * Bus Scan Re-check: 'i2cdetect -y -r 7' now shows strictly 0x40; address 0x70 disappears.
+
+[DEC-M30] Bus 1 (c240000.i2c) INA3221 / FUSB301 False Positive & Header Pin 27/28 (ID_I2C) Trap:
+- Bench Observation: Operator moved SDA to Pin 27 and SCL to Pin 28, then executed
+  'sudo i2cdetect -y -r 1'. Scan returned:
+    Address 0x25: 'UU'
+    Address 0x40: 'UU'
+    All other addresses: '--'
+- In-Depth Architecture Analysis & Root Cause:
+    1. 'UU' Does NOT Mean PCA9685:
+       The symbol 'UU' indicates that an address is actively claimed and reserved
+       by a Linux kernel device driver. An unconfigured external I2C device always
+       reports numeric hex (e.g. '40'), NEVER 'UU'.
+    2. Bus 1 (c240000.i2c) is Strictly Internal:
+       On the NVIDIA Jetson Orin Nano, /dev/i2c-1 is an internal system monitoring bus
+       soldered directly on the module/carrier board:
+         - 0x40 ('UU') is the Texas Instruments INA3221 triple-channel power/current
+           monitor IC (/sys/bus/i2c/devices/1-0040, driver 'ina3221').
+         - 0x25 ('UU') is the ON Semiconductor FUSB301 USB Type-C controller
+           (/sys/bus/i2c/devices/1-0025, driver 'fusb301').
+       This bus does NOT connect to external expansion header pins.
+    3. Pin 27 and Pin 28 Functionality:
+       On the Jetson 40-pin header, Pin 27 (ID_SD) and Pin 28 (ID_SC) connect to
+       controller 3160000.i2c, registered in Linux as /dev/i2c-0. This bus is dedicated
+       to the HAT ID EEPROM (addresses 0x50 and 0x57) and lacks standard pull-up
+       resistors for general peripherals.
+    4. Mandatory User I2C Bus Mapping:
+       The general-purpose user I2C bus on the Jetson Orin Nano 40-pin header is
+       strictly:
+         - Pin 3: I2C1_SDA (Data)
+         - Pin 5: I2C1_SCL (Clock)
+       This controller is c250000.i2c, registered in Linux as /dev/i2c-7.
+- Resolution & Next Action:
+    1. Move SDA and SCL jumpers back to Jetson Pin 3 (SDA) and Pin 5 (SCL).
+    2. Ensure PCA9685 onboard green PWR LED is illuminated by supplying 3.3V to Pin 5 (VCC).
+    3. Execute scan strictly on bus 7: 'i2cdetect -y -r 7'.
+
+[DEC-M31] Silkscreen Name vs Header Pin Number Transposition Hazard & LED Power Triage:
+- Bench Observation: 'i2cdetect -y -r 7' returned all null values ('--' from 0x03 to 0x77).
+  Low-level SMBus probe confirmed OSError [Errno 121] Remote I/O error (standard NACK).
+  The Jetson Tegra I2C master controller is fully functional, generating start/clock cycles,
+  but receives zero ACK from the bus.
+- Critical Failure Mechanisms & Root Causes:
+    1. Pin Number 1:1 Transposition Hazard:
+       Connecting by pin index number (Jetson Pin N to PCA9685 Pin N) causes a catastrophic
+       signal swap:
+         - Jetson Pin 1 (3.3V) --> PCA9685 Pin 1 (GND) [Dead short across 3.3V power rail!]
+         - Jetson Pin 3 (SDA)  --> PCA9685 Pin 3 (SCL) [SDA and SCL swapped]
+         - Jetson Pin 5 (SCL)  --> PCA9685 Pin 5 (VCC) [Clock line shorted to power rail]
+         - Jetson Pin 6 (GND)  --> PCA9685 Pin 6 (V+)  [Ground tied to servo power]
+    2. Silkscreen-Strict Label Rule:
+       WIRING MUST BE PERFORMED STRICTLY BY PRINTED SILKSCREEN TEXT LABELS, NEVER PIN INDICES:
+         * Jetson Pin 1 (3.3V)  --> PCA9685 Pin labeled 'VCC' (Pin 5)
+         * Jetson Pin 9 (GND)   --> PCA9685 Pin labeled 'GND' (Pin 1)
+         * Jetson Pin 3 (SDA)   --> PCA9685 Pin labeled 'SDA' (Pin 4)
+         * Jetson Pin 5 (SCL)   --> PCA9685 Pin labeled 'SCL' (Pin 3)
+    3. All-Inner-Row Connection Rule (Eliminates Row-Hop Errors):
+       Jetson Pin 1 (3.3V), Pin 3 (SDA), Pin 5 (SCL), and Pin 9 (GND) are ALL on the
+       exact same INNER ROW (Row 1, nearest the SoC heatsink). By using Pin 9 instead
+       of Pin 6 for ground, the operator avoids jumping between inner and outer rows.
+    4. Onboard Green PWR LED Invariant:
+       The PCA9685 breakout board has a green SMD PWR LED wired directly across VCC and GND.
+       If this LED is OFF, the chip has zero logic power, and no I2C communication is possible.
+       The LED must be illuminated before running any software or bus scan.
+    5. Complete Perfboard Mechanical Isolation:
+       The PCA9685 module must be physically pulled out of any socket or perfboard and held
+       in mid-air via 4 flying jumper wires to guarantee no residual solder whiskers or
+       shorted traces interfere with the bus.
+
+[DEC-M32] Total Bus Inactivity Triage: Master vs Slave Hardware Elimination Protocol:
+- Context: Operator reported total failure across standard direct jumper configurations
+  ('all methodologies failed'). Bus scan on /dev/i2c-7 returns exclusively null values ('--').
+- Low-Level Master Verification:
+  Low-level SMBus software probe on Jetson returns OSError [Errno 121] (Remote I/O error).
+  This proves the Linux driver and Tegra hardware master initiated the 9-clock I2C frame
+  normally, confirming the failure is strictly at the physical layer: either the master pins
+  (Pin 3/5) are floating/damaged, or the slave module (PCA9685) is dead or unpowered.
+- 3-Phase Elimination Strategy:
+    Phase 1: Jetson Master Bus Health (Multimeter with Jetson Header Disconnected):
+      * Measure Pin 1 to Pin 9: Must be 3.25V – 3.33V (confirms 3.3V logic rail).
+      * Measure Pin 3 (SDA) to Pin 9 (GND): Must be 3.25V – 3.33V (confirms internal pull-up).
+      * Measure Pin 5 (SCL) to Pin 9 (GND): Must be 3.25V – 3.33V (confirms internal pull-up).
+      * Finding: If Pin 3 or 5 reads 0V with nothing connected, the bus is clamped or the
+        Tegra pin is damaged. If all read ~3.3V, the Jetson master hardware is 100% healthy.
+    Phase 2: PCA9685 Silicon Destruction Triage:
+      * Cutting perfboard wires with metallic clippers while powered or charged creates
+        instantaneous cross-shorts (e.g. 6V actuator power to 3.3V logic line).
+      * If the 28-pin PCA9685 IC gets warm or hot to the touch with only 3.3V applied, the
+        silicon has suffered an internal dielectric breakdown and is permanently destroyed.
+    Phase 3: Alternate Slave Substitution (Divide-and-Conquer):
+      * Connect an alternate known-good 3.3V I2C device (ADS1115 ADC at 0x48 or AS5600 at 0x36)
+        directly to Jetson Pins 1, 9, 3, 5.
+      * If alternate device appears on 'i2cdetect -y -r 7', the Jetson and wiring are proven
+        healthy, isolating the fault definitively to a damaged PCA9685 breakout board.
+
+[DEC-M33] Multi-Device Null ACK Root Cause: Common Rail Power/Ground Loss & Pin 17 Fallback:
+- Bench Finding: Operator confirmed both PCA9685 (no hot chip) and AS5600 encoder
+  return identical null scans (all '--'). Readings functioned properly yesterday, but
+  all devices fail today.
+- Root Cause Deduction:
+    Because two completely different ICs (PCA9685 and AS5600) both fail simultaneously
+    while neither is thermally shorted, individual chip destruction and address conflicts
+    are 100% ruled out. The failure is strictly in a COMMON hardware dependency shared by
+    both tests:
+      1. Jetson Pin 1 (3.3V) Rail Tripped or Damaged: Wire cutting on the perfboard
+         may have shorted Pin 1, tripping the PMIC or blowing the Pin 1 surface trace.
+      2. Ground Reference Disconnection: The ground jumper wire has an internal break
+         or is connected to an ungrounded pin. Without a 0V return, logic voltage across
+         the sensor is 0.0V.
+      3. Broken Jumper Wires: Reusing the same Dupont jumper wires for both devices
+         propagates an internal open-circuit wire fault.
+- Corrective Action:
+    1. Switch 3.3V supply wire from Pin 1 to Jetson Pin 17 (3.3V Auxiliary Supply).
+    2. Ground the sensor directly to the Jetson USB port metal chassis outer shield
+       (guaranteed chassis star ground) or Pin 14.
+    3. Replace all 4 jumper wires with fresh leads.
+    4. Verify PCA9685 green PWR LED illuminates before issuing any software commands.
+
+[DEC-M34] PCA9685 Detection Confirmation (0x40/0x70) & Virtualenv Site Packages Alignment:
+- Bench Milestone Achieved:
+    * 'i2cdetect -y -r 7' successfully confirmed PCA9685 online at address 0x40 and default All-Call 0x70!
+    * Physical power restoration to Pin 17/GND successfully re-established I2C communication.
+- Software Resolution (smbus2 ModuleNotFoundError):
+    * Running 'python3 tools/calibration/calibrate_system.py' initially threw:
+        'ModuleNotFoundError: No module named smbus2'
+      because the newly created '.venv' defaulted to isolated site packages.
+    * Enabled 'include-system-site-packages = true' in '.venv/pyvenv.cfg', cleanly linking
+      the system Tegra smbus2 package into '.venv'.
+- Calibration Execution Strategy (Staged vs Monolithic):
+    * 'tools/calibration/calibrate_system.py' is the master end-to-end qualification certificate
+      wizard and expects all 5 subsystems (PCA9685, TCA9548A, AS5600, ESP32 UART, RealSense)
+      active simultaneously.
+    * Because the TCA9548A mux was disconnected (DEC-M22) and ESP32 UART is not yet attached,
+      Steps 2, 3, and 4 naturally reported disconnected.
+    * Immediate Action: Calibrate the verified PCA9685 servos independently via the modular tool:
+        python3 tools/calibration/calibrate_servos.py
+
+
+6. ACTUATOR POWER & HARDWARE SAFETY INTERLOCK GATING
+--------------------------------------------------------------------------------
+
+[DEC-M14] Dual-Rail Power Architecture & Star Ground Reference:
+- Power Rail Separation:
+    * 3.3V Logic Rail: Sourced strictly from Jetson Pin 1 (3.3V, max 500 mA).
+      Powers PCA9685 VCC, TCA9548A VCC, and AS5600 encoders.
+    * 6.0V Actuator Rail: Sourced strictly from high-current bench DC supply
+      or 2S LiFePO4 battery (up to 20A peak). Connected to PCA9685 V+ and GND
+      screw terminals via physical E-Stop contactor / BTS50015 PROFET.
+    * MANDATORY SAFETY RULE: NEVER connect servo power (V+) to Jetson 5V or 3.3V
+      pins. Servo stall currents (2.5A per motor, up to 22.5A peak across 9 servos)
+      will vaporize Jetson carrier board traces and cause severe hardware damage.
+- Star Ground Bonding: The GND of the 6.0V servo supply, ESP32 GND, and Jetson
+  Pin 6 GND must meet at a single, low-impedance common star ground point on
+  the main board to ensure an identical voltage reference for PWM signals and
+  prevent ground bounce.
+
+[DEC-M15] ESP32 Output Enable (/OE) Safety Supervisor Bringup:
+- Active-LOW Hardware Output Gate:
+    * PCA9685 /OE (Pin 23) gates all 16 PWM output stages in hardware.
+    * Power-on Default: ESP32 GPIO25 boots in input/pull-up state, holding /OE
+      at 3.3V (HIGH / Disabled). Servos receive 0% duty cycle and remain completely
+      limp and backdriveable by hand without mechanical resistance.
+    * Arming Transition: Only after explicit operator command and all pre-flight
+      checks pass does ESP32 drive GPIO25 LOW (0V / Enabled).
+- Verification Procedure:
+    * Execution: python3 tools/bench/test_oe.py --channel 0
+    * Multimeter Check: Measure voltage between PCA9685 /OE and GND:
+        - In DISARMED state: 3.25V to 3.33V (HIGH).
+        - In ARMED state: < 0.1V (LOW).
+
+[DEC-M28] Actuator Rail 6.0V Bringup & ESP32 /OE Safety Supervisor Interlock:
+- Hardware Non-Negotiables Before Applying Servo Power:
+    1. Mechanical Tendon Disconnection: All nylon/Dyneema tendon lines must be completely
+       unhooked from servo horns. Servos must rotate completely free of mechanical load.
+    2. Physical Emergency Stop in Hand: Industrial latching mushroom switch wired in series
+       with the BTS50015 PROFET solid-state high-side switch gating the 6.0V rail.
+    3. Bench Power Supply Current Limit: Set bench DC power supply to 6.0V with current limit
+       set conservatively to 2.0A for single-joint bringup (preventing damage in case of stall).
+- Interlock Verification Protocol:
+    1. Phase 1 (Disarmed Baseline):
+       * Power up system with ESP32 flashed and Jetson running.
+       * Multimeter check: Measure voltage between PCA9685 /OE (Pin 2) and GND.
+         Must read 3.25V to 3.33V (HIGH / Disabled).
+       * Move servo horns gently by hand: Servos must be completely limp with 0 holding torque.
+    2. Phase 2 (ESP32 Arming Test):
+       * Run 'python3 tools/bench/test_oe.py --channel 0' (human-confirmed bench script).
+       * Multimeter check: /OE drops to < 0.1V (LOW / Enabled).
+       * Servo on Channel 0 engages neutral hold position (1500 µs).
+    3. Phase 3 (E-Stop Trigger Test):
+       * While armed, hit physical E-Stop button.
+       * ESP32 immediately de-asserts GPIO25 (driving /OE HIGH) and PROFET cuts 6V power.
+       * Servo immediately releases hold and returns to limp state in < 1 ms.
+
+
+7. RESUMING MASTER SYSTEM CALIBRATION (tools/calibration/calibrate_system.py)
+--------------------------------------------------------------------------------
+
+[DEC-M16] Master System Calibration Bringup Sequence:
+- Once I2C bus detection on the main board is verified (0x40 and 0x71/0x70 active),
+  resume calibration using the following step-by-step interactive workflow:
+    1. Step 1 (Servos):
+       python3 tools/calibration/calibrate_servos.py
+       - Verifies 9 actuator endpoints (pulse_min_us, pulse_max_us, neutral_us 1500 us)
+         with mechanical tendons unloaded and physical E-Stop in hand.
+       - Saves calibrated pulse ranges to config/servos.yaml.
+    2. Step 2 (Encoders):
+       python3 tools/calibration/calibrate_encoders.py
+       - Reads magnet detection (MD) and field strength (ML/MH) across 4 AS5600
+         encoders via TCA9548A, recording mechanical zero-angle offsets.
+       - Saves joint zero offsets and directions to config/hardware.yaml.
+    3. Step 3 (FSRs):
+       python3 tools/calibration/calibrate_fsr.py
+       - Calibrates 5 fingertip FSR402 sensors with tare and calibration weights.
+       - Saves piecewise voltage-to-gram curves to config/fsr.yaml.
+    4. Step 4 (EMG):
+       python3 tools/calibration/calibrate_emg.py
+       - Calibrates resting baseline noise and MVC on isolated MyoWare channels.
+       - Saves activation thresholds to config/emg.yaml.
+    5. Step 5 (Camera):
+       python3 tools/calibration/calibrate_camera.py
+       - Verifies Intel RealSense D435i depth alignment and 12x16 matrix bounds.
+    6. Master Qualification:
+       python3 tools/calibration/calibrate_system.py
+       - Runs full multi-subsystem check and issues signed calibration certificate
+         to config/calibration_certificate.yaml.
+
+[DEC-M17] Mock Simulation Fallback:
+- For software verification without physical hardware connected:
+    python3 tools/calibration/calibrate_system.py --mock
+  Simulates all 5 calibration steps and produces a mock qualification certificate.
+
+[DEC-M29] Master Hardware Bringup & Verification Progression Matrix:
+- Complete End-to-End Progression from Silent Bus to Fully Commissioned System:
+  +-------+-----------------------------+------------------------------------+--------------------------------+
+  | Step  | Milestone Objective         | Verification Tool / Command        | Success Criterion              |
+  +-------+-----------------------------+------------------------------------+--------------------------------+
+  | M-01  | Clear PMIC 3.3V Latch       | DMM (Jetson Pin 1 to Pin 6)        | 3.30V ± 0.05V DC steady        |
+  | M-02  | Standalone PCA9685 (4-Wire) | i2cdetect -y -r 7                  | 0x40 and 0x70 detected         |
+  | M-03  | Suppress All-Call 0x70      | i2cset -y 7 0x40 0x00 0x00         | 0x70 disappears from bus scan  |
+  | M-04  | Add TCA9548A Mux (6-Wire)   | i2cdetect -y -r 7                  | 0x40 and 0x71 coexisting       |
+  | M-05  | Downstream AS5600 Encoders  | python3 tools/bench/test_encoders  | 4 joints report MD=1, AGC ok   |
+  | M-06  | ESP32 /OE & E-Stop Safety   | python3 tools/bench/test_oe        | /OE 3.3V disarmed, <0.1V armed |
+  | M-07  | Calibrate Servos (Unloaded) | python3 tools/calibration/...servos| Min/Max/Neutral saved to yaml  |
+  | M-08  | Calibrate Encoders Zero Deg | python3 tools/calibration/...enc   | Zero offsets saved to yaml     |
+  | M-09  | Calibrate FSR Fingertips    | python3 tools/calibration/...fsr   | Gram curves saved to yaml      |
+  | M-10  | Calibrate EMG Baseline/MVC  | python3 tools/calibration/...emg   | Thresholds saved to yaml       |
+  | M-11  | RealSense Camera Alignment  | python3 tools/calibration/...camera| 12x16 matrix depth verified    |
+  | M-12  | Master System Certification | python3 tools/calibration/...system| Signed certificate generated   |
+  +-------+-----------------------------+------------------------------------+--------------------------------+
+
+
+8. HARDWARE COMMISSIONING & WEBCAM INTEGRATION LOG (2026-11-20)
+--------------------------------------------------------------------------------
+
+[DEC-M30] I2C Bus 7 PCA9685 Detection & All-Call Response:
+- Observation:
+    * 'i2cdetect -y -r 7' successfully detected two active I2C addresses on Jetson
+      Tegra bus 7:
+        0x40: Primary PCA9685 PWM controller address.
+        0x70: Default hardware All-Call broadcast address on PCA9685 power-up.
+    * 'python3 tools/bench/i2c_scan.py' verified both devices cleanly with 0x40 PASS.
+- Decision:
+    * Physical I2C wiring (Pins 3 & 5 with Star Ground on Pin 6) is verified and operational.
+    * All-Call (0x70) is suppressed in software during driver initialization (MODE1 bit 0).
+
+[DEC-M31] Python Virtual Environment & PEP 660 Editable Installation:
+- Issue:
+    * Executing 'pip install -e ".[dev]"' inside '.venv' failed with:
+      "ERROR: Project has a 'pyproject.toml' and its build backend is missing the
+       'build_editable' hook. Since it does not have a 'setup.py' nor a 'setup.cfg',
+       it cannot be installed in editable mode."
+- Root Cause:
+    * The '.venv' was running legacy Ubuntu 22.04 packages: pip 22.0.2 and setuptools 59.6.0.
+      PEP 660 editable builds require setuptools >= 64.0.0. Older setuptools also produced
+      an 'UNKNOWN.egg-info' directory because setuptools 59.6 does not parse PEP 621 metadata.
+- Resolution:
+    1. Upgraded build tools: pip upgraded to 26.3, setuptools upgraded to 84.2.1.
+    2. Added 'setup.py' shim calling setup() to guarantee cross-compatibility with legacy tools.
+    3. Removed stale 'UNKNOWN.egg-info'.
+    4. Verified 'pip install -e ".[dev]"' builds and installs cleanly.
+
+[DEC-M32] High-Speed ESP32 UART Link & CRC16 Integrity (460,800 Baud):
+- Observation:
+    * 'python3 tools/bench/esp_link_monitor.py --port /dev/ttyTHS1 --baud 460800 --duration 60'
+      successfully established connection with the ESP32 safety supervisor.
+    * Telemetry Statistics:
+        - Frames Received: 1,097
+        - CRC Errors: 0 (0.00% error rate)
+        - Resync Events: 0
+    * Sensor Data Stream:
+        - Flexor EMG: ~19,980 counts (~2497 mV).
+        - Extensor EMG: ~23,950 counts (~2994 mV).
+        - 5x FSRs: Real-time non-zero rest counts on Thumb, Index, Middle, Ring, Little.
+        - Safety Flags: 'OE_DIS' (Output Enable disabled by ESP32 supervisor on boot).
+- Decision:
+    * Jetson UART1 (/dev/ttyTHS1) cross-wiring (Jetson TX Pin 8 -> ESP32 RX Pin 16,
+      Jetson RX Pin 10 -> ESP32 TX Pin 17) and baud rate 460,800 are robust and zero-loss.
+
+[DEC-M33] Hardware Output Enable (/OE) & Emergency Stop Interlock Verification:
+- Procedure:
+    * Executed 'python3 tools/bench/test_oe.py' with test servo connected to Channel 0.
+- Verification Results:
+    1. Check 1 (Default /OE 3.3V): Servo horn was verified completely limp and backdriveable.
+    2. Check 2 (Armed /OE 0.0V): Servo snapped to neutral (1500 us) with firm holding torque.
+    3. Check 3 (E-Stop Strike): Striking E-stop immediately cut servo torque back to limp state (<1 ms).
+- Conclusion:
+    * Independent ESP32 hardware OE supervisor complies with AGENTS.md Hard Rule 8.
+
+[DEC-M34] Generic USB Webcam (Logitech C920) Perception Pipeline Architecture:
+- Context:
+    * System currently operates with a Logitech HD Pro C920 USB webcam (/dev/video0) instead
+      of an Intel RealSense D435i depth camera.
+    * RealSense provides both RGB and a 16-bit stereo depth map for 3D distance matrices.
+      A standard USB webcam provides RGB color frames only (no native hardware depth).
+- Architectural Changes:
+    1. 'config/vision.yaml':
+       - Updated camera.device to "webcam" with device_index: 0 (640x480 @ 30 FPS).
+    2. 'vapa/hal/webcam.py':
+       - GenericWebcam (OpenCV / V4L2) captures live 640x480 BGR frames from /dev/video0.
+    3. 'vapa/hal/factory.py':
+       - HALContainer extended with webcam: Optional[AbstractWebcam] and camera_type handling.
+       - Mock mode instantiates both MockWebcam and MockRealSense for test harness compatibility.
+    4. 'vapa/vision/worker.py':
+       - Dedicated 30 Hz VisionWorker adapted to support both USB webcams and RealSense.
+       - For webcam: grabs color frames, runs GripSelector (object detection + N-of-M temporal voting),
+         and safely outputs dist_result=None without crashing the control loop or arbitration.
+    5. 'vapa/app/main.py':
+       - Added '--camera {auto,webcam,realsense,none}' and '--enable-vision' CLI arguments.
+       - SharedControlArbitrator seamlessly handles webcam input (suggested grip profile from
+         detected objects, neutral preshape until EMG flexion).
+    6. 'tools/bench/test_webcam.py':
+       - Created dedicated human-run bench testing tool for live video feed, capture FPS monitoring,
+         and real-time grip profile classification preview.
+    7. 'tools/bench/hil_system_check.py':
+       - Updated Step 4 to dynamically verify video acquisition from either webcam or RealSense.
+
+[DEC-M35] Servo Calibration Standards & Physical Parameter Guidelines:
+- Question: What numerical values should be supplied to calibrate the servos?
+- Standard Specifications for VAPA Hand Servos (MG996R on fingers, DS3225 on wrist):
+    * Neutral Pulse (pulse_neutral_us): 1500 us (range: 1480 to 1520 us).
+    * Minimum Pulse (pulse_min_us): 1000 us (range: 980 to 1080 us, finger full open).
+    * Maximum Pulse (pulse_max_us): 2000 us (range: 1920 to 2050 us, finger full close).
+    * Direction (direction): 1 (normal) or -1 (reversed).
+- Critical Safety Invariant:
+    * In 'config/servos.yaml', pulse_min_us < pulse_neutral_us < pulse_max_us is mandatory.
+      Setting neutral equal to max (e.g. 1550 and 1550) creates a degenerate zero-range servo.
+    * When calibrating near physical mechanical stops, back off by 30 us from any audible
+      motor buzzing to prevent stall current draw and gear stripping.
+- Tools:
+    * 'python3 tools/calibration/calibrate_servos.py' (direct numeric entry).
+    * 'python3 tools/bench/calibrate_servos.py' (interactive +/- nudging in 10 us increments).
+
+[DEC-M36] Test Suite Verification & Pre-Flight Qualification:
+- Test Results:
+    * Full pytest suite: 92 / 92 tests passed ('mock-verified').
+    * Fault injection tests: E-stop transients, watchdog stalls, UART disconnects, adversarial
+      clamping, sensor open/short circuits all pass.
+    * HAL, Vision, EMG, Control, and Config unit tests fully green.
+
+================================================================================

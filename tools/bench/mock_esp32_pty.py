@@ -8,6 +8,12 @@ supervisor rules, ADS1115 envelope streams, and FSR sensors.
 import time
 import signal
 import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from vapa.hal import MockESP32Pty
 
 def main():

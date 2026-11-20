@@ -101,7 +101,6 @@ def test_illegal_state_transitions():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -114,5 +113,5 @@ def test_illegal_state_transitions():
 
     sm.set_active()
     assert sm.state == SafetyState.FAULT
-    assert sm.request_arm(True, True, True, True, True, True, True) is False
+    assert sm.request_arm(True, True, True, True, True, True) is False
     assert sm.state == SafetyState.FAULT

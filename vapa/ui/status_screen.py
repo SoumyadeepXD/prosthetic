@@ -64,6 +64,7 @@ class StatusScreen:
         self._font_med = None
         self._font_large = None
         self._last_render_time = 0.0
+        self._last_headless_render_time = 0.0
 
         if not self.headless:
             self._init_pygame()
@@ -152,6 +153,12 @@ class StatusScreen:
         self._last_render_time = now
 
         if self.headless:
+            if (now - self._last_headless_render_time) >= 1.0:
+                self._last_headless_render_time = now
+                if sys.stdout.isatty():
+                    print("\033[2J\033[H" + self.format_ascii_dashboard(), flush=True)
+                else:
+                    logger.debug("\n" + self.format_ascii_dashboard())
             return
 
         import pygame

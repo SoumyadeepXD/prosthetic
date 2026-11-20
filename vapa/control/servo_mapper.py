@@ -20,7 +20,6 @@ class ServoCalibration:
     max_slew_rate_deg_s: float
     home_position: float
     calibrated: bool = False
-    has_encoder: bool = True
 
 class ServoMapper:
     """Translates normalized positions (0.0 to 1.0) and joint angles into clamped PWM pulses."""
@@ -43,7 +42,6 @@ class ServoMapper:
                 max_slew_rate_deg_s=float(cfg.get("max_slew_rate_deg_s", 180.0)),
                 home_position=float(cfg.get("home_position", 0.0)),
                 calibrated=bool(cfg.get("calibrated", False)),
-                has_encoder=bool(cfg.get("has_encoder", True)),
             )
 
     def normalized_to_pulse(self, servo_name: str, normalized_pos: float) -> float:

@@ -25,4 +25,4 @@ This repository contains the software and firmware stack for the Vision-Assisted
 - [ ] Heartbeat 50 Hz from dedicated thread; stops if control loop stalls.
 - [ ] Global exception handlers and `atexit` drop arm request and halt heartbeats.
 - [ ] Protocol frames use CRC16-CCITT-FALSE (poly `0x1021`, init `0xFFFF`) over `LEN, TYPE, SEQ, PAYLOAD`.
-- [ ] TCA9548A mux address is `0x71` (A0 to 3.3V). PCA9685 is `0x40` with `ALLCALL` disabled at init.
+- [ ] PCA9685 is at address `0x40` with `ALLCALL` disabled at init.

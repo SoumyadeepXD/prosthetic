@@ -43,9 +43,8 @@ To completely eliminate common-impedance coupling, the VAPA electrical architect
 | - Servo Rail A (15A max) |                                           | - Jetson Orin Nano (5V)  |
 | - Servo Rail B (15A max) |                                           | - ESP32-WROOM-32E (3.3V) |
 | - High-Side PROFET GND   |                                           | - PCA9685 Logic Core     |
-| - Decoupling Caps (4x)   |                                           | - TCA9548A Mux & AS5600s |
-+--------------------------+                                           | - FSR Voltage Dividers   |
-                                                                       +--------------------------+
+| - Decoupling Caps (4x)   |                                           | - FSR Voltage Dividers   |
++--------------------------+                                           +--------------------------+
                                                                                      |
                                                                         [1.5 kV ISOLATION BARRIER]
                                                                         (Mornsun B0505S + ISO1540)
@@ -68,7 +67,7 @@ To completely eliminate common-impedance coupling, the VAPA electrical architect
 - High-frequency bulk decoupling capacitors ($2200\,\mu\text{F}$ 16V low-ESR) are positioned physically adjacent to the servo power pins so current loops close locally within millimeters, rather than traversing the entire harness.
 
 ### 2.2 Zone 2: System Logic Ground (`GND_LOGIC`)
-- Dedicated to digital computing (NVIDIA Jetson, ESP32, PCA9685 logic, TCA9548A multiplexer) and non-body sensors (AS5600 encoders, FSRs).
+- Dedicated to digital computing (NVIDIA Jetson, ESP32, PCA9685 logic) and non-body sensors (FSRs).
 - Meets `GND_POWER` at exactly **ONE single physical star point** on the PDB adjacent to the battery connector.
 - No servo return currents ever flow through the `GND_LOGIC` plane.
 

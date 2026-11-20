@@ -19,7 +19,6 @@ from vapa.fusion.arbitrator import SharedControlArbitrator, ArbitrationOutput
 from vapa.vision.distance_matrix import DistanceMatrixResult
 from vapa.vision.detector import GripSelectionResult
 from vapa.control.grip_executor import GripExecutor
-from vapa.control.encoder_monitor import EncoderMonitor
 from vapa.control.servo_mapper import ServoMapper
 from vapa.control.slew_limiter import SlewRateLimiter
 from vapa.control.force_controller import FingerForceController
@@ -75,7 +74,6 @@ def vapa_pipeline(configs):
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -86,7 +84,6 @@ def vapa_pipeline(configs):
     slew_rates = {k: float(v.get("max_slew_rate_deg_s", 180.0)) for k, v in configs["servos"].get("servos", {}).items()}
     slew = SlewRateLimiter(slew_rates)
     force = FingerForceController()
-    encoder_mon = EncoderMonitor()
     executor = GripExecutor(mapper, slew, force, gate)
 
     return {
@@ -94,7 +91,6 @@ def vapa_pipeline(configs):
         "decoder": decoder,
         "arbitrator": arbitrator,
         "executor": executor,
-        "encoder_mon": encoder_mon,
         "safety": safety,
         "gate": gate,
         "pca": pca,
@@ -109,7 +105,6 @@ def test_end_to_end_latency_budget(vapa_pipeline):
     decoder: ThresholdEMGDecoder = p["decoder"]
     arbitrator: SharedControlArbitrator = p["arbitrator"]
     executor: GripExecutor = p["executor"]
-    encoder_mon: EncoderMonitor = p["encoder_mon"]
     profiles = p["profiles"]
 
     dist_res = DistanceMatrixResult(
@@ -171,13 +166,6 @@ def test_end_to_end_latency_budget(vapa_pipeline):
             dt_s=0.01,
         )
 
-        # 5. Closed-Loop Encoder Monitoring
-        enc_fault, _ = encoder_mon.update(
-            commanded_angles=executor.current_joint_angles,
-            measured_angles=executor.current_joint_angles,
-            dt_s=0.01,
-        )
-
         t_end = time.perf_counter_ns()
         latency_us = (t_end - t_start) / 1000.0
         latencies_us.append(latency_us)
@@ -210,7 +198,6 @@ def test_stage_latency_breakdown(vapa_pipeline):
     decoder: ThresholdEMGDecoder = p["decoder"]
     arbitrator: SharedControlArbitrator = p["arbitrator"]
     executor: GripExecutor = p["executor"]
-    encoder_mon: EncoderMonitor = p["encoder_mon"]
     profiles = p["profiles"]
 
     dist_res = DistanceMatrixResult(
@@ -229,7 +216,6 @@ def test_stage_latency_breakdown(vapa_pipeline):
         "decode": [],
         "arbitrate": [],
         "execute": [],
-        "encoder": [],
     }
 
     for _ in range(iterations):
@@ -265,12 +251,6 @@ def test_stage_latency_breakdown(vapa_pipeline):
         )
         t1 = time.perf_counter_ns()
         times["execute"].append((t1 - t0) / 1000.0)
-
-        # 5. Encoder Monitor
-        t0 = time.perf_counter_ns()
-        encoder_mon.update(executor.current_joint_angles, executor.current_joint_angles, 0.01)
-        t1 = time.perf_counter_ns()
-        times["encoder"].append((t1 - t0) / 1000.0)
 
     print("\n--- Subsystem Latency Breakdown (Mean ± Std in µs) ---")
     for stage, t_list in times.items():

@@ -94,7 +94,6 @@ servos:
     direction: 1
     max_slew_rate_deg_s: 60.0
     home_position: 0.0
-    has_encoder: false
     calibrated: true
   forearm_rotation:
     channel: 8

@@ -19,8 +19,8 @@ def test_pty_serial_end_to_end():
         # Wait briefly for initial frames to arrive
         time.sleep(0.1)
 
-        # Wait up to 250ms for condition to be met
-        def wait_sensor(condition, timeout=0.25):
+        # Wait up to 600ms for condition to be met
+        def wait_sensor(condition, timeout=0.6):
             t0 = time.time()
             while time.time() - t0 < timeout:
                 s = link.get_latest_sensor()

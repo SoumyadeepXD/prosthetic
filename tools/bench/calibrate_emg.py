@@ -20,6 +20,10 @@ from typing import List, Tuple
 import yaml
 import numpy as np
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 CONFIG_PATH = Path("config/emg.yaml")
 ADS1115_MV_PER_LSB = 0.125
 

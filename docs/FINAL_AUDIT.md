@@ -27,6 +27,9 @@ This document identifies all defects, architectural shortcomings, and physical i
 
 ## 1. Existing Implementation Status
 
+> [!NOTE]
+> Architectural Update: The TCA9548A multiplexer and AS5600 joint encoders have been removed from the active software stack to streamline direct PCA9685 I2C actuation and focus closed-loop control on 5-finger FSR402 force feedback.
+
 | Subsystem | Existing Implementation Status | Health / Readiness |
 | :--- | :--- | :--- |
 | **Jetson HAL Drivers** | Mock & Real drivers for PCA9685, TCA9548A, AS5600, RealSense D435i, and ESP32 UART link. | Basic drivers exist; lacks hardware health recovery and real encoder integration in the loop. |

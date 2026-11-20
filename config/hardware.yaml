@@ -7,37 +7,6 @@ jetson:
     address: 64
     frequency_hz: 50
     disable_allcall: true
-  tca9548a:
-    address: 113
-  as5600:
-    address: 54
-    max_retries: 3
-    channels:
-      finger_group:
-        channel: 0
-        zero_offset_deg: 0.0
-        direction: 1
-        calibrated: true
-      wrist_flex:
-        channel: 1
-        zero_offset_deg: 0.0
-        direction: 1
-        calibrated: true
-      wrist_rotate:
-        channel: 2
-        zero_offset_deg: 0.0
-        direction: 1
-        calibrated: true
-      forearm_rotation:
-        channel: 3
-        zero_offset_deg: 0.0
-        direction: 1
-        calibrated: true
-      wrist_bend_reserved:
-        channel: 4
-        zero_offset_deg: 0.0
-        direction: 1
-        calibrated: true
 esp32:
   pins:
     i2c_sda: 21

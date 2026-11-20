@@ -56,7 +56,8 @@ Never use solid-core wire on articulating prosthesis joints. Repeated bending ca
 4. Route the orange PWM signal wires into channels 0 to 4 of the PCA9685 3-pin headers.
 5. Group the wrist servos (Servos 6–8) and forearm servo (Servo 9) onto Rail B. Route their PWM signal wires into channels 5 to 8 of the PCA9685 headers.
 
-### Step 4: Magnetic Encoder Wiring (TCA9548A to AS5600)
+### Step 4: Magnetic Encoder Wiring (Optional / Reference)
+*(Note: TCA9548A and AS5600 encoders have been removed from the active software stack. Retained for optional custom build reference.)*
 1. Use 4-conductor shielded twisted-pair cables for each joint encoder.
 2. Twist `SDA` with `GND`, and `SCL` with `3.3V` to minimize inductive cross-talk.
 3. Crimp JST-SH 1.0 mm terminals onto both ends.

@@ -19,8 +19,7 @@ The VAPA system operates nine mechanical actuators simultaneously with high-perf
 | **NVIDIA Jetson Orin Nano** (15W Mode) | 5.0 V | 1.20 A / 2.50 A | 3.50 A | 1 | **3.50 A** (17.5 W peak) |
 | **Intel RealSense D435i** (via USB 3.1) | 5.0 V (from Jetson) | 0.40 A / 0.70 A | 0.90 A | 1 | Included in Jetson |
 | **ESP32-WROOM-32E** (Wi-Fi/BT Off) | 3.3 V | 0.08 A / 0.12 A | 0.25 A | 1 | **0.25 A** |
-| **PCA9685 + TCA9548A + ADS1115** | 3.3 V | 0.01 A | 0.03 A | 3 | **0.03 A** |
-| **AS5600 Encoders** (4x) | 3.3 V | 0.01 A | 0.02 A | 4 | **0.08 A** |
+| **PCA9685 + ADS1115** | 3.3 V | 0.01 A | 0.02 A | 2 | **0.02 A** |
 | **MyoWare 2.0 Sensors** (2x, Isolated) | 3.3 V_ISO | 0.01 A | 0.02 A | 2 | **0.04 A** |
 
 ### 1.2 Subsystem Rail Budget Summary
@@ -112,7 +111,8 @@ Prosthetic arms contact human skin via surface EMG electrodes. Placing user-worn
   This effectively attenuates 20 kHz PWM motor switching noise while preserving 100 Hz fingertip contact dynamics.
 - **Clamping**: Littelfuse SP3002 TVS array clamps voltage spikes to $\le 3.6\,\text{V}$, preventing ESD damage to ESP32 ADC1 inputs.
 
-### 5.2 AS5600 Magnetic Rotary Encoders & TCA9548A Multiplexer
+### 5.2 AS5600 Magnetic Rotary Encoders & TCA9548A Multiplexer (Optional / Reference)
+*(Note: TCA9548A and AS5600 encoders have been removed from the active software stack. Retained for optional custom build reference.)*
 - **Addressing**: All 4x AS5600 chips have fixed I2C address `0x36`.
 - **Multiplexer**: TCA9548A routes the I2C bus to channels 0, 1, 2, 3. Address set to `0x71` ($A_0 = \text{VDD}, A_1 = \text{GND}, A_2 = \text{GND}$) to prevent collision with PCA9685 All-Call (`0x70`).
 - **Magnets**: Diametrically magnetized Grade N52 neodymium discs placed with air gap $0.5\text{--}1.5\,\text{mm}$ from chip package. Status register `0x0B` monitored for `MD=1` (Magnet Detected), `ML=0` (Magnet Not Too Weak), `MH=0` (Magnet Not Too Strong).

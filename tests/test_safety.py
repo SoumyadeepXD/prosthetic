@@ -8,7 +8,7 @@ from vapa.safety import (
     HeartbeatThread, SafetyEmergencyShutdown
 )
 from vapa.hal import (
-    MockPCA9685, MockTCA9548A, MockAS5600, MockESPLink, MockRealSense,
+    MockPCA9685, MockESPLink, MockRealSense,
     HALContainer, create_hal
 )
 from vapa.control import FingerForceController
@@ -45,7 +45,6 @@ def test_no_pwm_emitted_unless_active_or_armed_idle():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -75,7 +74,6 @@ def test_heartbeat_loss_disarms(mock_hal):
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -105,7 +103,6 @@ def test_estop_disarms(mock_hal):
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -151,7 +148,6 @@ def test_stuck_emg_faults():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -184,22 +180,17 @@ def test_arming_refused_when_any_precondition_fails(mock_hal):
     assert validator.evaluate(mock_hal, servo_cfg).passed is False
     mock_hal.esp_link.estop_active = False
 
-    # Case B: AS5600 degraded magnet
-    mock_hal.as5600.set_mock_magnet("wrist_flex", False)
-    assert validator.evaluate(mock_hal, servo_cfg).passed is False
-    mock_hal.as5600.set_mock_magnet("wrist_flex", True)
-
-    # Case C: FSR high at rest (not plausible)
+    # Case B: FSR high at rest (not plausible)
     mock_hal.esp_link.sim_fsr = (50, 400, 50, 50, 50)  # > 250 counts
     assert validator.evaluate(mock_hal, servo_cfg).passed is False
     mock_hal.esp_link.sim_fsr = (50, 50, 50, 50, 50)
 
-    # Case D: EMG saturated
+    # Case C: EMG saturated
     mock_hal.esp_link.sim_emg = (3500, 300)  # > 3000 mV
     assert validator.evaluate(mock_hal, servo_cfg).passed is False
     mock_hal.esp_link.sim_emg = (300, 300)
 
-    # Case E: Missing servo configuration
+    # Case D: Missing servo configuration
     assert validator.evaluate(mock_hal, {"servos": {}}).passed is False
 
 def test_exception_handler_drops_arm_request(mock_hal):
@@ -210,7 +201,6 @@ def test_exception_handler_drops_arm_request(mock_hal):
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -295,7 +285,6 @@ def test_formal_eight_states():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     ) is True
@@ -328,10 +317,10 @@ def test_estop_unconditional_override():
     for st in [SafetyState.ACTIVE, SafetyState.ARMED_IDLE, SafetyState.CALIBRATION, SafetyState.SELF_TEST]:
         sm = SafetyStateMachine()
         if st == SafetyState.ACTIVE:
-            sm.request_arm(True, True, True, True, True, True, True)
+            sm.request_arm(True, True, True, True, True, True)
             sm.set_active()
         elif st == SafetyState.ARMED_IDLE:
-            sm.request_arm(True, True, True, True, True, True, True)
+            sm.request_arm(True, True, True, True, True, True)
         elif st == SafetyState.CALIBRATION:
             sm.enter_calibration()
         elif st == SafetyState.SELF_TEST:
@@ -342,5 +331,5 @@ def test_estop_unconditional_override():
         assert sm.is_pwm_allowed is False
         assert sm.arm_request == 0
         # Arming request must be rejected while in E-stop
-        assert sm.request_arm(True, True, True, True, True, True, True) is False
+        assert sm.request_arm(True, True, True, True, True, True) is False
 

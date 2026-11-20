@@ -1,11 +1,9 @@
-certificate_id: VAPA-CAL-1793864087
-date: 2026-11-05 07:34:47 UTC
+certificate_id: VAPA-CAL-1795081498
+date: 2026-11-19 09:44:58 UTC
 mode: MOCK_SIMULATION
 overall_status: CERTIFIED
 subsystem_checks:
   Servo Controller & Actuator Limits: PASSED
-  AS5600 Magnetic Rotary Encoders: PASSED
   FSR402 Fingertip Force Sensors: PASSED
   Two-Channel EMG Baseline & MVC: PASSED
-  RealSense D435i Camera Alignment: PASSED
 operator: VAPA Validation Engineer

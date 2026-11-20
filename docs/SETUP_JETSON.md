@@ -54,7 +54,6 @@ i2cdetect -y -r 7
 ```
 Expected devices on bus 7:
 - `0x40` (PCA9685 PWM Controller)
-- `0x71` (TCA9548A I2C Multiplexer, A0 strapped to 3.3V)
 
 ### UART Configuration
 Disable the default Linux serial login console on `/dev/ttyTHS1` (Pins 8 and 10 of 40-pin header):
@@ -104,12 +103,12 @@ Follow this order when deploying physical hardware:
    ```bash
    python3 tools/calibration/calibrate_system.py
    ```
-   Follow interactive wizard prompts for Servos, AS5600 Encoders, FSR402 Fingertips, MyoWare EMG, and RealSense D435i.
+   Follow interactive wizard prompts for Servos, FSR402 Fingertips, MyoWare EMG, and RealSense D435i.
 3. **Execute Hardware-In-The-Loop (HIL) Qualification**:
    ```bash
    python3 tools/bench/hil_system_check.py
    ```
-   Ensures all 6 hardware subsystems are operational and verified before arming.
+   Ensures all 5 hardware subsystems are operational and verified before arming.
 4. **Launch Main Controller**:
    ```bash
    # Physical hardware mode (interactive dashboard):

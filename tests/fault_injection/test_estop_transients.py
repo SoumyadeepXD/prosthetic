@@ -29,7 +29,6 @@ def test_estop_under_active_motion():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -78,7 +77,6 @@ def test_estop_clear_prevention_while_pressed():
         estop_released=False,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -104,7 +102,6 @@ def test_estop_release_transitions_only_to_disarmed():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )

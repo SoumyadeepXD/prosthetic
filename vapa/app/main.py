@@ -22,13 +22,12 @@ import yaml
 import logging
 
 from ..safety import SafetyStateMachine, SafetyState, HeartbeatThread, PWMGate
-from ..hal import MockPCA9685, MockTCA9548A, MockAS5600, MockESPLink
+from ..hal import MockPCA9685, MockESPLink
 from ..control import (
     ServoMapper,
     SlewRateLimiter,
     FingerForceController,
     GripExecutor,
-    EncoderMonitor,
     FSRCalibrator,
 )
 from ..emg import (
@@ -56,12 +55,14 @@ class VAPAApplication:
         config_dir: str = "config",
         record: bool = False,
         headless: Optional[bool] = None,
-        enable_vision: bool = False,  # Bypassed by default until generic webcam integration
+        enable_vision: bool = True,
+        camera_type: str = "auto",
     ):
         self.mock_mode = mock_mode
         self.config_dir = Path(config_dir)
         self.record_enabled = record
         self.enable_vision = enable_vision
+        self.camera_type = camera_type
 
         # Load YAML configurations
         self.hw_config = self._load_yaml("hardware.yaml")
@@ -77,8 +78,6 @@ class VAPAApplication:
         # HAL Layer
         if self.mock_mode:
             self.pca9685 = MockPCA9685()
-            self.tca9548a = MockTCA9548A()
-            self.as5600 = MockAS5600()
             self.esp_link = MockESPLink()
         else:
             from ..hal.factory import create_hal_container
@@ -86,10 +85,9 @@ class VAPAApplication:
                 backend="real",
                 config_dir=str(self.config_dir),
                 enable_camera=self.enable_vision,
+                camera_type=self.camera_type,
             )
             self.pca9685 = container.pca9685
-            self.tca9548a = container.tca9548a
-            self.as5600 = container.as5600
             self.esp_link = container.esp_link
 
         # PWM Arm Gate
@@ -107,7 +105,6 @@ class VAPAApplication:
             force_controller=self.force_controller,
             pwm_gate=self.pwm_gate,
         )
-        self.encoder_monitor = EncoderMonitor()
 
         # EMG Processing Subsystem
         f_thresh = self.emg_config.get("thresholds", {}).get("flexor", {})
@@ -136,36 +133,26 @@ class VAPAApplication:
         # =========================================================================
         # VISION / CAMERA INTEGRATION (Bypassed for Standalone EMG Operation)
         # =========================================================================
-        # NOTE: Intel RealSense camera processing is kept in code but commented out /
-        # bypassed here until generic USB webcam integration is activated.
-        # When enable_vision is False, the arm operates strictly as an active
-        # EMG-driven prosthetic using muscle intent, closed-loop FSR force control,
-        # and AS5600 encoder tracking.
+        # NOTE: Vision Subsystem Integration (Webcam / RealSense)
         # =========================================================================
         self.vision_queue = mp.Queue(maxsize=2)
         self.vision_stop = mp.Event()
         self.vision_worker: Optional[VisionWorker] = None
 
         if self.enable_vision:
-            # Active when vision subsystem is explicitly enabled:
+            cam_dev = self.vision_config.get("camera", {}).get("device", "webcam")
+            chosen_cam = cam_dev if self.camera_type == "auto" else self.camera_type
             self.vision_worker = VisionWorker(
                 result_queue=self.vision_queue,
                 stop_event=self.vision_stop,
                 mock_mode=self.mock_mode,
                 fps=30,
                 config_dir=str(self.config_dir),
+                camera_type=chosen_cam,
             )
+            logger.info(f"Vision worker activated using camera device '{chosen_cam}'.")
         else:
-            # Standalone EMG prosthetic mode:
-            # The RealSense camera worker process is NOT spawned.
-            # self.vision_worker = VisionWorker(
-            #     result_queue=self.vision_queue,
-            #     stop_event=self.vision_stop,
-            #     mock_mode=self.mock_mode,
-            #     fps=30,
-            #     config_dir=str(self.config_dir),
-            # )
-            logger.info("Camera/Vision worker is BYPASSED. Running in standalone EMG-driven prosthetic mode.")
+            logger.info("Vision worker BYPASSED. Running in standalone EMG-driven prosthetic mode.")
 
         # Latest vision context cache (None in standalone EMG mode)
         self.latest_dist_result: Optional[DistanceMatrixResult] = None
@@ -211,8 +198,6 @@ class VAPAApplication:
         logger.info("Initializing VAPA subsystems...")
         ok = (
             self.pca9685.initialize()
-            and self.tca9548a.initialize()
-            and self.as5600.initialize()
             and self.esp_link.initialize()
         )
         if not ok:
@@ -269,7 +254,7 @@ class VAPAApplication:
             # Standalone EMG prosthetic mode:
             # Vision results remain None, so arbitrator directly executes pure EMG intent
             # (Flexor -> Close, Extensor -> Open, Co-contraction -> Mode Cycle, Rest -> Hold)
-            # with closed-loop FSR force control and AS5600 encoder feedback.
+            # with closed-loop FSR force control.
             # dist_res, grip_res, t_vis = self.vision_queue.get_nowait()
             pass
 
@@ -336,33 +321,7 @@ class VAPAApplication:
             dt_s=dt_s,
         )
 
-        # 9. Closed-Loop Encoder Monitoring
-        # Build commanded angles for all monitored joints (including finger_group)
-        commanded_angles = dict(self.grip_executor.current_joint_angles)
-        commanded_angles["finger_group"] = self.grip_executor.current_finger_positions.get("index", 0.0) * 90.0
-
-        # In mock mode, advance mock physical positions towards commanded angles
-        if isinstance(self.as5600, MockAS5600):
-            self.as5600.simulate_step(commanded_angles)
-
-        # Read actual measured joint angles from AS5600 sensors behind TCA9548A mux
-        measured_angles: Dict[str, float] = {}
-        for joint in self.encoder_monitor.monitored_joints:
-            status = self.as5600.read_joint_status(joint)
-            if not status.is_valid:
-                self.safety.trigger_fault(f"Encoder invalid or disconnected for joint '{joint}'")
-                break
-            measured_angles[joint] = status.joint_angle_degrees
-
-        enc_fault, enc_reason = self.encoder_monitor.update(
-            commanded_angles=commanded_angles,
-            measured_angles=measured_angles,
-            dt_s=dt_s,
-        )
-        if enc_fault:
-            self.safety.trigger_fault(enc_reason or "Encoder tracking mismatch")
-
-        # 10. Record Telemetry
+        # 9. Record Telemetry
         if self.record_enabled:
             self.recorder.record_sensors(
                 t_ms=sensor_msg.t_ms,
@@ -373,7 +332,7 @@ class VAPAApplication:
                 flags=sensor_msg.flags,
             )
 
-        # 11. Timing & Jitter Measurement
+        # 10. Timing & Jitter Measurement
         t_cycle_end = time.perf_counter()
         cycle_time_s = t_cycle_end - t_cycle_start
         cycle_ms = cycle_time_s * 1000.0
@@ -386,7 +345,7 @@ class VAPAApplication:
         if cycle_ms > 40.0:
             self.safety.trigger_fault(f"Control loop stall watchdog: cycle took {cycle_ms:.2f} ms (>40ms)")
 
-        # 12. Update UI Status Model
+        # 11. Update UI Status Model
         nearest_mm = self.latest_dist_result.nearest_distance_mm if self.latest_dist_result else 0.0
         reach_conf = self.latest_dist_result.reach_confidence if self.latest_dist_result else 0.0
         app_vel = self.latest_dist_result.approach_velocity_mm_s if self.latest_dist_result else 0.0
@@ -452,19 +411,36 @@ class VAPAApplication:
 def main():
     parser = argparse.ArgumentParser(description="VAPA Prosthetic Arm Master Orchestrator")
     parser.add_argument("--mock", action="store_true", help="Run with mock hardware backends (default: False on hardware)")
-    parser.add_argument("--enable-vision", action="store_true", default=False, help="Enable vision subsystem (kept bypassed until generic webcam integration)")
+    parser.add_argument("--camera", type=str, default="auto", choices=["auto", "webcam", "realsense", "none"], help="Camera type (auto, webcam, realsense, none)")
+    parser.add_argument("--enable-vision", action="store_true", default=False, help="Explicitly enable vision subsystem")
     parser.add_argument("--config", type=str, default="config", help="Configuration directory path")
     parser.add_argument("--record", action="store_true", help="Record session telemetry to logs/")
     parser.add_argument("--headless", action="store_true", help="Run without graphical display")
+    parser.add_argument("--log-level", type=str, default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"], help="Logging level (DEBUG, INFO, WARNING, ERROR)")
     parser.add_argument("--duration", type=float, default=0.0, help="Optional duration in seconds (0 = run indefinitely)")
     args = parser.parse_args()
+
+    # Configure logging level
+    numeric_level = getattr(logging, args.log_level.upper(), logging.INFO)
+    logging.getLogger().setLevel(numeric_level)
+    logger.setLevel(numeric_level)
+
+    # Determine vision activation
+    if args.camera == "none":
+        vision_active = False
+    elif args.enable_vision or args.camera in ("webcam", "realsense"):
+        vision_active = True
+    else:
+        # "auto": active in mock mode or if requested
+        vision_active = args.enable_vision
 
     app = VAPAApplication(
         mock_mode=args.mock,
         config_dir=args.config,
         record=args.record,
         headless=args.headless,
-        enable_vision=args.enable_vision,
+        enable_vision=vision_active,
+        camera_type=args.camera,
     )
 
     if not app.initialize():
@@ -477,7 +453,6 @@ def main():
             estop_released=True,
             no_latched_fault=True,
             pca9685_healthy=True,
-            encoders_healthy=True,
             emg_plausible=True,
             fsr_plausible=True,
         )

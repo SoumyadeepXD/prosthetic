@@ -32,17 +32,17 @@ This document records safety and architectural design choices, alternatives cons
 
 ---
 
-### DEC-005: TCA9548A I2C Address Relocation to 0x71
-- **Decision:** Configure TCA9548A hardware address to `0x71` by pulling A0 to 3.3V.
-- **Alternatives Considered:** Leaving TCA9548A at default `0x70`.
-- **Reason:** PCA9685 responds to the I2C All-Call broadcast address `0x70`. Placing the mux at `0x70` causes bus conflicts whenever the All-Call address is acknowledged.
+### DEC-005: Removal of TCA9548A Multiplexer and AS5600 Encoders
+- **Decision:** Removed TCA9548A I2C multiplexer and AS5600 encoders to streamline architecture to direct PCA9685 I2C actuation and closed-loop FSR force feedback.
+- **Supersedes:** Earlier relocation of TCA9548A to address `0x71`.
+- **Reason:** Eliminates multi-drop I2C switching overhead and magnet alignment sensitivity; simplifies wiring and reduces mechanical points of failure while retaining closed-loop force control via FSR402 sensors.
 
 ---
 
-### DEC-006: Servo Range Safety Clamping and Closed-Loop Mismatch Monitoring
-- **Decision:** Any uncalibrated servo in `config/servos.yaml` is clamped to neutral (1500 us) to prevent mechanical overdrive. For joints with AS5600 encoders, closed-loop tracking trips a system fault if commanded-vs-measured position mismatch exceeds 12° for >0.35 s (stall/mechanical jamming) or uncommanded motion exceeds 20°/s for >0.25 s (slippage/external backdrive). In the finger force loop, exceeding the force cap triggers immediate positional backoff, while opening motions bypass the force controller unconditionally.
-- **Alternatives Considered:** Open-loop commands only; or continuing to drive servos during joint stall.
-- **Reason:** Tendon-driven fingers and high-torque digital servos will strip gears or burn motors if driven while jammed. Immediate detection and disarm protects the mechanics and patient.
+### DEC-006: Servo Range Safety Clamping and Force-Loop Safeguards
+- **Decision:** Any uncalibrated servo in `config/servos.yaml` is clamped to neutral (1500 us) to prevent mechanical overdrive. In the finger force loop, exceeding the force cap triggers immediate positional backoff, while opening motions bypass the force controller unconditionally.
+- **Alternatives Considered:** Open-loop commands only without force capping.
+- **Reason:** High-torque digital servos will strip gears or burn motors if driven while jammed. Immediate detection and force backoff protects the mechanics and object.
 
 ---
 

@@ -17,6 +17,10 @@ from pathlib import Path
 from typing import Dict, Any, List, Tuple
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 CONFIG_PATH = Path("config/fsr.yaml")
 FINGERS = ["thumb", "index", "middle", "ring", "little"]
 CALIBRATION_GRAMS = [0.0, 50.0, 150.0, 300.0, 500.0, 1000.0]

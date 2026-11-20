@@ -18,7 +18,6 @@ The Vision-Assisted Prosthetic Arm (VAPA) mechanical stack comprises a 9-degree-
    - **Radial / Ulnar Deviation (Bend)**: ±30° (DS3225 servo, 25 kg·cm)
 3. **Forearm Rotation Joint**: 1-DOF continuous-rated rotation mechanism (DS3218 servo, 18 kg·cm) supported on dual thin-section sealed ball bearings.
 4. **Sensor Accommodations**:
-   - 4x AS5600 12-bit magnetic absolute encoders with co-axial diametric N52 magnets.
    - 5x FSR402 piezoresistive fingertip sensors with molded elastomeric force-concentrating pucks.
    - 1x Intel RealSense D435i depth camera mounted on a rigid, vibration-isolated dorsal bracket.
 5. **Transradial Interface**: Standard modular 4-hole European prosthetic pyramid adapter or socket receiver.
@@ -94,7 +93,9 @@ A critical failure mode identified in initial prototypes is excessive cantilever
 
 ## 4. Sensor Physical Integration
 
-### AS5600 Magnetic Rotary Encoder Installation
+*(Note: AS5600 magnetic encoders and TCA9548A multiplexer have been removed from the active software stack. The guidelines below are preserved for mechanical reference in optional custom hardware builds.)*
+
+### AS5600 Magnetic Rotary Encoder Installation (Optional / Reference)
 To guarantee reliable 12-bit angular tracking without field dropouts:
 1. **Magnet Specifications**: Strictly diametrically magnetized N52 neodymium disc magnet ($6.0\text{ mm}\text{ diameter} \times 2.5\text{ mm}\text{ thickness}$). Axially magnetized magnets are strictly forbidden.
 2. **Co-Axial Alignment**: The magnet must be press-fit into the rotating joint pivot pin with runout $< 0.1\text{ mm}$ concentric to the joint axis.

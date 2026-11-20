@@ -5,7 +5,7 @@ resolution:
   height: 480
 target_distance_m: 0.35
 temporal_noise_std_mm: 0.0
-frame_rate_fps: 22.7
+frame_rate_fps: 25.9
 noise_acceptable: true
 camera_to_palm_transform:
   translation_mm:
@@ -19,4 +19,4 @@ camera_to_palm_transform:
   nominal_workspace_range_m:
     min: 0.15
     max: 0.85
-calibrated_timestamp: '2026-11-05 13:04:47'
+calibrated_timestamp: '2026-11-18 17:49:58'

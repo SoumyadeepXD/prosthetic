@@ -122,7 +122,6 @@ def test_vapa_app_end_to_end_mock_run():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )

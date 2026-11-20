@@ -1,11 +1,12 @@
 # Vision Pipeline Configuration (Rev 2)
 
 camera:
-  device: "realsense_d435i"
+  device: "webcam"             # "webcam" (Generic USB / Logitech C920) or "realsense_d435i"
+  device_index: 0              # /dev/video0
   width: 640
   height: 480
   fps: 30
-  align_depth_to_color: true
+  align_depth_to_color: false  # Only applicable to stereo depth cameras (e.g. RealSense)
   filters:
     decimation_magnitude: 2
     spatial_filter: true

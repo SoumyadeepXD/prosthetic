@@ -14,8 +14,8 @@ The Jetson Orin Nano connects to the VAPA carrier motherboard via its standard 4
 | **Pin 2** | `5V_IN` | Power Input | PDB 5V / 6A Buck Converter | 5.0 V DC ($\pm 3\%$) | **RED** | High-current logic supply |
 | **Pin 4** | `5V_IN` | Power Input | PDB 5V / 6A Buck Converter | 5.0 V DC ($\pm 3\%$) | **RED** | Paralleled with Pin 2 for 4A capability |
 | **Pin 6** | `GND` | Ground | System Logic Ground (GND_LOGIC) | 0.0 V | **BLACK** | Star-ground return |
-| **Pin 3** | `I2C_SDA` | Bidirectional | TCA9548A (0x71) & PCA9685 (0x40) | 3.3 V Logic | **GREEN** | Jetson I2C Bus 7 (400 kHz) |
-| **Pin 5** | `I2C_SCL` | Bidirectional | TCA9548A (0x71) & PCA9685 (0x40) | 3.3 V Logic | **YELLOW** | Jetson I2C Bus 7 (400 kHz) |
+| **Pin 3** | `I2C_SDA` | Bidirectional | PCA9685 (0x40) | 3.3 V Logic | **GREEN** | Jetson I2C Bus 7 (400 kHz) |
+| **Pin 5** | `I2C_SCL` | Bidirectional | PCA9685 (0x40) | 3.3 V Logic | **YELLOW** | Jetson I2C Bus 7 (400 kHz) |
 | **Pin 8** | `UART1_TXD` | Output | ESP32 GPIO16 (`UART2_RX2`) | 3.3 V CMOS | **ORANGE** | 460800 baud binary telemetry |
 | **Pin 10** | `UART1_RXD` | Input | ESP32 GPIO17 (`UART2_TX2`) | 3.3 V CMOS | **BLUE** | 460800 baud binary telemetry |
 | **Pin 9** | `GND` | Ground | ESP32 Digital Ground | 0.0 V | **BLACK** | Serial signal reference return |
@@ -59,7 +59,9 @@ The Jetson Orin Nano connects to the VAPA carrier motherboard via its standard 4
 
 ---
 
-## 4. TCA9548A I2C Multiplexer & AS5600 Magnetic Encoders
+## 4. TCA9548A I2C Multiplexer & AS5600 Magnetic Encoders (Optional / Reference)
+
+*(Note: The TCA9548A multiplexer and AS5600 encoders have been removed from the active software stack; preserved here as electrical pinout reference for optional hardware revisions.)*
 
 All encoder connections use 4-pin JST-SH (1.0 mm pitch) shielded cables.
 

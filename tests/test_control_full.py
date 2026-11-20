@@ -10,8 +10,6 @@ from vapa.control import (
     FingerForceController,
     PIConfig,
     GripExecutor,
-    EncoderMonitor,
-    MonitorConfig,
 )
 from vapa.hal.pca9685 import MockPCA9685
 from vapa.safety.state_machine import SafetyStateMachine, SafetyState
@@ -163,63 +161,6 @@ def test_force_controller_anti_windup_and_backoff():
         dt_s=0.01,
     )
     assert backed_off_pos == pos_before - cfg.backoff_step
-
-
-def test_encoder_monitor_stall_and_uncommanded_motion():
-    cfg = MonitorConfig(
-        stall_error_threshold_deg=12.0,
-        min_velocity_deg_s=3.0,
-        uncommanded_velocity_deg_s=20.0,
-        stall_timeout_s=0.35,
-        drift_timeout_s=0.25,
-    )
-    monitor = EncoderMonitor(cfg)
-
-    # 1. Healthy tracking: commanded matches measured within 2 deg
-    for _ in range(20):
-        fault, reason = monitor.update(
-            commanded_angles={"wrist_flex": 20.0},
-            measured_angles={"wrist_flex": 20.5},
-            dt_s=0.02,
-        )
-        assert not fault
-        assert reason is None
-
-    # 2. Joint Stall: Commanded to 40°, but measured stays stuck at 10° (err=30° > 12°)
-    # Should not fault immediately, but must fault after 0.35 seconds
-    monitor.reset()
-    # First update seeds last positions
-    monitor.update({"wrist_flex": 40.0}, {"wrist_flex": 10.0}, 0.02)
-
-    total_time = 0.0
-    fault_detected = False
-    for _ in range(25):  # 25 * 0.02 = 0.50 s
-        fault, reason = monitor.update({"wrist_flex": 40.0}, {"wrist_flex": 10.0}, 0.02)
-        total_time += 0.02
-        if fault:
-            fault_detected = True
-            assert "stall detected" in reason
-            break
-
-    assert fault_detected
-    assert total_time >= cfg.stall_timeout_s
-
-    # 3. Uncommanded motion (drift): Commanded stays at 0.0°, but measured spins at 60°/s
-    monitor.reset()
-    fault_detected = False
-    meas_angle = 0.0
-    # Seed
-    monitor.update({"forearm_rotation": 0.0}, {"forearm_rotation": meas_angle}, 0.02)
-
-    for _ in range(20):  # 20 * 0.02 = 0.40s
-        meas_angle += 60.0 * 0.02  # 60 deg/sec
-        fault, reason = monitor.update({"forearm_rotation": 0.0}, {"forearm_rotation": meas_angle}, 0.02)
-        if fault:
-            fault_detected = True
-            assert "uncommanded motion detected" in reason
-            break
-
-    assert fault_detected
 
 
 def test_grip_executor_end_to_end_with_pwm_gate():

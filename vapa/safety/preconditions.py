@@ -76,11 +76,7 @@ class PreconditionValidator:
         if not hal.pca9685.is_healthy():
             failed.append("PCA9685 PWM driver is not healthy or responding")
 
-        # 6. AS5600 Encoders Health (MD=1, ML=0, MH=0)
-        if not hal.as5600.verify_all_magnets():
-            failed.append("One or more AS5600 magnetic encoders report missing/degraded magnet")
-
-        # 7. Servo Calibration Presence
+        # 6. Servo Calibration Presence
         servos = servo_config.get("servos", {})
         if not servos:
             failed.append("Servo configuration missing")

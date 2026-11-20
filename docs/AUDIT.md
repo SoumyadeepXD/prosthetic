@@ -9,7 +9,7 @@
 ## 2. Specification Alignment (Hardware Connection Guide Rev 2)
 Since the repository is initialized clean:
 - **No legacy conflicts exist** with previous revisions.
-- **I2C Architecture:** TCA9548A mux configured at `0x71` (avoiding the `0x70` PCA9685 All-Call clash), PCA9685 at `0x40` (All-Call disabled at initialization).
+- **I2C Architecture:** PCA9685 at `0x40` (All-Call disabled at initialization). TCA9548A mux and AS5600 encoders removed from active architecture.
 - **ESP32 Pins:**
   - GPIO25: PCA9685 `OE` active-low (default HIGH / disabled via hardware 1k pull-up; initialized HIGH immediately on ESP32 boot).
   - GPIO27: E-stop NC/NO to GND (`INPUT_PULLUP`, LOW = pressed).

@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 CONFIG_PATH = Path("config/servos.yaml")
 
 def print_safety_banner():
@@ -118,7 +122,20 @@ def main():
         pca = RealPCA9685(bus_num=7, address=0x40, frequency_hz=50)
 
     if not pca.initialize():
-        print("ERROR: Failed to initialize PCA9685.")
+        err_msg = getattr(pca, "last_error", "No response from I2C device")
+        print(f"\nERROR: Failed to initialize PCA9685 at address 0x{getattr(pca, 'address', 0x40):02X} on /dev/i2c-{getattr(pca, 'bus_num', 7)}.")
+        print(f"Details: {err_msg}")
+        print("\nPhysical Hardware Checklist (see VAPA_Robotic_Arm_Connection_Guide.pdf Sec 6 & 7):")
+        print("  1. Jetson 40-pin header connections to PCA9685:")
+        print("     - Jetson Pin 1 (3.3V)  -> PCA9685 VCC (Chip logic power - MANDATORY)")
+        print("     - Jetson Pin 6 (GND)   -> PCA9685 GND (Common Star Ground)")
+        print("     - Jetson Pin 3 (SDA)   -> PCA9685 SDA (I2C Data)")
+        print("     - Jetson Pin 5 (SCL)   -> PCA9685 SCL (I2C Clock)")
+        print("  2. Verify 4.7k ohm pull-up resistors from SDA & SCL to 3.3V.")
+        print("  3. Verify PCA9685 address pads A0-A5 are all open/grounded (Address 0x40).")
+        print("  4. Verify 6V power rail is supplied to PCA9685 V+ and GND screw terminals.")
+        print("  5. Test bus detection manually: 'i2cdetect -y -r 7'")
+        print("  (Note: For automated simulation without physical wiring, run with --mock)")
         sys.exit(1)
 
     # Backup configuration

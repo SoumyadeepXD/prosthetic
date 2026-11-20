@@ -3,7 +3,7 @@
 Verifies that when camera/vision processing is commented out / bypassed:
 1. VAPAApplication initializes without starting the vision worker process.
 2. Muscle intent (EMG) directly controls the prosthetic arm.
-3. Slew rate limiter, FSR force controller, and AS5600 encoder feedback function correctly.
+3. Slew rate limiter and FSR force controller function correctly.
 4. Extensor OPEN unconditionally aborts closing motion.
 5. System shuts down cleanly without dangling processes.
 """
@@ -86,7 +86,7 @@ def test_standalone_emg_arbitration_direct():
 
 
 def test_standalone_emg_full_motion_cycles():
-    """Verify 50 cycles of standalone EMG control loop with FSR and encoder feedback."""
+    """Verify 50 cycles of standalone EMG control loop with FSR feedback."""
     app = VAPAApplication(mock_mode=True, headless=True, enable_vision=False)
     assert app.initialize() is True
 
@@ -96,7 +96,6 @@ def test_standalone_emg_full_motion_cycles():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )

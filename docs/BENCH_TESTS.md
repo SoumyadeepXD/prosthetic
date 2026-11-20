@@ -1,7 +1,7 @@
 # Hardware Bench Testing Protocol (Rev 2)
 
 **Document Reference:** VAPA-TEST-REV2  
-**Target Architecture:** NVIDIA Jetson Orin Nano + ESP32-WROOM-32 Supervisor + PCA9685 + TCA9548A + RealSense D435i  
+**Target Architecture:** NVIDIA Jetson Orin Nano + ESP32-WROOM-32 Supervisor + PCA9685 + RealSense D435i  
 
 ---
 
@@ -46,7 +46,7 @@
 [ Checkpoint 3: Hardware E-Stop & Relay Interlock ]
          │
          ▼
-[ Checkpoint 4: Jetson I2C Scan (0x40 PCA9685, 0x71 TCA9548A) ]
+[ Checkpoint 4: Jetson I2C Scan (0x40 PCA9685) ]
          │
          ▼
 [ Checkpoint 5: PCA9685 Hardware OE Gating ]
@@ -55,13 +55,10 @@
 [ Checkpoint 6: Interactive Servo Range Calibration ]
          │
          ▼
-[ Checkpoint 7: AS5600 Magnetic Encoder Bus ]
+[ Checkpoint 7: MyoWare EMG Envelope & MVC Calibration ]
          │
          ▼
-[ Checkpoint 8: MyoWare EMG Envelope & MVC Calibration ]
-         │
-         ▼
-[ Checkpoint 9: RealSense Depth Matrix Ground Truth ]
+[ Checkpoint 8: RealSense Depth Matrix Ground Truth ]
          │
          ▼
 [ Checkpoint 10: Full Shared-Control Integration & E-Stop Trip ]
@@ -133,21 +130,19 @@
 
 ### Checkpoint 4: Jetson I2C Bus Scan
 
-- **Objective:** Confirm detection of PCA9685 at `0x40` and TCA9548A multiplexer at `0x71` on Jetson I2C Bus 1.
+- **Objective:** Confirm detection of PCA9685 at `0x40` on Jetson I2C Bus 1 / Bus 7.
 - **Physical Wiring:**
-  - Jetson Pin 3 (I2C1 SDA) -> Level Shifter -> PCA9685 SDA & TCA9548A SDA
-  - Jetson Pin 5 (I2C1 SCL) -> Level Shifter -> PCA9685 SCL & TCA9548A SCL
-  - TCA9548A Address Pin A0 connected to 3.3V, A1/A2 to GND (`0x71`).
+  - Jetson Pin 3 (I2C SDA) -> Level Shifter -> PCA9685 SDA
+  - Jetson Pin 5 (I2C SCL) -> Level Shifter -> PCA9685 SCL
 - **Execution Command:**
   ```bash
-  python3 tools/bench/i2c_scan.py --bus 1
+  python3 tools/bench/i2c_scan.py
   ```
 - **Pass/Fail Criteria:**
-  - **PASS:** Scan outputs exactly:
+  - **PASS:** Scan outputs:
     - Address `0x40`: PCA9685 16-Channel PWM Driver.
-    - Address `0x71`: TCA9548A 8-Channel I2C Multiplexer.
     - Address `0x70` is NOT present or disabled (PCA9685 All-Call disabled).
-  - **FAIL:** Missing `0x40` or `0x71`. Multiplexer appears at `0x70` (A0 pulled to ground instead of 3.3V).
+  - **FAIL:** Missing `0x40`.
 
 ---
 
@@ -190,23 +185,7 @@
 
 ---
 
-### Checkpoint 7: AS5600 Magnetic Encoder Bus Readout
-
-- **Objective:** Verify magnetic field detection (`MD=1`, `ML=0`, `MH=0`) and 12-bit monotonic angle tracking across all 4 encoders connected to TCA9548A Channels 0, 1, 2, and 3.
-- **Execution Command:**
-  ```bash
-  python3 tools/bench/test_encoders.py
-  ```
-- **Procedure:**
-  - Manually rotate each joint through its full mechanical range.
-  - Observe angle readouts across the 0° / 360° boundary.
-- **Pass/Fail Criteria:**
-  - **PASS:** All 4 encoders report `Magnet: OK`. Rotating joint increases angle smoothly without jumps or NaN errors. Read latency < 0.05 ms per channel.
-  - **FAIL:** `Magnet: WEAK` (air gap > 2.0 mm), `Magnet: STRONG` (air gap < 0.5 mm), or `Magnet: NO_MAG`.
-
----
-
-### Checkpoint 8: MyoWare EMG Baseline & MVC Calibration
+### Checkpoint 7: MyoWare EMG Baseline & MVC Calibration
 
 - **Objective:** Measure user rest baseline voltage (5 seconds) and Maximum Voluntary Contraction (MVC, 3 repeats of 2 seconds) for forearm flexor and extensor muscles.
 - **Physical Setup:**
@@ -229,7 +208,7 @@
 
 ---
 
-### Checkpoint 9: RealSense Depth Matrix Ground Truth Validation
+### Checkpoint 8: RealSense Depth Matrix Ground Truth Validation
 
 - **Objective:** Verify accuracy of the 12x16 central zone distance matrix against physical tape measure ground truth.
 - **Physical Setup:** Secure camera rigidly on bench. Align flat 200x200 mm cardboard target perpendicular to camera optical axis.
@@ -249,7 +228,7 @@
 
 ---
 
-### Checkpoint 10: Full Shared-Control Integration & Emergency Stop Trip
+### Checkpoint 9: Full Shared-Control Integration & Emergency Stop Trip
 
 - **Objective:** Complete end-to-end integration test validating shared-control arbitration, proportional grasp, extensor rapid open override, and emergency stop shutdown.
 - **Execution Command:**
@@ -280,10 +259,9 @@
 | **CP-01** | ESP32 Firmware & ADS1115 FSRs | | | |
 | **CP-02** | 460800 Baud UART Link & CRC16 | | | |
 | **CP-03** | Hardware E-Stop & Relay Interlock | | | |
-| **CP-04** | Jetson I2C Scan (0x40 & 0x71) | | | |
+| **CP-04** | Jetson I2C Scan (0x40 PCA9685) | | | |
 | **CP-05** | PCA9685 Hardware OE Gating | | | |
 | **CP-06** | Interactive Servo Range Calibration | | | |
-| **CP-07** | AS5600 Magnetic Encoders (Ch 0..3) | | | |
-| **CP-08** | MyoWare EMG Baseline & MVC | | | |
-| **CP-09** | RealSense Depth Matrix Calibration | | | |
-| **CP-10** | Full Shared-Control Integration & E-Stop | | | |
+| **CP-07** | MyoWare EMG Baseline & MVC | | | |
+| **CP-08** | RealSense Depth Matrix Calibration | | | |
+| **CP-09** | Full Shared-Control Integration & E-Stop | | | |

@@ -30,7 +30,6 @@ def test_heartbeat_loss_exact_timing():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )
@@ -103,7 +102,6 @@ def test_heartbeat_recovery_requires_operator_clear():
         estop_released=True,
         no_latched_fault=not sensor_resumed.latched_fault,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     ) is False
@@ -123,7 +121,6 @@ def test_uart_disconnect_injection():
         estop_released=True,
         no_latched_fault=True,
         pca9685_healthy=True,
-        encoders_healthy=True,
         emg_plausible=True,
         fsr_plausible=True,
     )

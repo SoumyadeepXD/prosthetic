@@ -1,14 +1,14 @@
 decoder: threshold
 thresholds:
   flexor:
-    baseline_mv: 239.4
-    mvc_mv: 2302.2
+    baseline_mv: 239.2
+    mvc_mv: 2338.2
     activation_threshold: 0.25
     deactivation_threshold: 0.15
     saturation_mv: 3200.0
   extensor:
-    baseline_mv: 250.1
-    mvc_mv: 2331.7
+    baseline_mv: 250.0
+    mvc_mv: 2325.5
     activation_threshold: 0.25
     deactivation_threshold: 0.15
     saturation_mv: 3200.0

@@ -1,13 +1,13 @@
 # VAPA — Vision-Assisted Prosthetic Arm
 **Full Product Development & Physical Prototype Architecture**
 
-[![CI / Pre-Flight Tests](https://img.shields.io/badge/tests-96%20passed%20%28100%25%29-brightgreen)]()
+[![CI / Pre-Flight Tests](https://img.shields.io/badge/tests-90%20passed%20%28100%25%29-brightgreen)]()
 [![Safety Architecture](https://img.shields.io/badge/safety-ISO%2013849%20PL%20d%20%7C%20IEC%2060601--1%20Type%20BF-blue)]()
 [![Platform](https://img.shields.io/badge/compute-NVIDIA%20Jetson%20Orin%20Nano%20%2B%20ESP32-orange)]()
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![Hardware](https://img.shields.io/badge/status-physical--prototype--ready-success)]()
 
-VAPA is an advanced multi-modal active transradial robotic prosthetic arm combining dual-processor shared control, biological muscular intent (two-site surface electromyography), closed-loop force and magnetic encoder feedback, and real-time computer vision (RGB-D object classification and distance tracking).
+VAPA is an advanced multi-modal active transradial robotic prosthetic arm combining dual-processor shared control, biological muscular intent (two-site surface electromyography), closed-loop force feedback, and real-time computer vision (RGB-D object classification and distance tracking).
 
 > [!IMPORTANT]
 > **SHARED-CONTROL SAFETY NON-NEGOTIABLES:**
@@ -45,18 +45,17 @@ VAPA is an advanced multi-modal active transradial robotic prosthetic arm combin
                        |           NVIDIA JETSON ORIN NANO             |
                        | - 100 Hz Deterministic Control Loop           |
                        | - Envelope Normalization & Threshold Decoder  |
-                       | - Closed-Loop AS5600 Encoder Monitor          |
                        | - 30 Hz Multiprocess Vision Worker (RealSense)|
                        | - Shared-Control Arbitrator & Slew Limiter    |
                        +-----------------------------------------------+
-                                  |                      |
-               (I2C-7, Addr 0x40) v                      v (I2C-7, Addr 0x71 Mux)
-                       +-------------------+  +-------------------+
-                       |  PCA9685 16-Ch    |  | TCA9548A Mux      |
-                       |  12-bit PWM Driver|  | 4x AS5600 Encoders|
-                       +-------------------+  +-------------------+
-                                  |
-                                  v (9x Guarded PWM Channels)
+                                               |
+                            (I2C-7, Addr 0x40) v
+                                   +-------------------+
+                                   |  PCA9685 16-Ch    |
+                                   |  12-bit PWM Driver|
+                                   +-------------------+
+                                               |
+                                               v (9x Guarded PWM Channels)
             +-----------------------------------------------------------+
             | 5x MG996R Fingers | 3x DS3225 Wrist | 1x DS3218 Forearm   |
             +-----------------------------------------------------------+
@@ -72,6 +71,7 @@ VAPA is an advanced multi-modal active transradial robotic prosthetic arm combin
 | **[`docs/SAFETY_ARCHITECTURE.md`](docs/SAFETY_ARCHITECTURE.md)** | Formal 8-state finite state machine, 14-point fault reaction matrix, and dual-layer cutoff. |
 | **[`docs/MECHANICAL_DESIGN.md`](docs/MECHANICAL_DESIGN.md)** | Kinematics, 40mm tendon stroke math, capstan spools, wrist gimbal, and 1,284g mass budget. |
 | **[`docs/DECISIONS.md`](docs/DECISIONS.md)** | Architectural Decision Records (ADRs DEC-001 through DEC-016). |
+| **[`minor_decisions.txt`](minor_decisions.txt)** | Physical hardware commissioning findings, bench troubleshooting notes, and minor decisions. |
 | **[`docs/BENCH_TESTS.md`](docs/BENCH_TESTS.md)** | 10-checkpoint bench bringup protocol for human test operators. |
 | **[`docs/SETUP_JETSON.md`](docs/SETUP_JETSON.md)** | JetPack 6 installation, real-time tuning, udev rules, and systemd daemon setup. |
 | **[`docs/PROTOCOL.md`](docs/PROTOCOL.md)** | Binary framing specification with CRC16-CCITT-FALSE lookup table. |
@@ -89,7 +89,6 @@ Deliverables located in [`hardware/`](hardware/):
   - `servo_controller.kicad_sch` (PCA9685 at 0x40, dual servo power split rails)
   - `emg_interface.kicad_sch` (IEC 60601-1 Type BF isolation barrier, Mornsun B0505S, ISO1540 isolator)
   - `fsr_interface.kicad_sch` (5x 10k 0.1% dividers, 0.1uF filter caps, SP3002 TVS diodes)
-  - `encoder_interface.kicad_sch` (TCA9548A at 0x71, 4x AS5600 headers)
 - **Wiring Diagrams (`hardware/diagrams/`)**:
   - `complete_wiring_diagram.svg` and high-res `complete_wiring_diagram.png` (2048px)
   - `power_distribution.svg` and `signal_flow.svg`
@@ -113,9 +112,9 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-### Run Test Suite (96 Tests Passing)
+### Run Test Suite (90 Tests Passing)
 ```bash
-# Full test suite (including 21 fault injection and fuzzing tests)
+# Full test suite (including 17 fault injection and fuzzing tests)
 pytest
 
 # Fault injection test suite alone
@@ -177,11 +176,10 @@ sudo systemctl start vapa.service
 | :--- | :---: | :--- |
 | **8-State Safety Machine** | `mock-verified` | ISO 13849-1 Cat 3 / PL d |
 | **Dual-Layer Actuator Cutoff** | `mock-verified` | Hardware /OE + PROFET switch |
-| **Closed-Loop Joint Tracking** | `mock-verified` | AS5600 Stall / Runaway detection |
 | **Piecewise FSR Calibration** | `mock-verified` | Open-circuit (<10) / Short-circuit (≥4090) faults |
 | **Two-Site EMG Normalization**| `mock-verified` | Dwell debouncing, rail saturation, open override |
 | **Optical Distance Matrix** | `mock-verified` | Central tracking cone, N-of-M temporal voting |
-| **Fault Injection Suite** | `mock-verified` | 21 adversarial failure mode tests passing |
+| **Fault Injection Suite** | `mock-verified` | 17 adversarial failure mode tests passing |
 | **Physical Hardware Actuation**| `bench-pending` | Requires technician sign-off per Checkpoints 1–10 |
 
 *Disclaimer: VAPA is an open-architecture engineering research prototype. Autonomous software test verification does not constitute clinical regulatory approval (FDA / CE mark). Physical human attachment requires independent institutional review board (IRB) approval, medical supervision, and isolated battery operation.*
